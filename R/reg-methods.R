@@ -135,7 +135,6 @@ shift.Reg <- function(x, shift_amount, ...) {
 #' @param x A `Reg` object.
 #' @param ... Not used.
 #' @importFrom cli cli_h1 cli_text cli_div cli_li
-#' @importFrom assertthat assert_that
 #' @export
 #' @method print Reg
 #' @rdname print
@@ -150,7 +149,7 @@ print.Reg <- function(x, ...) {
   
   # Use cli_div for potentially better alignment than cli_ul
   cli::cli_div(theme = list(ul = list("margin-left" = 2), li = list("margin-bottom" = 0.5)))
-  cli::cli_li("Type: {.cls {class(x)[1]}} {if(inherits(x, 'regressor')) cli::cli_text('(Legacy compatible)')}")
+  cli::cli_li("Type: {.cls {class(x)[1]}}{if(inherits(x, 'regressor')) ' (Legacy compatible)'}")
   if (n_ons == 0) {
     cli::cli_li("Events: 0 (Empty Regressor)")
   } else {
@@ -166,8 +165,8 @@ print.Reg <- function(x, ...) {
   cli::cli_li("HRF: {hrf_name} ({nb} basis function{?s})")
   cli::cli_li("HRF Span: {hrf_span}s")
   cli::cli_li("Summation: {x$summate}")
-  # cli_end() is not needed for cli_div
-  
+  cli::cli_end()
+
   invisible(x)
 }
 
