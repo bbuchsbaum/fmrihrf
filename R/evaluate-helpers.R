@@ -64,9 +64,11 @@ prep_reg_inputs <- function(x, grid, precision) {
   hrf_fine_matrix <- .memo_hrf(x$hrf, hrf_span, precision)
   
   # Prepare fine grid (needed for Rconv/loop interpolation)
-  # Use full range of onsets when constructing the fine grid
-  # to handle unsorted event inputs without reordering events
-  fine_grid_start <- min(grid[1], min(valid_ons)) - hrf_span
+  # Start at the earliest possible contribution from kept events
+  # which occurs at `grid[1] - hrf_span`
+  fine_grid_start <- grid[1] - hrf_span
+  # Use the full range of onsets when determining the end of the fine grid
+  # to handle unsorted event inputs without reordering
   fine_grid_end <- max(grid[length(grid)], max(valid_ons) + max(valid_durs)) + hrf_span
   fine_grid <- seq(fine_grid_start, fine_grid_end, by = precision)
 
