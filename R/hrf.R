@@ -854,10 +854,9 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
   # Apply normalization if requested, handling matrix/vector case
   if (normalize) {
       if (is.matrix(out)) {
-          apply(out, 2, function(col) {
-              peak_val <- max(abs(col), na.rm = TRUE)
-              if (!is.na(peak_val) && peak_val != 0) col / peak_val else col
-          })
+          peaks <- apply(out, 2, function(col) max(abs(col), na.rm = TRUE))
+          peaks[peaks == 0 | is.na(peaks)] <- 1
+          out <- sweep(out, 2, peaks, "/")
       } else {
           peak_val <- max(abs(out), na.rm = TRUE)
           if (!is.na(peak_val) && peak_val != 0) out / peak_val else out

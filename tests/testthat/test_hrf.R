@@ -471,6 +471,16 @@ test_that("gen_hrf correctly sets nbasis for function inputs", {
   expect_equal(nbasis(hrf_tent7), 7)
 })
 
+test_that("normalize in evaluate.HRF preserves matrix dimensions", {
+  grid <- seq(0, 2, by = 1)
+  res <- evaluate(HRF_SPMG2, grid, normalize = TRUE)
+  expect_true(is.matrix(res))
+  expect_equal(dim(res), c(length(grid), nbasis(HRF_SPMG2)))
+
+  single <- evaluate(HRF_SPMG2, 0, normalize = TRUE)
+  expect_true(is.matrix(single))
+  expect_equal(dim(single), c(1L, nbasis(HRF_SPMG2)))
+}
 
 test_that("lag_hrf and block_hrf enforce finite parameters", {
   expect_error(lag_hrf(HRF_SPMG1, Inf), "finite")
