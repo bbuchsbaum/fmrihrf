@@ -145,9 +145,20 @@ eval_Rconv <- function(p, ...) {
   
   # Proceed with R convolution using stats::convolve
   delta <- numeric(length(p$fine_grid))
-  onset_indices <- round((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
+  onset_indices <- floor((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
   valid_onset_indices <- onset_indices >= 1 & onset_indices <= length(p$fine_grid)
-  delta[onset_indices[valid_onset_indices]] <- p$valid_amp[valid_onset_indices]
+
+  if (length(p$valid_durs) > 0) {
+    dur_len <- floor(p$valid_durs[1] / p$precision)
+  } else {
+    dur_len <- 0
+  }
+
+  for (i in which(valid_onset_indices)) {
+    start_idx <- onset_indices[i]
+    end_idx <- min(start_idx + dur_len, length(p$fine_grid))
+    delta[start_idx:end_idx] <- delta[start_idx:end_idx] + p$valid_amp[i]
+  }
   
   samhrf <- p$hrf_fine_matrix # Already evaluated and potentially memoized
   nb <- p$nb
