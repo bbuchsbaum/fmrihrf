@@ -15,8 +15,12 @@ new_sampling_frame <- function(blocklens, TR, start_time, precision) {
 #' A \code{sampling_frame} describes the block structure and temporal sampling of an fMRI paradigm.
 #'
 #' @param blocklens A numeric vector representing the number of scans in each block.
-#' @param TR A numeric value or vector representing the repetition time in seconds (i.e., the spacing between consecutive image acquisitions).
-#' @param start_time A numeric value or vector representing the offset of the first scan of each block (default is \code{TR/2}).
+#' @param TR A numeric value or vector representing the repetition time in seconds
+#'   (i.e., the spacing between consecutive image acquisitions). When a vector is
+#'   provided, its length must be 1 or equal to the number of blocks.
+#' @param start_time A numeric value or vector representing the offset of the first
+#'   scan of each block (default is \code{TR/2}). When a vector is provided, its
+#'   length must be 1 or equal to the number of blocks.
 #' @param precision A numeric value representing the discrete sampling interval used for convolution with the hemodynamic response function (default is 0.1).
 #'
 #' @examples
@@ -32,11 +36,19 @@ new_sampling_frame <- function(blocklens, TR, start_time, precision) {
 sampling_frame <- function(blocklens, TR, start_time = TR / 2, precision = .1)
 {
   # --- recycle & validate ------------------------------------------------
-  # Ensure all vectors have the same length
-  max_len <- max(length(blocklens), length(TR), length(start_time))
-  blocklens <- rep_len(blocklens, max_len)
-  TR <- rep_len(TR, max_len)
-  start_time <- rep_len(start_time, max_len)
+  n_blocks <- length(blocklens)
+
+  # Check that TR and start_time are either length 1 or match n_blocks
+  if (length(TR) != 1L && length(TR) != n_blocks) {
+    stop("TR must have length 1 or match the number of blocks")
+  }
+  if (length(start_time) != 1L && length(start_time) != n_blocks) {
+    stop("start_time must have length 1 or match the number of blocks")
+  }
+
+  # Recycle values to the number of blocks
+  TR <- rep_len(TR, n_blocks)
+  start_time <- rep_len(start_time, n_blocks)
   
   # Validate inputs with proper error messages
   if (!all(blocklens > 0)) {
