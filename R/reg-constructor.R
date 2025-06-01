@@ -157,9 +157,18 @@ null_regressor <- function(hrf=HRF_SPMG1, span=24) {
 #' @export
 single_trial_regressor <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=24) {
   # Basic validation specific to single trial before calling Reg
-  stopifnot(length(onsets) == 1)
-  stopifnot(length(duration) <= 1) # Allow scalar or length 1
-  stopifnot(length(amplitude) <= 1) # Allow scalar or length 1
+  assertthat::assert_that(
+    length(onsets) == 1,
+    msg = "`onsets` must be of length 1"
+  )
+  assertthat::assert_that(
+    length(duration) <= 1,
+    msg = "`duration` must have length 1 or be a scalar"
+  )
+  assertthat::assert_that(
+    length(amplitude) <= 1,
+    msg = "`amplitude` must have length 1 or be a scalar"
+  )
   
   # Call Reg constructor, which now sets correct classes
   Reg(onsets       = onsets,
