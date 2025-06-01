@@ -2,6 +2,12 @@
 #' @keywords internal
 #' @noRd
 .memo_hrf <- memoise::memoise(function(hrf, span, dt) {
+    if (!is.numeric(span) || length(span) != 1 || span <= 0) {
+        stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
+    }
+    if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
+        stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
+    }
     times <- seq(0, span, by = dt)
     # Evaluate HRF - ensure it returns a matrix
     val <- evaluate(hrf, times)
