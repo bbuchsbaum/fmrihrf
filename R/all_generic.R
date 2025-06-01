@@ -90,12 +90,16 @@ hrf_from_coefficients <- function(hrf, h, ...) UseMethod("hrf_from_coefficients"
 
 
 #' Number of basis functions
-#' 
-#' @description
-#' Get the number of basis functions for an HRF object. This is useful for:
-#' \itemize{
-#'   \item Understanding the complexity of an HRF model
-#'   \item Creating penalty matrices for regularization
+#'
+#' Return the number of basis functions represented by an object.
+#'
+#' This information is typically used when constructing penalty matrices
+#' or understanding the complexity of an HRF model or regressor.
+#'
+#' @param x Object containing HRF or regressor information.
+#' @param ... Additional arguments passed to methods.
+#' @return Integer scalar giving the number of basis functions.
+#' @export
 nbasis <- function(x, ...) UseMethod("nbasis")
 
 
@@ -164,8 +168,6 @@ hrf_from_coefficients <- function(hrf, h, ...) { UseMethod("hrf_from_coefficient
 #'
 #' @param hrf An object of class `HRF`.
 #' @param sframe A `sampling_frame` object or numeric vector of times.
-#' @param precision Optional sampling interval in seconds when `sframe`
-#'   is a `sampling_frame`. Defaults to the TR of `sframe`.
 #' @param ... Additional arguments passed to methods
 #' @return A numeric matrix with one column per basis function.
 #' @export
@@ -181,10 +183,70 @@ reconstruction_matrix <- function(hrf, sframe, ...) { UseMethod("reconstruction_
 #' @export
 durations <- function(x, ...) UseMethod("durations")
 
+#' Get amplitudes from an object
+#'
+#' Generic accessor returning event amplitudes or scaling factors.
+#'
+#' @param x Object containing amplitude information
+#' @param ... Additional arguments passed to methods
+#' @return Numeric vector of amplitudes
+#' @export
+amplitudes <- function(x, ...) UseMethod("amplitudes")
+
+#' Get event onsets from an object
+#'
+#' Generic accessor returning event onset times in seconds.
+#'
+#' @param x Object containing onset information
+#' @param ... Additional arguments passed to methods
+#' @return Numeric vector of onsets
+#' @export
+onsets <- function(x, ...) UseMethod("onsets")
+
+#' Get sample acquisition times
+#'
+#' Generic function retrieving sampling times from a sampling frame or
+#' related object.
+#'
+#' @param x Object describing the sampling grid
+#' @param ... Additional arguments passed to methods
+#' @return Numeric vector of sample times
+#' @export
+samples <- function(x, ...) UseMethod("samples")
+
+#' Convert onsets to global timing
+#'
+#' Generic accessor for converting block-wise onsets to global onsets.
+#'
+#' @param x Object describing the sampling frame
+#' @param ... Additional arguments passed to methods
+#' @return Numeric vector of global onset times
+#' @export
+global_onsets <- function(x, ...) UseMethod("global_onsets")
+
+#' Get block identifiers
+#'
+#' Generic accessor returning block indices for each sample or onset.
+#'
+#' @param x Object containing block structure
+#' @param ... Additional arguments passed to methods
+#' @return Integer vector of block ids
+#' @export
+blockids <- function(x, ...) UseMethod("blockids")
+
+#' Get block lengths
+#'
+#' Generic accessor returning the number of scans in each block of a
+#' sampling frame or similar object.
+#'
+#' @param x Object containing block length information
+#' @param ... Additional arguments passed to methods
+#' @return Numeric vector of block lengths
+#' @export
+blocklens <- function(x, ...) UseMethod("blocklens")
 
 
 
-amplitudes <- function(x) UseMethod("amplitudes")
 
 
 

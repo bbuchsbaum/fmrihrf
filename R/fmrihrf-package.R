@@ -5,7 +5,9 @@
 #'
 #' @keywords internal
 #' "_PACKAGE"
+#' @docType package
+#' @name fmrihrf-package
 #'
 #' @useDynLib fmrihrf, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-NULL 
+NULL
