@@ -52,5 +52,5 @@ Internally, it utilizes the `Reg()` constructor which performs validation and
 efficient storage. The resulting object can be evaluated at specific time points 
 using the `evaluate()` function.
 
-Events with an amplitude of 0 or NA are automatically filtered out.
+Events with an amplitude of 0 are automatically filtered out.
 }

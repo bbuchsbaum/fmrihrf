@@ -28,11 +28,11 @@ test_that("regressor constructs valid Reg objects", {
 })
 
 
-test_that("events with zero or NA amplitude are filtered", {
-  reg <- regressor(onsets = c(1, 2, 3), amplitude = c(1, 0, NA))
-  expect_equal(reg$onsets, 1)
-  expect_equal(reg$duration, 0)
-  expect_equal(reg$amplitude, 1)
+test_that("events with zero amplitude are filtered", {
+  reg <- regressor(onsets = c(1, 2, 3), amplitude = c(1, 0, 2))
+  expect_equal(reg$onsets, c(1, 3))
+  expect_equal(reg$duration, c(0, 0))
+  expect_equal(reg$amplitude, c(1, 2))
   expect_false(attr(reg, "filtered_all"))
 
   reg_empty <- regressor(onsets = c(1, 2), amplitude = c(0, 0))
@@ -40,11 +40,22 @@ test_that("events with zero or NA amplitude are filtered", {
   expect_true(attr(reg_empty, "filtered_all"))
 })
 
+test_that("NA inputs trigger errors", {
+  expect_error(regressor(onsets = NA_real_, duration = 1), "onsets")
+  expect_error(regressor(onsets = 1, duration = NA_real_), "duration")
+  expect_error(regressor(onsets = 1, amplitude = NA_real_), "amplitude")
+  expect_error(regressor(onsets = 1, span = NA_real_), "span")
+})
+
 
 test_that("invalid inputs are rejected", {
   expect_error(regressor(onsets = c(-1, 1)), "onsets")
   expect_error(regressor(onsets = 1, duration = -2), "duration")
   expect_error(regressor(onsets = 1, span = 0), "span")
+  expect_error(regressor(onsets = c(1, Inf)), "onsets")
+  expect_error(regressor(onsets = 1, duration = Inf), "duration")
+  expect_error(regressor(onsets = 1, amplitude = Inf), "amplitude")
+  expect_error(regressor(onsets = 1, span = Inf), "span")
 })
 
 
