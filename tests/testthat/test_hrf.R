@@ -345,10 +345,11 @@ test_that("block_hrf correctly blocks an HRF object", {
   t <- seq(0, 30, by = 0.2)
   width <- 5
   precision <- 0.2
+  half_life_inf <- 1e12
 
-  blocked_hrf_sum <- block_hrf(base_hrf, width = width, precision = precision, summate = TRUE, normalize = FALSE)
-  blocked_hrf_max <- block_hrf(base_hrf, width = width, precision = precision, summate = FALSE, normalize = FALSE)
-  blocked_hrf_norm <- block_hrf(base_hrf, width = width, precision = precision, summate = TRUE, normalize = TRUE)
+  blocked_hrf_sum <- block_hrf(base_hrf, width = width, precision = precision, half_life = half_life_inf, summate = TRUE, normalize = FALSE)
+  blocked_hrf_max <- block_hrf(base_hrf, width = width, precision = precision, half_life = half_life_inf, summate = FALSE, normalize = FALSE)
+  blocked_hrf_norm <- block_hrf(base_hrf, width = width, precision = precision, half_life = half_life_inf, summate = TRUE, normalize = TRUE)
 
   # Test basic structure
   expect_true(inherits(blocked_hrf_sum, "HRF"))
@@ -388,7 +389,7 @@ test_that("block_hrf correctly blocks an HRF object", {
   expect_true(max(abs(blocked_hl(t))) < max(abs(blocked_hrf_sum(t)))) # Expect decay to reduce peak
 
   # Test negligible width
-  blocked_negligible <- block_hrf(base_hrf, width = 0.01, precision = 0.1)
+  blocked_negligible <- block_hrf(base_hrf, width = 0.01, precision = 0.1, half_life = half_life_inf)
   expect_equal(blocked_negligible(t), base_hrf(t))
 })
 
@@ -471,9 +472,18 @@ test_that("gen_hrf correctly sets nbasis for function inputs", {
 })
 
 
+test_that("lag_hrf and block_hrf enforce finite parameters", {
+  expect_error(lag_hrf(HRF_SPMG1, Inf), "finite")
+  expect_error(lag_hrf(HRF_SPMG1, NA_real_), "finite")
+  expect_error(block_hrf(HRF_SPMG1, width = Inf, precision = 0.1, half_life = 1), "finite")
+  expect_error(block_hrf(HRF_SPMG1, width = 1, precision = Inf, half_life = 1), "finite")
+  expect_error(block_hrf(HRF_SPMG1, width = 1, precision = 0.1, half_life = Inf), "finite")
+})
+
 test_that("evaluate.HRF validates grid and precision", {
   expect_error(evaluate(HRF_SPMG1, numeric(0)), "grid")
   expect_error(evaluate(HRF_SPMG1, c(0, NA)), "grid")
   expect_error(evaluate(HRF_SPMG1, 0:1, precision = 0), "precision")
   expect_error(evaluate(HRF_SPMG1, 0:1, precision = -0.5), "precision")
+
 })
