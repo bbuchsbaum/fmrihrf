@@ -44,7 +44,15 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv"
   
   # Check if prep_reg_inputs indicated no relevant events
   if (length(prep_data$valid_ons) == 0) {
-    return(matrix(0, length(grid), prep_data$nb)) 
+    zero_res <- if (prep_data$nb == 1) {
+      rep(0, length(grid))
+    } else {
+      matrix(0, nrow = length(grid), ncol = prep_data$nb)
+    }
+    if (sparse) {
+      zero_res <- Matrix::Matrix(zero_res, sparse = TRUE)
+    }
+    return(zero_res)
   }
   
   # --- Method Dispatch to Internal Engines ---
@@ -72,11 +80,7 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv"
   
   # Convert to sparse matrix if requested
   if (sparse) {
-    if (is.vector(final_result)) {
-      return(Matrix::Matrix(final_result, sparse=TRUE))
-    } else {
-      return(Matrix::Matrix(final_result, sparse=TRUE))
-    }
+    return(Matrix::Matrix(final_result, sparse = TRUE))
   } else {
     return(final_result)
   }
