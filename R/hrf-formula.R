@@ -47,7 +47,10 @@ make_hrf <- function(basis, lag, nbasis = 1) {
     final_hrf <- gen_hrf(basis, lag = lag)
 
   } else {
-    stop("invalid basis function: must be 1) character string indicating hrf type, e.g. 'gamma' 2) a function or 3) an object of class 'HRF': ", basis)
+    stop(sprintf(
+      "invalid basis function '%s' of class %s: must be 1) character string indicating hrf type, e.g. 'gamma', 2) a function or 3) an object of class 'HRF'",
+      deparse(substitute(basis)), paste(class(basis), collapse = ", ")
+    ))
   }
   
   return(final_hrf)
