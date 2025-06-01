@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-library(fmrireg)
+library(fmrihrf)
 library(dplyr) # For pipe operator %>%
 library(ggplot2) # For plotting
 library(tidyr) # For data manipulation
@@ -28,11 +28,11 @@ library(tidyr) # For data manipulation
 
 A hemodynamic response function (HRF) models the temporal evolution of the fMRI BOLD (Blood-Oxygen-Level-Dependent) signal in response to a brief neural event. Typically, the BOLD signal peaks 4-6 seconds after the event onset and then returns to baseline, often with a slight undershoot.
 
-`fmrireg` provides tools to define, manipulate, and visualize various HRFs commonly used in fMRI analysis.
+`fmrihrf` provides tools to define, manipulate, and visualize various HRFs commonly used in fMRI analysis.
 
 ## Pre-defined HRF Objects
 
-`fmrireg` includes several pre-defined HRF objects, which are essentially functions with specific attributes defining their type, number of basis functions (`nbasis`), and effective duration (`span`).
+`fmrihrf` includes several pre-defined HRF objects, which are essentially functions with specific attributes defining their type, number of basis functions (`nbasis`), and effective duration (`span`).
 
 Let's look at two common examples: the SPM canonical HRF (`HRF_SPMG1`) and a Gaussian HRF (`HRF_GAUSSIAN`).
 
@@ -351,7 +351,7 @@ Instead of assuming a fixed HRF shape, we can model the response using a linear 
 
 ### SPM Basis Sets
 
-`fmrireg` provides pre-defined HRF objects for the SPM canonical HRF plus its temporal derivative (`HRF_SPMG2`), and additionally its dispersion derivative (`HRF_SPMG3`).
+`fmrihrf` provides pre-defined HRF objects for the SPM canonical HRF plus its temporal derivative (`HRF_SPMG2`), and additionally its dispersion derivative (`HRF_SPMG3`).
 
 ```{r spm_basis_sets}
 # SPM + Temporal Derivative (2 basis functions)

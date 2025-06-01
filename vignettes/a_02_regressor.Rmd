@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-library(fmrireg)
+library(fmrihrf)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -28,7 +28,7 @@ library(tidyr)
 
 In fMRI analysis, a **regressor** (or predictor) represents the expected BOLD signal timecourse associated with a specific experimental condition or event type. It's typically created by convolving a series of event onsets (often represented as delta functions or "sticks") with a hemodynamic response function (HRF).
 
-`fmrireg` provides the `regressor()` function to easily create these objects from event timings and an HRF. While these regressor objects are often constructed automatically behind the scenes by modeling functions like `fmri_lm`, this vignette explores how to create and manipulate them directly, offering finer control over the model components.
+`fmrihrf` provides the `regressor()` function to easily create these objects from event timings and an HRF. While these regressor objects are often constructed automatically by modeling functions in other packages, this vignette explores how to create and manipulate them directly, offering finer control over the model components.
 
 ## Basic Regressor from Event Onsets
 
@@ -72,13 +72,7 @@ ggplot(plot_df, aes(x = Time, y = Response)) +
        x = "Time (seconds)",
        y = "Predicted Response") +
   theme_minimal()
-
-# The autoplot() method provides a quick ggplot object
-# library(ggplot2)
-# autoplot(reg1, grid = scan_times)
 ```
-
-The `autoplot()` method (requires `ggplot2`) provides a quick way to visualize the evaluated timecourse.
 
 ## Varying Event Durations
 
@@ -210,9 +204,6 @@ nbasis(reg_basis) # Should be 5
 scan_times_basis <- seq(0, max(onsets_basis) + 30, by = TR)
 pred_basis_matrix <- evaluate(reg_basis, scan_times_basis)
 dim(pred_basis_matrix) # rows = time points, cols = basis functions
-
-# Plot the basis set regressors using autoplot
-# autoplot(reg_basis, grid = scan_times_basis)
 
 # Or plot manually with ggplot
 colnames(pred_basis_matrix) <- paste0("Basis_", 1:ncol(pred_basis_matrix))
