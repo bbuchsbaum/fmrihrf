@@ -38,8 +38,10 @@ with the duration of sustained events (via internal convolution/summation). If `
 the response reflects the peak HRF reached during the event duration.}
 }
 \value{
-An S3 object of class `Reg` and `list` 
-  containing processed event information and the HRF specification.
+An S3 object of class `Reg` and `list`
+  containing processed event information and the HRF specification. The
+  object includes a \code{filtered_all} attribute indicating whether all
+  events were removed due to zero or \code{NA} amplitudes.
 }
 \description{
 Creates an object representing event-related regressors for fMRI modeling.
@@ -52,5 +54,5 @@ Internally, it utilizes the `Reg()` constructor which performs validation and
 efficient storage. The resulting object can be evaluated at specific time points 
 using the `evaluate()` function.
 
-Events with an amplitude of 0 or NA are automatically filtered out.
+Events with an amplitude of 0 are automatically filtered out.
 }

@@ -26,15 +26,33 @@
 #' @importFrom stats approx median convolve
 #' @importFrom Rcpp evalCpp
 evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv", "loop"), sparse = FALSE, ...) {
-  
+
   method <- match.arg(method)
-  
+
+  # Validate inputs
+  if (!is.numeric(grid) || length(grid) == 0 || anyNA(grid)) {
+    stop("`grid` must be a non-empty numeric vector with no NA values.",
+         call. = FALSE)
+  }
+  if (!is.numeric(precision) || length(precision) != 1 || is.na(precision) ||
+      precision <= 0) {
+    stop("`precision` must be a positive numeric value.", call. = FALSE)
+  }
+
   # Prepare inputs using the helper function
   prep_data <- prep_reg_inputs(x, grid, precision)
   
   # Check if prep_reg_inputs indicated no relevant events
   if (length(prep_data$valid_ons) == 0) {
-    return(matrix(0, length(grid), prep_data$nb)) 
+    zero_res <- if (prep_data$nb == 1) {
+      rep(0, length(grid))
+    } else {
+      matrix(0, nrow = length(grid), ncol = prep_data$nb)
+    }
+    if (sparse) {
+      zero_res <- Matrix::Matrix(zero_res, sparse = TRUE)
+    }
+    return(zero_res)
   }
   
   # --- Method Dispatch to Internal Engines ---
@@ -62,11 +80,7 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv"
   
   # Convert to sparse matrix if requested
   if (sparse) {
-    if (is.vector(final_result)) {
-      return(Matrix::Matrix(final_result, sparse=TRUE))
-    } else {
-      return(Matrix::Matrix(final_result, sparse=TRUE))
-    }
+    return(Matrix::Matrix(final_result, sparse = TRUE))
   } else {
     return(final_result)
   }
@@ -78,14 +92,21 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv"
 #' @export
 #' @importFrom assertthat assert_that
 shift.Reg <- function(x, shift_amount, ...) {
-  if (!inherits(x, "Reg")) {
-    # This check might be redundant if S3 dispatch works, but good safety
-    stop("Input 'x' must inherit from class 'Reg'")
+  dots <- list(...)
+
+  if (missing(shift_amount) && "offset" %in% names(dots)) {
+    shift_amount <- dots$offset
   }
 
-  if (!is.numeric(shift_amount) || length(shift_amount) != 1) {
-    stop("`shift_amount` must be a single numeric value")
+  assert_that(inherits(x, "Reg"),
+              msg = "Input 'x' must inherit from class 'Reg'")
+
+  if (missing(shift_amount)) {
+    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
   }
+
+  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
+              msg = "`shift_amount` must be a single numeric value")
 
   # Handle empty regressor case
   if (length(x$onsets) == 0 || (length(x$onsets) == 1 && is.na(x$onsets[1]))) {
@@ -114,7 +135,6 @@ shift.Reg <- function(x, shift_amount, ...) {
 #' @param x A `Reg` object.
 #' @param ... Not used.
 #' @importFrom cli cli_h1 cli_text cli_div cli_li
-#' @importFrom assertthat assert_that
 #' @export
 #' @method print Reg
 #' @rdname print
@@ -129,7 +149,7 @@ print.Reg <- function(x, ...) {
   
   # Use cli_div for potentially better alignment than cli_ul
   cli::cli_div(theme = list(ul = list("margin-left" = 2), li = list("margin-bottom" = 0.5)))
-  cli::cli_li("Type: {.cls {class(x)[1]}} {if(inherits(x, 'regressor')) cli::cli_text('(Legacy compatible)')}")
+  cli::cli_li("Type: {.cls {class(x)[1]}}{if(inherits(x, 'regressor')) ' (Legacy compatible)'}")
   if (n_ons == 0) {
     cli::cli_li("Events: 0 (Empty Regressor)")
   } else {
@@ -145,8 +165,8 @@ print.Reg <- function(x, ...) {
   cli::cli_li("HRF: {hrf_name} ({nb} basis function{?s})")
   cli::cli_li("HRF Span: {hrf_span}s")
   cli::cli_li("Summation: {x$summate}")
-  # cli_end() is not needed for cli_div
-  
+  cli::cli_end()
+
   invisible(x)
 }
 

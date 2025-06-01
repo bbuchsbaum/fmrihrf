@@ -6,6 +6,8 @@
 #'   * `amplitude`: Numeric vector of event amplitudes/scaling factors.
 #'   * `span`: Numeric scalar indicating the HRF span (seconds).
 #'   * `summate`: Logical indicating if overlapping HRF responses should summate.
+#'   * `filtered_all`: Logical attribute set to `TRUE` when all events were
+#'     removed due to zero or `NA` amplitudes.
 #' @importFrom assertthat assert_that
 Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate=TRUE) {
   
@@ -13,18 +15,33 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   onsets    <- as.numeric(onsets)
   duration  <- as.numeric(duration)
   amplitude <- as.numeric(amplitude)
-  summate   <- isTRUE(summate)
+  assert_that(is.logical(summate), length(summate) == 1)
+  summate   <- as.logical(summate)
   span_arg  <- as.numeric(span) # Store original arg
 
   # Handle NA onset case explicitly (represents intent for zero events)
   if (length(onsets) == 1 && is.na(onsets[1])) {
       onsets <- numeric(0)
   }
+
+  # Validate converted inputs for finiteness/NA
+  if (anyNA(onsets) || any(!is.finite(onsets))) {
+      stop("`onsets` must contain finite numeric values.", call. = FALSE)
+  }
+  if (anyNA(duration) || any(!is.finite(duration))) {
+      stop("`duration` must contain finite numeric values.", call. = FALSE)
+  }
+  if (anyNA(amplitude) || any(!is.finite(amplitude))) {
+      stop("`amplitude` must contain finite numeric values.", call. = FALSE)
+  }
+  if (is.na(span_arg) || !is.finite(span_arg) || span_arg <= 0) {
+      stop("`span` must be a positive, finite number.", call. = FALSE)
+  }
   n_onsets <- length(onsets)
-  
+
   # Check for invalid onsets *before* recycling other args
-  if (any(onsets < 0 | is.na(onsets))) {
-      stop("`onsets` must be non-negative and non-NA.", call. = FALSE)
+  if (any(onsets < 0)) {
+      stop("`onsets` must be non-negative.", call. = FALSE)
   }
   
   # Recycle/Validate inputs *before* filtering
@@ -34,9 +51,9 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   
   # Check for invalid inputs early
   if (any(duration < 0, na.rm = TRUE)) stop("`duration` cannot be negative.")
-  if (span_arg <= 0) stop("`span` must be positive.")
   
-  # Filter events based on non-zero and non-NA amplitude (Ticket B-3)
+
+  # Filter events based on non-zero and non-NA amplitude
   if (n_onsets > 0) { 
       keep_indices <- which(amplitude != 0 & !is.na(amplitude))
       # Store whether filtering occurred
@@ -49,14 +66,12 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
           duration_filtered  <- duration[keep_indices]
           amplitude <- amplitude[keep_indices]
           n_onsets  <- length(onsets) # Update count after filtering
-          duration <- recycle_or_error(duration_filtered, n_onsets, "duration")
-      } 
+      }
   } else {
       filtered_all <- TRUE # If input was empty, effectively all are filtered
   }
   
-  # Ensure HRF is a valid HRF object using make_hrf 
-  # Explicitly namespace internal function call (Ticket G-3)
+  # Ensure HRF is a valid HRF object using make_hrf
   hrf  <- make_hrf(hrf, lag = 0) 
   assert_that(inherits(hrf, "HRF"), msg = "Invalid 'hrf' provided or generated.")
   
@@ -103,8 +118,8 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #'   it may be inferred from the `hrf` object or default to 40s. **Note:** Unlike some
 #'   previous versions, the `span` is not automatically adjusted based on `duration`;
 #'   ensure the provided or inferred `span` is sufficient for your longest event duration.
-#' @param summate Logical; if `TRUE` (default), the HRF response amplitude scales 
-#'   with the duration of sustained events (via internal convolution/summation). If `FALSE`, 
+#' @param summate Logical scalar; if `TRUE` (default), the HRF response amplitude scales
+#'   with the duration of sustained events (via internal convolution/summation). If `FALSE`,
 #'   the response reflects the peak HRF reached during the event duration.
 #'   
 #' @details 
@@ -113,10 +128,12 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #' efficient storage. The resulting object can be evaluated at specific time points 
 #' using the `evaluate()` function.
 #' 
-#' Events with an amplitude of 0 or NA are automatically filtered out.
+#' Events with an amplitude of 0 are automatically filtered out.
 #' 
-#' @return An S3 object of class `Reg` and `list` 
-#'   containing processed event information and the HRF specification.
+#' @return An S3 object of class `Reg` and `list`
+#'   containing processed event information and the HRF specification. The
+#'   object includes a `filtered_all` attribute indicating whether all events
+#'   were removed due to zero or `NA` amplitudes.
 #' @importFrom assertthat assert_that
 #' @export
 regressor <- Reg # Assign Reg directly to regressor
@@ -157,9 +174,18 @@ null_regressor <- function(hrf=HRF_SPMG1, span=24) {
 #' @export
 single_trial_regressor <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=24) {
   # Basic validation specific to single trial before calling Reg
-  stopifnot(length(onsets) == 1)
-  stopifnot(length(duration) <= 1) # Allow scalar or length 1
-  stopifnot(length(amplitude) <= 1) # Allow scalar or length 1
+  assertthat::assert_that(
+    length(onsets) == 1,
+    msg = "`onsets` must be of length 1"
+  )
+  assertthat::assert_that(
+    length(duration) <= 1,
+    msg = "`duration` must have length 1 or be a scalar"
+  )
+  assertthat::assert_that(
+    length(amplitude) <= 1,
+    msg = "`amplitude` must have length 1 or be a scalar"
+  )
   
   # Call Reg constructor, which now sets correct classes
   Reg(onsets       = onsets,

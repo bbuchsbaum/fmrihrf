@@ -16,7 +16,10 @@
 #' HRF_SPMG1(5)
 lag_hrf <- function(hrf, lag) {
   assertthat::assert_that(inherits(hrf, "HRF"), msg = "Input 'hrf' must be an HRF object.")
-  assertthat::assert_that(is.numeric(lag) && length(lag) == 1, msg = "'lag' must be a single numeric value.")
+  assertthat::assert_that(
+    is.numeric(lag) && length(lag) == 1 && is.finite(lag),
+    msg = "'lag' must be a single finite numeric value."
+  )
 
   # Original attributes
   orig_name <- attr(hrf, "name")
@@ -64,9 +67,18 @@ lag_hrf <- function(hrf, lag) {
 #' legend("topright", legend = c("Original", "Blocked (width=5)"), col = c("blue", "red"), lty = 1)
 block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TRUE, normalize = FALSE) {
   assertthat::assert_that(inherits(hrf, "HRF"), msg = "Input 'hrf' must be an HRF object.")
-  assertthat::assert_that(is.numeric(width) && length(width) == 1 && width >= 0, msg = "'width' must be a single non-negative numeric value.")
-  assertthat::assert_that(is.numeric(precision) && length(precision) == 1 && precision > 0, msg = "'precision' must be a single positive numeric value.")
-  assertthat::assert_that(is.numeric(half_life) && length(half_life) == 1 && half_life > 0, msg = "'half_life' must be a single positive numeric value (use Inf for no decay).")
+  assertthat::assert_that(
+    is.numeric(width) && length(width) == 1 && width >= 0 && is.finite(width),
+    msg = "'width' must be a single non-negative finite numeric value."
+  )
+  assertthat::assert_that(
+    is.numeric(precision) && length(precision) == 1 && precision > 0 && is.finite(precision),
+    msg = "'precision' must be a single finite positive numeric value."
+  )
+  assertthat::assert_that(
+    is.numeric(half_life) && length(half_life) == 1 && half_life > 0 && is.finite(half_life),
+    msg = "'half_life' must be a single finite positive numeric value."
+  )
   assertthat::assert_that(is.logical(summate) && length(summate) == 1, msg = "'summate' must be a single logical value.")
   assertthat::assert_that(is.logical(normalize) && length(normalize) == 1, msg = "'normalize' must be a single logical value.")
 
@@ -185,15 +197,12 @@ normalise_hrf <- function(hrf) {
         res <- res / peak_val
       }
     } else if (is.matrix(res)) {
-      # Normalise each basis column independently
-      res <- apply(res, 2, function(basis_col) {
-        peak_val <- max(abs(basis_col), na.rm = TRUE)
-        if (!is.na(peak_val) && peak_val != 0) {
-          basis_col / peak_val
-        } else {
-          basis_col
-        }
+      # Normalise each basis column independently while preserving matrix shape
+      peaks <- apply(res, 2, function(basis_col) {
+        max(abs(basis_col), na.rm = TRUE)
       })
+      peaks_safe <- ifelse(is.na(peaks) | peaks == 0, 1, peaks)
+      res <- sweep(res, 2, peaks_safe, "/")
     }
     # If it's not numeric or matrix (e.g., NULL or error result), return as is
     return(res)

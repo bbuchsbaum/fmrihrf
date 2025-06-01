@@ -19,6 +19,7 @@ test_that("sampling_frame constructor works correctly", {
               "TR .* must be positive")
   expect_error(sampling_frame(blocklens = c(100, 100), TR = 2, precision = 3),
               "Precision must be positive and less than")
+
   expect_error(sampling_frame(blocklens = c("a", 100), TR = 2),
                "numeric")
   expect_error(sampling_frame(blocklens = c(100, NA), TR = 2),
@@ -30,6 +31,12 @@ test_that("sampling_frame constructor works correctly", {
   expect_error(sampling_frame(blocklens = c(100, 100), TR = 2,
                               start_time = c(0, NA)),
                "non-NA")
+
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = c(2, 2, 2)),
+              "TR must have length 1 or match the number of blocks")
+  expect_error(sampling_frame(blocklens = c(100, 100), start_time = c(0, 0, 0)),
+              "start_time must have length 1 or match the number of blocks")
+
 })
 
 test_that("samples.sampling_frame works correctly", {
@@ -65,11 +72,11 @@ test_that("global_onsets works correctly", {
   expect_equal(global_times[1], 10)  # First block onset unchanged
   expect_equal(global_times[2], 220)  # Second block onset = 200 (block1 duration) + 20
   
-  # Test error conditions
-  #expect_error(global_onsets(sframe, c(10), c(1, 2)), 
-  #            "length.*onsets.*length.*blockids")
-  #expect_error(global_onsets(sframe, c(10), c(3)), 
-  #            "blockids.*1.*length")
+  # Test error conditions for non-integer block ids
+  expect_error(global_onsets(sframe, onsets, c(1.5, 2)),
+               "blockids must be whole numbers")
+  expect_error(global_onsets(sframe, onsets, c(1, NA)),
+               "blockids must be whole numbers")
 })
 
 test_that("print.sampling_frame works correctly", {
@@ -109,7 +116,7 @@ test_that("sampling_frame maintains temporal consistency", {
   
   # Check uniform spacing within blocks
   for (block in 1:3) {
-    block_idx <- which(sframe$blockids == block)
+    block_idx <- which(blockids(sframe) == block)
     diffs <- diff(glob_samples[block_idx])
     expect_true(all(abs(diffs - 2) < 1e-10))
   }
