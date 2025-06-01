@@ -462,3 +462,11 @@ test_that("gen_hrf correctly sets nbasis for function inputs", {
   hrf_tent7 <- gen_hrf(hrf_bspline, N = 7, degree = 1)
   expect_equal(nbasis(hrf_tent7), 7)
 })
+
+
+test_that("evaluate.HRF validates grid and precision", {
+  expect_error(evaluate(HRF_SPMG1, numeric(0)), "grid")
+  expect_error(evaluate(HRF_SPMG1, c(0, NA)), "grid")
+  expect_error(evaluate(HRF_SPMG1, 0:1, precision = 0), "precision")
+  expect_error(evaluate(HRF_SPMG1, 0:1, precision = -0.5), "precision")
+})
