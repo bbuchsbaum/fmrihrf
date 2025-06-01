@@ -228,16 +228,11 @@ gen_hrf_set <- function(...) {
 #' @importFrom purrr pmap partial
 #' @export
 hrf_library <- function(fun, pgrid, ...) {
+  extras <- list(...)
   # Ensure fun returns an HRF object
   hrf_list <- purrr::pmap(pgrid, function(...) {
       params <- list(...)
-      # Assuming 'fun' is designed to take these params and return an HRF
-      # If fun itself is just a base function, we need to wrap it
-      # Let's assume fun already produces an HRF or can be wrapped by as_hrf
-      # This part might need adjustment based on typical usage of 'fun'
-      do.call(fun, c(params, list(...))) # Pass original dots as well?
-      # Safest might be if 'fun' is expected to return an HRF object directly
-      # Example: fun = function(lag) HRF_SPMG1 |> lag_hrf(lag)
+      do.call(fun, c(params, extras))
   })
   # Bind the generated HRFs
   do.call(bind_basis, hrf_list)
