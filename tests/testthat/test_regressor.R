@@ -66,6 +66,17 @@ test_that("shift.Reg shifts onsets correctly", {
   expect_identical(shifted$amplitude, reg$amplitude)
 })
 
+test_that("shift.Reg accepts offset argument", {
+  reg <- regressor(c(1, 3), hrf = HRF_SPMG1)
+  shifted <- shift(reg, offset = 2)
+  expect_equal(shifted$onsets, c(3, 5))
+})
+
+test_that("shift.Reg errors without shift specification", {
+  reg <- regressor(0, hrf = HRF_SPMG1)
+  expect_error(shift(reg), "shift_amount")
+})
+
 
 test_that("evaluate.Reg computes convolution correctly", {
   reg <- regressor(onsets = c(0, 2), hrf = BOX_HRF, span = 1)

@@ -78,14 +78,21 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv"
 #' @export
 #' @importFrom assertthat assert_that
 shift.Reg <- function(x, shift_amount, ...) {
-  if (!inherits(x, "Reg")) {
-    # This check might be redundant if S3 dispatch works, but good safety
-    stop("Input 'x' must inherit from class 'Reg'")
+  dots <- list(...)
+
+  if (missing(shift_amount) && "offset" %in% names(dots)) {
+    shift_amount <- dots$offset
   }
 
-  if (!is.numeric(shift_amount) || length(shift_amount) != 1) {
-    stop("`shift_amount` must be a single numeric value")
+  assert_that(inherits(x, "Reg"),
+              msg = "Input 'x' must inherit from class 'Reg'")
+
+  if (missing(shift_amount)) {
+    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
   }
+
+  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
+              msg = "`shift_amount` must be a single numeric value")
 
   # Handle empty regressor case
   if (length(x$onsets) == 0 || (length(x$onsets) == 1 && is.na(x$onsets[1]))) {
