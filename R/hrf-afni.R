@@ -35,7 +35,6 @@ as.character.AFNI_HRF <- function(x,...) {
 
 #' construct an native AFNI hrf specification for '3dDeconvolve' with the 'stim_times' argument.
 #' 
-#' @inheritParams hrf
 #' @param start the start of the window for sin/poly/csplin models
 #' @param stop the stop time for sin/poly/csplin models
 #' @export
@@ -129,8 +128,6 @@ afni_hrf <- function(..., basis=c("spmg1", "block", "dmblock",
 #' @param start start of hrf (for multiple basis hrfs)
 #' @param stop end of hrf (for multiple basis hrfs)
 #' 
-#' @inheritParams hrf
-#' @examples 
 #' 
 #' 
 #' tw <- afni_trialwise("trialwise", basis="gamma", onsets=seq(1,100,by=5))
