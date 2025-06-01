@@ -102,7 +102,7 @@ test_that("sampling_frame maintains temporal consistency", {
   
   # Check uniform spacing within blocks
   for (block in 1:3) {
-    block_idx <- which(sframe$blockids == block)
+    block_idx <- which(blockids(sframe) == block)
     diffs <- diff(glob_samples[block_idx])
     expect_true(all(abs(diffs - 2) < 1e-10))
   }
