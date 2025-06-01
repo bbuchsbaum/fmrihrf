@@ -5,10 +5,9 @@
 #'
 #' @param f The function to be turned into an HRF object. It must accept a single argument `t` (time).
 #' @param name The name for the HRF object. Defaults to the deparsed name of `f`.
-#' @param nbasis The number of basis functions represented by `f`. Defaults to 1L.
-#' @param span The nominal time span (duration in seconds) of the HRF. Defaults to 24.
+#' @param nbasis The number of basis functions represented by `f`. Must be \code{>= 1}. Defaults to 1L.
+#' @param span The nominal time span (duration in seconds) of the HRF. Must be positive. Defaults to 24.
 #' @param params A named list of parameters associated with the HRF function `f`. Defaults to an empty list.
-#' @param ... Additional arguments to pass to the function f.
 #' @return A new HRF object.
 #' @keywords internal
 #' @export
@@ -17,7 +16,9 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
   assertthat::assert_that(is.function(f))
   assertthat::assert_that(is.character(name), length(name) == 1)
   assertthat::assert_that(is.numeric(nbasis), length(nbasis) == 1)
+  assertthat::assert_that(nbasis >= 1, msg = "nbasis must be >= 1")
   assertthat::assert_that(is.numeric(span), length(span) == 1)
+  assertthat::assert_that(span > 0, msg = "span must be > 0")
   assertthat::assert_that(is.list(params))
 
   structure(
