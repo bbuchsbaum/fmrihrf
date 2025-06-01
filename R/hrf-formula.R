@@ -1,9 +1,14 @@
 
 #' @export
-make_hrf <- function(basis, lag, nbasis=1) {
-  if (!is.numeric(lag) || length(lag) > 1) {
-    stop("hrf: 'lag' must be a numeric scalar")
+make_hrf <- function(basis, lag, nbasis = 1) {
+  if (!is.numeric(lag) || length(lag) != 1 || !is.finite(lag)) {
+    stop("`lag` must be a single finite numeric value.")
   }
+  if (!is.numeric(nbasis) || length(nbasis) != 1 || !is.finite(nbasis) ||
+      nbasis < 1 || nbasis %% 1 != 0) {
+    stop("`nbasis` must be a single positive integer.")
+  }
+  nbasis <- as.integer(nbasis)
   
   if (is.character(basis)) {
     # Resolve character name to a base HRF object or function using getHRF
