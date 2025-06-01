@@ -60,7 +60,7 @@ prep_reg_inputs <- function(x, grid, precision) {
     return(list(nb = nb, grid = grid, valid_ons = numeric(0)))
   }
   
-  # Prepare/Memoize finely sampled HRF (Efficiency 2.1 / Ticket D-1)
+  # Prepare/Memoize finely sampled HRF for efficient evaluation
   hrf_fine_matrix <- .memo_hrf(x$hrf, hrf_span, precision)
   
   # Prepare fine grid (needed for Rconv/loop interpolation)

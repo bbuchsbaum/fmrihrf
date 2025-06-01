@@ -6,6 +6,8 @@
 #'   * `amplitude`: Numeric vector of event amplitudes/scaling factors.
 #'   * `span`: Numeric scalar indicating the HRF span (seconds).
 #'   * `summate`: Logical indicating if overlapping HRF responses should summate.
+#'   * `filtered_all`: Logical attribute set to `TRUE` when all events were
+#'     removed due to zero or `NA` amplitudes.
 #' @importFrom assertthat assert_that
 Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate=TRUE) {
   
@@ -36,7 +38,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   if (any(duration < 0, na.rm = TRUE)) stop("`duration` cannot be negative.")
   if (span_arg <= 0) stop("`span` must be positive.")
   
-  # Filter events based on non-zero and non-NA amplitude (Ticket B-3)
+  # Filter events based on non-zero and non-NA amplitude
   if (n_onsets > 0) { 
       keep_indices <- which(amplitude != 0 & !is.na(amplitude))
       # Store whether filtering occurred
@@ -55,8 +57,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
       filtered_all <- TRUE # If input was empty, effectively all are filtered
   }
   
-  # Ensure HRF is a valid HRF object using make_hrf 
-  # Explicitly namespace internal function call (Ticket G-3)
+  # Ensure HRF is a valid HRF object using make_hrf
   hrf  <- make_hrf(hrf, lag = 0) 
   assert_that(inherits(hrf, "HRF"), msg = "Invalid 'hrf' provided or generated.")
   
@@ -115,8 +116,10 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #' 
 #' Events with an amplitude of 0 or NA are automatically filtered out.
 #' 
-#' @return An S3 object of class `Reg` and `list` 
-#'   containing processed event information and the HRF specification.
+#' @return An S3 object of class `Reg` and `list`
+#'   containing processed event information and the HRF specification. The
+#'   object includes a `filtered_all` attribute indicating whether all events
+#'   were removed due to zero or `NA` amplitudes.
 #' @importFrom assertthat assert_that
 #' @export
 regressor <- Reg # Assign Reg directly to regressor

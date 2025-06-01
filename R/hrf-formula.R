@@ -7,8 +7,8 @@ make_hrf <- function(basis, lag, nbasis=1) {
   
   if (is.character(basis)) {
     # Resolve character name to a base HRF object or function using getHRF
-    # Note: getHRF itself might need simplification later (Ticket 12)
-    # but currently it calls gen_hrf internally for most types.
+    # Note: getHRF itself might need simplification later; it currently calls
+    # gen_hrf internally for most types.
     base_hrf_obj <- getHRF(basis, nbasis=nbasis, lag=0)
     # Apply lag using gen_hrf
     final_hrf <- gen_hrf(base_hrf_obj, lag = lag)
