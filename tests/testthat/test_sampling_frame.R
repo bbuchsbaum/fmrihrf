@@ -13,12 +13,23 @@ test_that("sampling_frame constructor works correctly", {
   expect_equal(sframe2$TR, c(2, 1.5))
   
   # Test input validation
-  expect_error(sampling_frame(blocklens = c(-1, 100), TR = 2), 
+  expect_error(sampling_frame(blocklens = c(-1, 100), TR = 2),
               "Block lengths must be positive")
-  expect_error(sampling_frame(blocklens = c(100, 100), TR = -1), 
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = -1),
               "TR .* must be positive")
   expect_error(sampling_frame(blocklens = c(100, 100), TR = 2, precision = 3),
               "Precision must be positive and less than")
+  expect_error(sampling_frame(blocklens = c("a", 100), TR = 2),
+               "numeric")
+  expect_error(sampling_frame(blocklens = c(100, NA), TR = 2),
+               "non-NA")
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = c(2, NA)),
+               "non-NA")
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = "a"),
+               "numeric")
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = 2,
+                              start_time = c(0, NA)),
+               "non-NA")
 })
 
 test_that("samples.sampling_frame works correctly", {

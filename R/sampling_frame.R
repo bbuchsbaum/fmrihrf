@@ -39,6 +39,15 @@ sampling_frame <- function(blocklens, TR, start_time = TR / 2, precision = .1)
   start_time <- rep_len(start_time, max_len)
   
   # Validate inputs with proper error messages
+  if (!is.numeric(blocklens) || any(is.na(blocklens))) {
+    stop("Block lengths must be numeric and non-NA")
+  }
+  if (!is.numeric(TR) || any(is.na(TR))) {
+    stop("TR values must be numeric and non-NA")
+  }
+  if (!is.numeric(start_time) || any(is.na(start_time))) {
+    stop("Start times must be numeric and non-NA")
+  }
   if (!all(blocklens > 0)) {
     stop("Block lengths must be positive")
   }
