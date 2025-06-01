@@ -5,7 +5,7 @@
 #'   * `duration`: Numeric vector of event durations (seconds).
 #'   * `amplitude`: Numeric vector of event amplitudes/scaling factors.
 #'   * `span`: Numeric scalar indicating the HRF span (seconds).
-#'   * `summate`: Logical indicating if overlapping HRF responses should summate.
+#'   * `summate`: Logical scalar indicating whether overlapping HRF responses should summate.
 #' @importFrom assertthat assert_that
 Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate=TRUE) {
   
@@ -13,7 +13,8 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   onsets    <- as.numeric(onsets)
   duration  <- as.numeric(duration)
   amplitude <- as.numeric(amplitude)
-  summate   <- isTRUE(summate)
+  assert_that(is.logical(summate), length(summate) == 1)
+  summate   <- as.logical(summate)
   span_arg  <- as.numeric(span) # Store original arg
 
   # Handle NA onset case explicitly (represents intent for zero events)
@@ -103,8 +104,8 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #'   it may be inferred from the `hrf` object or default to 40s. **Note:** Unlike some
 #'   previous versions, the `span` is not automatically adjusted based on `duration`;
 #'   ensure the provided or inferred `span` is sufficient for your longest event duration.
-#' @param summate Logical; if `TRUE` (default), the HRF response amplitude scales 
-#'   with the duration of sustained events (via internal convolution/summation). If `FALSE`, 
+#' @param summate Logical scalar; if `TRUE` (default), the HRF response amplitude scales
+#'   with the duration of sustained events (via internal convolution/summation). If `FALSE`,
 #'   the response reflects the peak HRF reached during the event duration.
 #'   
 #' @details 
