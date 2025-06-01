@@ -2,6 +2,12 @@
 #' @keywords internal
 #' @noRd
 .memo_hrf <- memoise::memoise(function(hrf, span, dt) {
+    if (!is.numeric(span) || length(span) != 1 || span <= 0) {
+        stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
+    }
+    if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
+        stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
+    }
     times <- seq(0, span, by = dt)
     # Evaluate HRF - ensure it returns a matrix
     val <- evaluate(hrf, times)
@@ -64,9 +70,11 @@ prep_reg_inputs <- function(x, grid, precision) {
   hrf_fine_matrix <- .memo_hrf(x$hrf, hrf_span, precision)
   
   # Prepare fine grid (needed for Rconv/loop interpolation)
-  # Use full range of onsets when constructing the fine grid
-  # to handle unsorted event inputs without reordering events
-  fine_grid_start <- min(grid[1], min(valid_ons)) - hrf_span
+  # Start at the earliest possible contribution from kept events
+  # which occurs at `grid[1] - hrf_span`
+  fine_grid_start <- grid[1] - hrf_span
+  # Use the full range of onsets when determining the end of the fine grid
+  # to handle unsorted event inputs without reordering
   fine_grid_end <- max(grid[length(grid)], max(valid_ons) + max(valid_durs)) + hrf_span
   fine_grid <- seq(fine_grid_start, fine_grid_end, by = precision)
 
@@ -145,9 +153,20 @@ eval_Rconv <- function(p, ...) {
   
   # Proceed with R convolution using stats::convolve
   delta <- numeric(length(p$fine_grid))
-  onset_indices <- round((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
+  onset_indices <- floor((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
   valid_onset_indices <- onset_indices >= 1 & onset_indices <= length(p$fine_grid)
-  delta[onset_indices[valid_onset_indices]] <- p$valid_amp[valid_onset_indices]
+
+  if (length(p$valid_durs) > 0) {
+    dur_len <- floor(p$valid_durs[1] / p$precision)
+  } else {
+    dur_len <- 0
+  }
+
+  for (i in which(valid_onset_indices)) {
+    start_idx <- onset_indices[i]
+    end_idx <- min(start_idx + dur_len, length(p$fine_grid))
+    delta[start_idx:end_idx] <- delta[start_idx:end_idx] + p$valid_amp[i]
+  }
   
   samhrf <- p$hrf_fine_matrix # Already evaluated and potentially memoized
   nb <- p$nb
@@ -198,7 +217,7 @@ eval_loop <- function(p, ...) {
   nidx <- findInterval(valid_ons, grid)
   nidx[nidx == 0] <- 1 
   
-  outmat <- matrix(0, length(grid), length(valid_ons) * nb)
+  outmat <- matrix(0, length(grid), nb)
 
   for (i in seq_along(valid_ons)) { 
     start_grid_idx <- nidx[i]
@@ -229,31 +248,10 @@ eval_loop <- function(p, ...) {
             next
         }
                           
-        if (nb > 1) {
-            start_col <- (i-1) * nb + 1
-            end_col <- i*nb 
-            outmat[target_indices_outmat, start_col:end_col] <- resp
-        } else {
-            outmat[target_indices_outmat, i] <- resp
-        }
+        outmat[target_indices_outmat, seq_len(nb)] <-
+          outmat[target_indices_outmat, seq_len(nb), drop = FALSE] + resp
     }
   }
   
-  # Sum contributions across onsets
-  if (length(valid_ons) > 1) {
-    if (nb == 1) {
-      result <- matrix(rowSums(outmat), ncol=1)
-    } else {
-      result <- do.call(cbind, lapply(1:nb, function(basis_idx) {
-        rowSums(outmat[, seq(basis_idx, by=nb, length.out=length(valid_ons)), drop = FALSE])
-      }))
-    }
-  } else { 
-    if (nb == 1) {
-        result <- matrix(outmat[,1], ncol=1) 
-    } else {
-        result <- outmat[, 1:nb, drop=FALSE] # Use drop=FALSE
-    }
-  }
-  result
+  outmat
 }
