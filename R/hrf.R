@@ -804,7 +804,17 @@ getHRF <- function(name = "spmg1", # Default to spmg1
 #' @export
 evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
                          precision = .2, summate = TRUE, normalize = FALSE, ...) {
-  
+
+  # Validate inputs
+  if (!is.numeric(grid) || length(grid) == 0 || anyNA(grid)) {
+    stop("`grid` must be a non-empty numeric vector with no NA values.",
+         call. = FALSE)
+  }
+  if (!is.numeric(precision) || length(precision) != 1 || is.na(precision) ||
+      precision <= 0) {
+    stop("`precision` must be a positive numeric value.", call. = FALSE)
+  }
+
   # Base function incorporating amplitude
   base <- function(g) amplitude * x(g)
 

@@ -80,3 +80,12 @@ test_that("unsorted grid triggers warning and sorted output", {
   expect_warning(out <- evaluate(reg, c(3, 0, 1), method = "conv", precision = 1))
   expect_equal(out, evaluate(reg, sort(c(3, 0, 1)), method = "conv", precision = 1))
 })
+
+
+test_that("evaluate.Reg validates grid and precision", {
+  reg <- regressor(onsets = 0, hrf = BOX_HRF, span = 1)
+  expect_error(evaluate(reg, numeric(0), method = "conv"), "grid")
+  expect_error(evaluate(reg, c(0, NA), method = "conv"), "grid")
+  expect_error(evaluate(reg, 0:1, precision = 0, method = "conv"), "precision")
+  expect_error(evaluate(reg, 0:1, precision = -1, method = "conv"), "precision")
+})
