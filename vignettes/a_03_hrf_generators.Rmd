@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-library(fmrireg)
+library(fmrihrf)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -26,7 +26,7 @@ library(tidyr)
 
 ## Why Generators?
 
-Most pre-defined HRFs in `fmrireg` (like `HRF_SPMG1` or `HRF_GAUSSIAN`) are ready-to-use objects.  
+Most pre-defined HRFs in `fmrihrf` (like `HRF_SPMG1` or `HRF_GAUSSIAN`) are ready-to-use objects.
 However, some HRFs are actually *generators*. A generator is a function that
 creates a new HRF object when you call it. This allows you to specify the number
 of basis functions (`nbasis`) and the time span (`span`) at creation time.
