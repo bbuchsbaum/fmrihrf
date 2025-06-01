@@ -17,13 +17,11 @@ as_hrf(
 
 \item{name}{The name for the HRF object. Defaults to the deparsed name of `f`.}
 
-\item{nbasis}{The number of basis functions represented by `f`. Defaults to 1L.}
+\item{nbasis}{The number of basis functions represented by `f`. Must be \code{>= 1}. Defaults to 1L.}
 
-\item{span}{The nominal time span (duration in seconds) of the HRF. Defaults to 24.}
+\item{span}{The nominal time span (duration in seconds) of the HRF. Must be positive. Defaults to 24.}
 
 \item{params}{A named list of parameters associated with the HRF function `f`. Defaults to an empty list.}
-
-\item{...}{Additional arguments to pass to the function f.}
 }
 \value{
 A new HRF object.

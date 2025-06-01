@@ -5,10 +5,9 @@
 #'
 #' @param f The function to be turned into an HRF object. It must accept a single argument `t` (time).
 #' @param name The name for the HRF object. Defaults to the deparsed name of `f`.
-#' @param nbasis The number of basis functions represented by `f`. Defaults to 1L.
-#' @param span The nominal time span (duration in seconds) of the HRF. Defaults to 24.
+#' @param nbasis The number of basis functions represented by `f`. Must be \code{>= 1}. Defaults to 1L.
+#' @param span The nominal time span (duration in seconds) of the HRF. Must be positive. Defaults to 24.
 #' @param params A named list of parameters associated with the HRF function `f`. Defaults to an empty list.
-#' @param ... Additional arguments to pass to the function f.
 #' @return A new HRF object.
 #' @keywords internal
 #' @export
@@ -17,7 +16,9 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
   assertthat::assert_that(is.function(f))
   assertthat::assert_that(is.character(name), length(name) == 1)
   assertthat::assert_that(is.numeric(nbasis), length(nbasis) == 1)
+  assertthat::assert_that(nbasis >= 1, msg = "nbasis must be >= 1")
   assertthat::assert_that(is.numeric(span), length(span) == 1)
+  assertthat::assert_that(span > 0, msg = "span must be > 0")
   assertthat::assert_that(is.list(params))
 
   structure(
@@ -228,16 +229,11 @@ gen_hrf_set <- function(...) {
 #' @importFrom purrr pmap partial
 #' @export
 hrf_library <- function(fun, pgrid, ...) {
+  extras <- list(...)
   # Ensure fun returns an HRF object
   hrf_list <- purrr::pmap(pgrid, function(...) {
       params <- list(...)
-      # Assuming 'fun' is designed to take these params and return an HRF
-      # If fun itself is just a base function, we need to wrap it
-      # Let's assume fun already produces an HRF or can be wrapped by as_hrf
-      # This part might need adjustment based on typical usage of 'fun'
-      do.call(fun, c(params, list(...))) # Pass original dots as well?
-      # Safest might be if 'fun' is expected to return an HRF object directly
-      # Example: fun = function(lag) HRF_SPMG1 |> lag_hrf(lag)
+      do.call(fun, c(params, extras))
   })
   # Bind the generated HRFs
   do.call(bind_basis, hrf_list)
@@ -804,7 +800,17 @@ getHRF <- function(name = "spmg1", # Default to spmg1
 #' @export
 evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
                          precision = .2, summate = TRUE, normalize = FALSE, ...) {
-  
+
+  # Validate inputs
+  if (!is.numeric(grid) || length(grid) == 0 || anyNA(grid)) {
+    stop("`grid` must be a non-empty numeric vector with no NA values.",
+         call. = FALSE)
+  }
+  if (!is.numeric(precision) || length(precision) != 1 || is.na(precision) ||
+      precision <= 0) {
+    stop("`precision` must be a positive numeric value.", call. = FALSE)
+  }
+
   # Base function incorporating amplitude
   base <- function(g) amplitude * x(g)
 
