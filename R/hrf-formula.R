@@ -23,7 +23,10 @@ make_hrf <- function(basis, lag, nbasis = 1) {
     final_hrf <- gen_hrf(basis, lag = lag)
     
   } else if (is.function(basis)) {
-    # If it's a raw function, gen_hrf will handle conversion via as_hrf and apply lag
+    # If a plain function is provided, explicitly convert it to an HRF so that
+    # the number of basis functions is set correctly before applying any
+    # decorators.
+    basis <- as_hrf(basis, nbasis = nbasis)
     final_hrf <- gen_hrf(basis, lag = lag)
 
   } else {
