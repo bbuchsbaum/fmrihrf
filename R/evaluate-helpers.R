@@ -217,7 +217,7 @@ eval_loop <- function(p, ...) {
   nidx <- findInterval(valid_ons, grid)
   nidx[nidx == 0] <- 1 
   
-  outmat <- matrix(0, length(grid), length(valid_ons) * nb)
+  outmat <- matrix(0, length(grid), nb)
 
   for (i in seq_along(valid_ons)) { 
     start_grid_idx <- nidx[i]
@@ -248,31 +248,10 @@ eval_loop <- function(p, ...) {
             next
         }
                           
-        if (nb > 1) {
-            start_col <- (i-1) * nb + 1
-            end_col <- i*nb 
-            outmat[target_indices_outmat, start_col:end_col] <- resp
-        } else {
-            outmat[target_indices_outmat, i] <- resp
-        }
+        outmat[target_indices_outmat, seq_len(nb)] <-
+          outmat[target_indices_outmat, seq_len(nb), drop = FALSE] + resp
     }
   }
   
-  # Sum contributions across onsets
-  if (length(valid_ons) > 1) {
-    if (nb == 1) {
-      result <- matrix(rowSums(outmat), ncol=1)
-    } else {
-      result <- do.call(cbind, lapply(1:nb, function(basis_idx) {
-        rowSums(outmat[, seq(basis_idx, by=nb, length.out=length(valid_ons)), drop = FALSE])
-      }))
-    }
-  } else { 
-    if (nb == 1) {
-        result <- matrix(outmat[,1], ncol=1) 
-    } else {
-        result <- outmat[, 1:nb, drop=FALSE] # Use drop=FALSE
-    }
-  }
-  result
+  outmat
 }
