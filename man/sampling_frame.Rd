@@ -29,4 +29,7 @@ sam <- samples(frame)
 # The global time (with respect to the first block) of each sample/acquisition
 gsam <- samples(frame, global = TRUE)
 
+Block identifiers for each acquisition can be retrieved with
+\code{blockids(frame)}.
+
 }
