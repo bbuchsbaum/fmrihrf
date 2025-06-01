@@ -58,11 +58,11 @@ test_that("global_onsets works correctly", {
   expect_equal(global_times[1], 10)  # First block onset unchanged
   expect_equal(global_times[2], 220)  # Second block onset = 200 (block1 duration) + 20
   
-  # Test error conditions
-  #expect_error(global_onsets(sframe, c(10), c(1, 2)), 
-  #            "length.*onsets.*length.*blockids")
-  #expect_error(global_onsets(sframe, c(10), c(3)), 
-  #            "blockids.*1.*length")
+  # Test error conditions for non-integer block ids
+  expect_error(global_onsets(sframe, onsets, c(1.5, 2)),
+               "blockids must be whole numbers")
+  expect_error(global_onsets(sframe, onsets, c(1, NA)),
+               "blockids must be whole numbers")
 })
 
 test_that("print.sampling_frame works correctly", {

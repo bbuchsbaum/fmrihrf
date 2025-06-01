@@ -107,12 +107,17 @@ samples.sampling_frame <- function(x, blockids = NULL, global = FALSE,...) {
 
 #' @method global_onsets sampling_frame
 #' @rdname global_onsets
+#' @param blockids Integer vector identifying the block for each onset. Values
+#'   must be whole numbers with no NAs.
 #' @export
 global_onsets.sampling_frame <- function(x, onsets, blockids,...) {
   # Calculate cumulative time offsets for each block
   block_durations <- x$blocklens * x$TR
   cumulative_time <- c(0, cumsum(block_durations))
-  
+
+  if (!is.numeric(blockids) || anyNA(blockids) || any(blockids %% 1 != 0)) {
+    stop("blockids must be whole numbers and not NA")
+  }
   blockids <- as.integer(blockids)
   stopifnot(length(onsets) == length(blockids),
             all(blockids >= 1L), all(blockids <= length(x$blocklens)))
