@@ -1,0 +1,27 @@
+Package: fmrihrf
+Type: Package
+Title: fMRI Hemodynamic Response Function (HRF) and Regressor Tools
+Version: 0.1.0
+Authors@R: person("Bradley", "Buchsbaum", email = "brad.buchsbaum@gmail.com", role = c("aut", "cre"))
+Description: Provides tools for creating, manipulating, and evaluating
+    Hemodynamic Response Functions (HRFs) and event-related regressors
+    for fMRI data analysis. Includes functions for generating various HRF
+    basis sets, applying decorators (e.g., lag, block), and convolving
+    regressors with HRFs.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2.9000
+Imports:
+    Rcpp,
+    assertthat,
+    purrr,
+    stats
+LinkingTo: Rcpp, RcppArmadillo
+Depends:
+    R (>= 3.5.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2
