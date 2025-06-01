@@ -432,6 +432,13 @@ test_that("normalise_hrf correctly normalises an HRF object", {
   expect_equal(max(abs(result_norm_spmg2[,2])), 1)
 })
 
+test_that("normalised multi-basis HRF evaluated at single point returns matrix", {
+  norm_spmg2 <- normalise_hrf(HRF_SPMG2)
+  single_res <- norm_spmg2(0)
+  expect_true(is.matrix(single_res))
+  expect_equal(dim(single_res), c(1, nbasis(norm_spmg2)))
+})
+
 test_that("gen_hrf correctly sets nbasis for function inputs", {
   # Single basis functions
   hrf_g <- gen_hrf(hrf_gaussian)
