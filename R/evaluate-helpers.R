@@ -145,7 +145,7 @@ eval_Rconv <- function(p, ...) {
   
   # Proceed with R convolution using stats::convolve
   delta <- numeric(length(p$fine_grid))
-  onset_indices <- round((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
+  onset_indices <- floor((p$valid_ons - p$fine_grid[1]) / p$precision) + 1
   valid_onset_indices <- onset_indices >= 1 & onset_indices <= length(p$fine_grid)
   delta[onset_indices[valid_onset_indices]] <- p$valid_amp[valid_onset_indices]
   
