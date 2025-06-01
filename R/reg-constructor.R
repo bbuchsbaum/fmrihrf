@@ -20,11 +20,25 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   if (length(onsets) == 1 && is.na(onsets[1])) {
       onsets <- numeric(0)
   }
+
+  # Validate converted inputs for finiteness/NA
+  if (anyNA(onsets) || any(!is.finite(onsets))) {
+      stop("`onsets` must contain finite numeric values.", call. = FALSE)
+  }
+  if (anyNA(duration) || any(!is.finite(duration))) {
+      stop("`duration` must contain finite numeric values.", call. = FALSE)
+  }
+  if (anyNA(amplitude) || any(!is.finite(amplitude))) {
+      stop("`amplitude` must contain finite numeric values.", call. = FALSE)
+  }
+  if (is.na(span_arg) || !is.finite(span_arg) || span_arg <= 0) {
+      stop("`span` must be a positive, finite number.", call. = FALSE)
+  }
   n_onsets <- length(onsets)
-  
+
   # Check for invalid onsets *before* recycling other args
-  if (any(onsets < 0 | is.na(onsets))) {
-      stop("`onsets` must be non-negative and non-NA.", call. = FALSE)
+  if (any(onsets < 0)) {
+      stop("`onsets` must be non-negative.", call. = FALSE)
   }
   
   # Recycle/Validate inputs *before* filtering
@@ -34,7 +48,6 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   
   # Check for invalid inputs early
   if (any(duration < 0, na.rm = TRUE)) stop("`duration` cannot be negative.")
-  if (span_arg <= 0) stop("`span` must be positive.")
   
   # Filter events based on non-zero and non-NA amplitude (Ticket B-3)
   if (n_onsets > 0) { 
@@ -113,7 +126,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #' efficient storage. The resulting object can be evaluated at specific time points 
 #' using the `evaluate()` function.
 #' 
-#' Events with an amplitude of 0 or NA are automatically filtered out.
+#' Events with an amplitude of 0 are automatically filtered out.
 #' 
 #' @return An S3 object of class `Reg` and `list` 
 #'   containing processed event information and the HRF specification.
