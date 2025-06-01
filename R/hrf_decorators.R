@@ -185,15 +185,12 @@ normalise_hrf <- function(hrf) {
         res <- res / peak_val
       }
     } else if (is.matrix(res)) {
-      # Normalise each basis column independently
-      res <- apply(res, 2, function(basis_col) {
-        peak_val <- max(abs(basis_col), na.rm = TRUE)
-        if (!is.na(peak_val) && peak_val != 0) {
-          basis_col / peak_val
-        } else {
-          basis_col
-        }
+      # Normalise each basis column independently while preserving matrix shape
+      peaks <- apply(res, 2, function(basis_col) {
+        max(abs(basis_col), na.rm = TRUE)
       })
+      peaks_safe <- ifelse(is.na(peaks) | peaks == 0, 1, peaks)
+      res <- sweep(res, 2, peaks_safe, "/")
     }
     # If it's not numeric or matrix (e.g., NULL or error result), return as is
     return(res)
