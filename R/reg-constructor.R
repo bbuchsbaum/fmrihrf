@@ -51,20 +51,16 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
   if (any(duration < 0, na.rm = TRUE)) stop("`duration` cannot be negative.")
   
   # Filter events based on non-zero and non-NA amplitude (Ticket B-3)
-  if (n_onsets > 0) { 
-      keep_indices <- which(amplitude != 0 & !is.na(amplitude))
-      # Store whether filtering occurred
-      filtered_some <- length(keep_indices) < n_onsets
-      # Store whether *all* were filtered
-      filtered_all <- length(keep_indices) == 0
-      
-      if (filtered_some) {
-          onsets    <- onsets[keep_indices]
-          duration_filtered  <- duration[keep_indices]
-          amplitude <- amplitude[keep_indices]
+  if (n_onsets > 0) {
+      keep <- amplitude != 0 & !is.na(amplitude)
+      filtered_all <- !any(keep)
+
+      if (!filtered_all && any(!keep)) {
+          onsets    <- onsets[keep]
+          duration  <- duration[keep]
+          amplitude <- amplitude[keep]
           n_onsets  <- length(onsets) # Update count after filtering
-          duration <- recycle_or_error(duration_filtered, n_onsets, "duration")
-      } 
+      }
   } else {
       filtered_all <- TRUE # If input was empty, effectively all are filtered
   }
