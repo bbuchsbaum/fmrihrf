@@ -464,10 +464,19 @@ test_that("gen_hrf correctly sets nbasis for function inputs", {
   expect_equal(nbasis(hrf_tent7), 7)
 })
 
+
 test_that("lag_hrf and block_hrf enforce finite parameters", {
   expect_error(lag_hrf(HRF_SPMG1, Inf), "finite")
   expect_error(lag_hrf(HRF_SPMG1, NA_real_), "finite")
   expect_error(block_hrf(HRF_SPMG1, width = Inf, precision = 0.1, half_life = 1), "finite")
   expect_error(block_hrf(HRF_SPMG1, width = 1, precision = Inf, half_life = 1), "finite")
   expect_error(block_hrf(HRF_SPMG1, width = 1, precision = 0.1, half_life = Inf), "finite")
+})
+
+test_that("evaluate.HRF validates grid and precision", {
+  expect_error(evaluate(HRF_SPMG1, numeric(0)), "grid")
+  expect_error(evaluate(HRF_SPMG1, c(0, NA)), "grid")
+  expect_error(evaluate(HRF_SPMG1, 0:1, precision = 0), "precision")
+  expect_error(evaluate(HRF_SPMG1, 0:1, precision = -0.5), "precision")
+
 })

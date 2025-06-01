@@ -26,9 +26,19 @@
 #' @importFrom stats approx median convolve
 #' @importFrom Rcpp evalCpp
 evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "fft", "Rconv", "loop"), sparse = FALSE, ...) {
-  
+
   method <- match.arg(method)
-  
+
+  # Validate inputs
+  if (!is.numeric(grid) || length(grid) == 0 || anyNA(grid)) {
+    stop("`grid` must be a non-empty numeric vector with no NA values.",
+         call. = FALSE)
+  }
+  if (!is.numeric(precision) || length(precision) != 1 || is.na(precision) ||
+      precision <= 0) {
+    stop("`precision` must be a positive numeric value.", call. = FALSE)
+  }
+
   # Prepare inputs using the helper function
   prep_data <- prep_reg_inputs(x, grid, precision)
   
