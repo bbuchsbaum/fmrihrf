@@ -57,3 +57,24 @@ A numeric matrix (or sparse matrix) with one column per factor level
 specified relative to individual blocks and by directly returning the
 evaluated design matrix.
 }
+\examples{
+# Create a sampling frame for 2 blocks, 100 scans each, TR=2
+sframe <- sampling_frame(blocklens = c(100, 100), TR = 2)
+
+# Events in block-relative time
+onsets <- c(10, 30, 50, 20, 40, 60)
+conditions <- factor(c("A", "B", "A", "B", "A", "B"))
+blocks <- c(1, 1, 1, 2, 2, 2)
+
+# Build design matrix
+design <- regressor_design(
+  onsets = onsets,
+  fac = conditions,
+  block = blocks,
+  sframe = sframe,
+  hrf = HRF_SPMG1
+)
+
+# Design matrix has 200 rows (total scans) and 2 columns (conditions)
+dim(design)
+}

@@ -45,6 +45,17 @@ A numeric vector or matrix of evaluated regressor values. If `sparse=TRUE`, a `d
 Generic function to evaluate a regressor object over a specified time grid.
 Different types of regressors may have different evaluation methods.
 }
+\examples{
+# Create a regressor
+reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
+
+# Evaluate at specific time points
+times <- seq(0, 80, by = 0.1)
+response <- evaluate(reg, times)
+
+# Plot the response
+plot(times, response, type = "l", xlab = "Time (s)", ylab = "Response")
+}
 \seealso{
 [single_trial_regressor()], [regressor()]
 }

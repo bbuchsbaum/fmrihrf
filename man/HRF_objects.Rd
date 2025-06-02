@@ -99,22 +99,6 @@ lines(times, gaussian_response, col = "green")
 legend("topright", c("SPM Canonical", "Gamma", "Gaussian"), 
        col = c("blue", "red", "green"), lty = 1)
 
-# Use in model specification
-\donttest{
-# In an event model
-evmodel <- event_model(
-  onsets ~ hrf(condition, basis = HRF_SPMG1),
-  data = event_data,
-  sampling_frame = sframe
-)
-
-# With multiple basis functions
-evmodel2 <- event_model(
-  onsets ~ hrf(condition, basis = HRF_SPMG3),
-  data = event_data,
-  sampling_frame = sframe
-)
-}
 
 }
 \seealso{

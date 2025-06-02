@@ -35,6 +35,22 @@ event using a specified hemodynamic response function (HRF).
 \details{
 This is a convenience wrapper around `regressor` that ensures inputs have length 1.
 }
+\examples{
+# Create single trial regressor at 10 seconds
+str1 <- single_trial_regressor(onsets = 10, hrf = HRF_SPMG1)
+
+# Single trial with duration and custom amplitude
+str2 <- single_trial_regressor(
+  onsets = 15,
+  duration = 3,
+  amplitude = 2,
+  hrf = HRF_SPMG1
+)
+
+# Evaluate the response
+times <- seq(0, 40, by = 0.1)
+response <- evaluate(str1, times)
+}
 \seealso{
 \code{\link{regressor}}
 }

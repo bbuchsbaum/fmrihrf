@@ -8,6 +8,16 @@
 #' @param grid A numeric vector specifying the time points at which to evaluate the regressor
 #' @param ... Additional arguments passed to specific methods
 #' @return A numeric vector or matrix containing the evaluated regressor values
+#' @examples
+#' # Create a regressor
+#' reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
+#' 
+#' # Evaluate at specific time points
+#' times <- seq(0, 80, by = 0.1)
+#' response <- evaluate(reg, times)
+#' 
+#' # Plot the response
+#' plot(times, response, type = "l", xlab = "Time (s)", ylab = "Response")
 #' @seealso [single_trial_regressor()], [regressor()]
 #' @export
 evaluate <- function(x, grid, ...) {

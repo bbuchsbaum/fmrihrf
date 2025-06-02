@@ -558,22 +558,6 @@ list_available_hrfs <- function(details = FALSE) {
 #' legend("topright", c("SPM Canonical", "Gamma", "Gaussian"), 
 #'        col = c("blue", "red", "green"), lty = 1)
 #' 
-#' # Use in model specification
-#' \donttest{
-#' # In an event model
-#' evmodel <- event_model(
-#'   onsets ~ hrf(condition, basis = HRF_SPMG1),
-#'   data = event_data,
-#'   sampling_frame = sframe
-#' )
-#' 
-#' # With multiple basis functions
-#' evmodel2 <- event_model(
-#'   onsets ~ hrf(condition, basis = HRF_SPMG3),
-#'   data = event_data,
-#'   sampling_frame = sframe
-#' )
-#' }
 #' 
 #' @name HRF_objects
 #' @aliases HRF_SPMG1 HRF_SPMG2 HRF_SPMG3 HRF_GAMMA HRF_GAUSSIAN HRF_BSPLINE HRF_FIR

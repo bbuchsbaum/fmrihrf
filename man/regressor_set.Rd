@@ -60,3 +60,24 @@ Creates a set of regressors, one for each level of a factor. Each
 condition shares the same HRF and other parameters but has distinct
 onsets, durations and amplitudes.
 }
+\examples{
+# Create events for 3 conditions
+onsets <- c(10, 20, 30, 40, 50, 60)
+conditions <- factor(c("A", "B", "C", "A", "B", "C"))
+
+# Create regressor set
+rset <- regressor_set(onsets, conditions, hrf = HRF_SPMG1)
+
+# With durations and amplitudes
+rset2 <- regressor_set(
+  onsets = onsets,
+  fac = conditions,
+  duration = 2,
+  amplitude = c(1, 1.5, 0.8, 1, 1.5, 0.8),
+  hrf = HRF_SPMG1
+)
+
+# Evaluate the regressor set
+times <- seq(0, 80, by = 0.1)
+design_matrix <- evaluate(rset, times)
+}

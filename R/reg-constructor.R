@@ -136,6 +136,24 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
 #'   containing processed event information and the HRF specification. The
 #'   object includes a `filtered_all` attribute indicating whether all events
 #'   were removed due to zero or `NA` amplitudes.
+#' @examples
+#' # Create a simple regressor with 3 events
+#' reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
+#' 
+#' # Regressor with durations and amplitudes
+#' reg2 <- regressor(
+#'   onsets = c(10, 30, 50),
+#'   duration = c(2, 2, 2),
+#'   amplitude = c(1, 1.5, 0.8),
+#'   hrf = HRF_SPMG1
+#' )
+#' 
+#' # Using different HRF types
+#' reg_gamma <- regressor(onsets = c(10, 30), hrf = "gamma")
+#' 
+#' # Evaluate regressor at specific time points
+#' times <- seq(0, 60, by = 0.1)
+#' response <- evaluate(reg, times)
 #' @importFrom assertthat assert_that
 #' @export
 regressor <- Reg # Assign Reg directly to regressor
@@ -171,6 +189,21 @@ null_regressor <- function(hrf=HRF_SPMG1, span=24) {
 #' @param amplitude scaling vector (default is 1), must be length 1.
 #' @param span the temporal window of the impulse response function (default is 24).
 #' @return A `Reg` object (inheriting from `regressor` and `list`).
+#' @examples
+#' # Create single trial regressor at 10 seconds
+#' str1 <- single_trial_regressor(onsets = 10, hrf = HRF_SPMG1)
+#' 
+#' # Single trial with duration and custom amplitude
+#' str2 <- single_trial_regressor(
+#'   onsets = 15,
+#'   duration = 3,
+#'   amplitude = 2,
+#'   hrf = HRF_SPMG1
+#' )
+#' 
+#' # Evaluate the response
+#' times <- seq(0, 40, by = 0.1)
+#' response <- evaluate(str1, times)
 #' @seealso \code{\link{regressor}}
 #' @importFrom assertthat assert_that
 #' @export

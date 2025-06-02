@@ -257,6 +257,30 @@ hrf_inv_logit <- function(t, mu1 = 6, s1 = 1, mu2 = 16, s2 = 1, lag = 0) {
 #' @param f2 Height of the end point.
 #' @return A vector of HRF values corresponding to the input time values.
 #' @references Woolrich, M. W., Behrens, T. E., & Smith, S. M. (2004). Constrained linear basis sets for HRF modelling using Variational Bayes. NeuroImage, 21(4), 1748-1761.
+#'
+#' Half-cosine HRF
+#'
+#' Creates a hemodynamic response function using half-cosine segments.
+#' The function consists of four phases controlled by h1-h4 parameters,
+#' with transitions between baseline (f1) and peak (1) and final (f2) levels.
+#'
+#' @param t Time points at which to evaluate the HRF
+#' @param h1 Duration of initial fall from f1 to 0 (default: 1)
+#' @param h2 Duration of rise from 0 to 1 (default: 5)
+#' @param h3 Duration of fall from 1 to 0 (default: 7)
+#' @param h4 Duration of final rise from 0 to f2 (default: 7)
+#' @param f1 Initial baseline level (default: 0)
+#' @param f2 Final baseline level (default: 0)
+#' @return Numeric vector of HRF values at time points t
+#' @examples
+#' # Standard half-cosine HRF
+#' t <- seq(0, 30, by = 0.1)
+#' hrf <- hrf_half_cosine(t)
+#' plot(t, hrf, type = "l", main = "Half-cosine HRF")
+#' 
+#' # Modified shape with undershoot
+#' hrf_under <- hrf_half_cosine(t, h1 = 1, h2 = 4, h3 = 6, h4 = 8, f2 = -0.2)
+#' lines(t, hrf_under, col = "red")
 #' @export
 hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
   rising_half_cosine <- function(t, f1, t0, w) {
@@ -313,6 +337,16 @@ hrf_fourier <- function(t, span = 24, nbasis = 5) {
 #' @param sparse Logical, if TRUE, the output Toeplitz matrix is returned as a sparse matrix (default: FALSE).
 #' 
 #' @return A Toeplitz matrix for HRF convolution.
+#' @examples
+#' # Create HRF and time points
+#' hrf_fun <- function(t) hrf_spmg1(t)
+#' times <- seq(0, 30, by = 1)
+#' 
+#' # Create Toeplitz matrix
+#' H <- hrf_toeplitz(hrf_fun, times, len = 50)
+#' 
+#' # Create sparse version
+#' H_sparse <- hrf_toeplitz(hrf_fun, times, len = 50, sparse = TRUE)
 #' @export
 hrf_toeplitz <- function(hrf, time, len, sparse=FALSE) {
   hreg <- hrf(time)

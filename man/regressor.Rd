@@ -56,3 +56,22 @@ using the `evaluate()` function.
 
 Events with an amplitude of 0 are automatically filtered out.
 }
+\examples{
+# Create a simple regressor with 3 events
+reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
+
+# Regressor with durations and amplitudes
+reg2 <- regressor(
+  onsets = c(10, 30, 50),
+  duration = c(2, 2, 2),
+  amplitude = c(1, 1.5, 0.8),
+  hrf = HRF_SPMG1
+)
+
+# Using different HRF types
+reg_gamma <- regressor(onsets = c(10, 30), hrf = "gamma")
+
+# Evaluate regressor at specific time points
+times <- seq(0, 60, by = 0.1)
+response <- evaluate(reg, times)
+}
