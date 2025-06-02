@@ -44,7 +44,7 @@ test_that("hrf_toeplitz constructs correct Toeplitz matrix", {
   expect_equal(as.matrix(H_dense), expected)
 
   H_sparse <- hrf_toeplitz(BOX_HRF, time, len, sparse = TRUE)
-  expect_s4_class(H_sparse, "dgCMatrix")
+  expect_s4_class(H_sparse, "Matrix")
   expect_equal(as.matrix(H_sparse), expected)
 })
 
