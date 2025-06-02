@@ -1,4 +1,6 @@
 # Put this in R/utils-internal.R
+#' @keywords keyword
+#' @noRd
 recycle_or_error <- function(x, n, name) {
   if (length(x) == n) {
     return(x)
@@ -9,7 +11,8 @@ recycle_or_error <- function(x, n, name) {
   stop(paste0("`", name, "` must have length 1 or ", n, ", not ", length(x)), call. = FALSE)
 }
 
-# Helper for default values (used in reg-constructor.R)
+#' @keywords internal
+#' @noRd
 `%||%` <- function(a, b) {
   if (is.null(a)) b else a
 } 
