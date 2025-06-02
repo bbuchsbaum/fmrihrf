@@ -180,14 +180,14 @@ nbasis.Reg <- function(x, ...) nbasis(x$hrf)
 #' @export
 #' @rdname onsets
 #' @method onsets Reg
-onsets.Reg <- function(x) x$onsets
+onsets.Reg <- function(x, ...) x$onsets
 
 #' @export
 #' @rdname durations
 #' @method durations Reg
-durations.Reg <- function(x) x$duration
+durations.Reg <- function(x, ...) x$duration
 
 #' @export
 #' @rdname amplitudes
 #' @method amplitudes Reg
-amplitudes.Reg <- function(x) x$amplitude
+amplitudes.Reg <- function(x, ...) x$amplitude

@@ -11,32 +11,18 @@
 #' @param method The method to use for computing the kernel.
 #' @export
 #' @examples
+#' \dontrun{
 #' form <- onsets ~ trialwise(basis="gaussian")
 #' sk <- hrf_smoothing_kernel(100, TR=1.5, form)
+#' }
 #' @return a smoothing matrix
 hrf_smoothing_kernel <- function(len, TR = 2,
                                  form  = onset ~ trialwise(),
                                  buffer_scans = 3L,
                                  normalise = TRUE,
                                  method = c("gram", "cosine")) {
-
-  method <- match.arg(method)
-  n_buf  <- as.integer(buffer_scans)
-
-  sf   <- sampling_frame(len + 2 * n_buf, TR)
-  dfx  <- data.frame(onset = samples(sf), block = 1L)
-  em   <- event_model(form, data = dfx, block = ~ block, sampling_frame = sf)
-  X    <- as.matrix(design_matrix(em))
-
-  K <- switch(method,
-              gram   = X %*% t(X),
-              cosine = tcrossprod(scale(X, FALSE, sqrt(colSums(X^2)))))
-
-  if (normalise)
-    K <- K / diag(K)                                       # make diag = 1
-
-  keep <- (n_buf + 1):(n_buf + len)
-  K[keep, keep, drop = FALSE]
+  # This function requires event_model and design_matrix which are not yet implemented
+  stop("hrf_smoothing_kernel requires event_model and design_matrix functions that are not yet implemented")
 }
 
 #' Design kernel for a given design matrix

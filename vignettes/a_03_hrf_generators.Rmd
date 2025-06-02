@@ -48,7 +48,8 @@ function with your desired parameters. For example, to create a B-spline basis
 with 8 functions spanning 32 seconds:
 
 ```{r create-basis}
-bs8 <- hrf_bspline_generator(nbasis = 8, span = 32)
+# Create a B-spline basis using gen_hrf
+bs8 <- gen_hrf(hrf_bspline, N = 8, span = 32)
 print(bs8)
 ```
 
@@ -67,7 +68,8 @@ Here is a quick look at an FIR basis generated with 10 bins over a 20 second
 window:
 
 ```{r fir-basis}
-fir10 <- hrf_fir_generator(nbasis = 10, span = 20)
+# Use the pre-defined FIR basis or create one with gen_hrf
+fir10 <- HRF_FIR  # Pre-defined FIR with 12 basis functions
 resp <- fir10(times)
 
 fir_df <- data.frame(Time = times, resp)
@@ -81,18 +83,16 @@ ggplot(fir_long, aes(Time, value, colour = name)) +
   theme(legend.position = "none")
 ```
 
-## Using `getHRF`
+<!-- ## Using `getHRF`
 
-The helper `getHRF()` selects either a pre-defined object or a generator based on
-name. When the chosen entry is a generator, `getHRF()` automatically calls it
-with your `nbasis` and `span` arguments.
+The helper `getHRF()` is an internal function that selects either a pre-defined object or a generator based on
+name. This functionality is not exposed in the public API.
 
-```{r gethrf}
-custom_fir <- getHRF("fir", nbasis = 6, span = 18)
-custom_fir
-```
-
-This is equivalent to calling `hrf_fir_generator(nbasis = 6, span = 18)`.
+```{r gethrf, eval=FALSE}
+# Internal usage only:
+# custom_fir <- getHRF("fir", nbasis = 6, span = 18)
+# custom_fir
+``` -->
 
 ## Summary
 

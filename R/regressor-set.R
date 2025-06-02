@@ -39,6 +39,12 @@ regressor_set <- function(onsets, fac, hrf = HRF_SPMG1, duration = 0,
 }
 
 #' @rdname regressor_set
+#' @param x A RegSet object
+#' @param grid Numeric vector of time points at which to evaluate
+#' @param precision Numeric precision for evaluation
+#' @param method Evaluation method
+#' @param sparse Logical whether to return sparse matrix
+#' @param ... Additional arguments passed to evaluate
 #' @export
 evaluate.RegSet <- function(x, grid, precision = .33,
                             method = c("conv", "fft", "Rconv", "loop"),

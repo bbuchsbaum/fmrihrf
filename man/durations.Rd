@@ -7,7 +7,7 @@
 \usage{
 durations(x, ...)
 
-\method{durations}{Reg}(x)
+\method{durations}{Reg}(x, ...)
 }
 \arguments{
 \item{x}{The object to get durations from}

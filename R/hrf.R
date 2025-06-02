@@ -86,6 +86,7 @@ bind_basis <- function(...) {
 #' @param lag Optional lag in seconds. If non-zero, applies `lag_hrf`.
 #' @param width Optional block width in seconds. If non-zero, applies `block_hrf`.
 #' @param precision Sampling precision for block convolution (passed to `block_hrf`). Default is 0.1.
+#' @param half_life Half-life decay parameter for exponential decay in seconds (passed to `block_hrf`). Default is Inf (no decay).
 #' @param summate Whether to summate within blocks (passed to `block_hrf`). Default is TRUE.
 #' @param normalize If TRUE, applies `normalise_hrf` at the end. Default is FALSE.
 #' @param name Optional name for the *final* HRF object. If NULL (default), a name is generated based on the base HRF and applied decorators.
@@ -103,7 +104,7 @@ bind_basis <- function(...) {
 #' grf_both_norm <- gen_hrf(HRF_SPMG1, lag=2, width=4, normalize=TRUE)
 #'
 #' @export
-gen_hrf <- function(hrf, lag=0, width=0, precision=.1, 
+gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
                     summate=TRUE, normalize=FALSE, name=NULL, span=NULL, ...) {
 
   # 1. Ensure we start with an HRF object
@@ -143,7 +144,7 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1,
     stopifnot(width > 0)
     # Note: block_hrf handles normalize=FALSE internally by default
     decorated_hrf <- block_hrf(decorated_hrf, width=width, precision=precision,
-                               summate=summate, normalize=FALSE)
+                               half_life=half_life, summate=summate, normalize=FALSE)
   }
 
   # Apply lag decorator if needed
@@ -397,10 +398,10 @@ hrf_lagged <- gen_hrf_lagged
 #' @export
 gen_hrf_blocked <- function(hrf=hrf_gaussian, width=5, precision=.1, 
                             half_life=Inf, summate=TRUE, normalize=FALSE, ...) {
-  force(hrf)
-  purrr::partial(convolve_block, hrf=hrf, width=width, 
-                 precision=precision, half_life=half_life, 
-                 summate=summate, normalize=normalize, ...)
+  # Deprecated - use gen_hrf with width parameter instead
+  .Deprecated("gen_hrf")
+  gen_hrf(hrf, width=width, precision=precision, half_life=half_life, 
+          summate=summate, normalize=normalize, ...)
 }
 
 #' @export
@@ -610,6 +611,7 @@ HRF_SPMG3 <- bind_basis(
 attr(HRF_SPMG3, "name") <- "SPMG3"
 
 # Define HRF Generators (Functions returning HRF objects) -----
+#' @keywords internal
 hrf_bspline_generator <- function(nbasis=5, span=24) {
   # Validate inputs
   if (nbasis < 1) {

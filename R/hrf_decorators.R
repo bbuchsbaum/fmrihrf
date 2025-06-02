@@ -76,8 +76,8 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
     msg = "'precision' must be a single finite positive numeric value."
   )
   assertthat::assert_that(
-    is.numeric(half_life) && length(half_life) == 1 && half_life > 0 && is.finite(half_life),
-    msg = "'half_life' must be a single finite positive numeric value."
+    is.numeric(half_life) && length(half_life) == 1 && half_life > 0,
+    msg = "'half_life' must be a single positive numeric value."
   )
   assertthat::assert_that(is.logical(summate) && length(summate) == 1, msg = "'summate' must be a single logical value.")
   assertthat::assert_that(is.logical(normalize) && length(normalize) == 1, msg = "'normalize' must be a single logical value.")

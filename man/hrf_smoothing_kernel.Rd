@@ -33,6 +33,8 @@ a smoothing matrix
 This function computes a temporal similarity matrix from a series of hemodynamic response functions.
 }
 \examples{
+\dontrun{
 form <- onsets ~ trialwise(basis="gaussian")
 sk <- hrf_smoothing_kernel(100, TR=1.5, form)
+}
 }

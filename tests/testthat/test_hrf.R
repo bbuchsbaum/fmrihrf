@@ -18,7 +18,7 @@ test_that("HRF_SPMG1 has correct structure and properties", {
   # Test basic structure
   expect_true(inherits(HRF_SPMG1, "HRF"))
   expect_equal(attr(HRF_SPMG1, "name"), "SPMG1")
-  expect_equal(attr(HRF_SPMG1, "param_names"), c("A1", "A2"))
+  expect_equal(attr(HRF_SPMG1, "param_names"), c("P1", "P2", "A1"))
   
   # Test function evaluation
   t <- seq(0, 30, by=0.5)
@@ -480,14 +480,15 @@ test_that("normalize in evaluate.HRF preserves matrix dimensions", {
   single <- evaluate(HRF_SPMG2, 0, normalize = TRUE)
   expect_true(is.matrix(single))
   expect_equal(dim(single), c(1L, nbasis(HRF_SPMG2)))
-}
+})
 
 test_that("lag_hrf and block_hrf enforce finite parameters", {
   expect_error(lag_hrf(HRF_SPMG1, Inf), "finite")
   expect_error(lag_hrf(HRF_SPMG1, NA_real_), "finite")
   expect_error(block_hrf(HRF_SPMG1, width = Inf, precision = 0.1, half_life = 1), "finite")
   expect_error(block_hrf(HRF_SPMG1, width = 1, precision = Inf, half_life = 1), "finite")
-  expect_error(block_hrf(HRF_SPMG1, width = 1, precision = 0.1, half_life = Inf), "finite")
+  # half_life = Inf is now allowed (means no decay)
+  expect_no_error(block_hrf(HRF_SPMG1, width = 1, precision = 0.1, half_life = Inf))
 })
 
 test_that("evaluate.HRF validates grid and precision", {

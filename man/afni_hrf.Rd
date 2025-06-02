@@ -23,6 +23,30 @@ afni_hrf(
 )
 }
 \arguments{
+\item{...}{Variables to include in the HRF specification}
+
+\item{basis}{Character string specifying the basis function type}
+
+\item{onsets}{Numeric vector of event onset times}
+
+\item{durations}{Numeric vector of event durations}
+
+\item{prefix}{Character string prefix for the term}
+
+\item{subset}{Expression for subsetting events}
+
+\item{nbasis}{Number of basis functions}
+
+\item{contrasts}{Contrast specifications}
+
+\item{id}{Character string identifier for the term}
+
+\item{lag}{Numeric lag in seconds}
+
+\item{precision}{Numeric precision for convolution}
+
+\item{summate}{Logical whether to summate overlapping responses}
+
 \item{start}{the start of the window for sin/poly/csplin models}
 
 \item{stop}{the stop time for sin/poly/csplin models}

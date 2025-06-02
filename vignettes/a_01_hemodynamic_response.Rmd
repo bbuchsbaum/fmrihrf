@@ -260,15 +260,15 @@ ggplot(plot_df_blocked_nosum_norm, aes(x = Time, y = Response, color = Duration)
   ylim(0, NA)
 ```
 
-## Modeling Temporal Shifts with `hrf_lagged`
+## Modeling Temporal Shifts with `lag_hrf`
 
-Sometimes, the hemodynamic response might be delayed or advanced relative to the event onset. The `hrf_lagged` function (or `gen_hrf_lagged`) shifts an existing HRF in time by a specified `lag` (in seconds). A positive lag delays the response, while a negative lag advances it.
+Sometimes, the hemodynamic response might be delayed or advanced relative to the event onset. The `lag_hrf` function (or `gen_hrf_lagged`) shifts an existing HRF in time by a specified `lag` (in seconds). A positive lag delays the response, while a negative lag advances it.
 
 ```{r lagged_hrfs}
 # Create lagged versions of the Gaussian HRF
-hrf_gauss_lag_neg2 <- hrf_lagged(HRF_GAUSSIAN, lag = -2)
+hrf_gauss_lag_neg2 <- lag_hrf(HRF_GAUSSIAN, lag = -2)
 hrf_gauss_lag_0 <- HRF_GAUSSIAN # Original (lag=0)
-hrf_gauss_lag_pos3 <- hrf_lagged(HRF_GAUSSIAN, lag = 3)
+hrf_gauss_lag_pos3 <- lag_hrf(HRF_GAUSSIAN, lag = 3)
 
 # Evaluate
 resp_lag_neg2 <- hrf_gauss_lag_neg2(time_points)
@@ -288,7 +288,7 @@ plot_df_lagged <- data.frame(
 ggplot(plot_df_lagged, aes(x = Time, y = Response, color = Lag)) +
   geom_line(linewidth = 1) +
   labs(title = "Gaussian HRF with Different Temporal Lags",
-       subtitle = "Using hrf_lagged()",
+       subtitle = "Using lag_hrf()",
        x = "Time (seconds)",
        y = "BOLD Response",
        color = "Lag") +
@@ -297,13 +297,13 @@ ggplot(plot_df_lagged, aes(x = Time, y = Response, color = Lag)) +
 
 ## Combining Lag and Duration
 
-We can combine `hrf_lagged` and `block_hrf` using the pipe operator (`%>%`) from `dplyr` (or `magrittr`).
+We can combine `lag_hrf` and `block_hrf` using the pipe operator (`%>%`) from `dplyr` (or `magrittr`).
 
 ```{r lagged_blocked_hrfs}
 # Create HRFs that are both lagged and blocked
-hrf_lb_1 <- HRF_GAUSSIAN %>% hrf_lagged(1) %>% block_hrf(width = 1, normalize = TRUE)
-hrf_lb_3 <- HRF_GAUSSIAN %>% hrf_lagged(3) %>% block_hrf(width = 3, normalize = TRUE)
-hrf_lb_5 <- HRF_GAUSSIAN %>% hrf_lagged(5) %>% block_hrf(width = 5, normalize = TRUE)
+hrf_lb_1 <- HRF_GAUSSIAN %>% lag_hrf(1) %>% block_hrf(width = 1, normalize = TRUE)
+hrf_lb_3 <- HRF_GAUSSIAN %>% lag_hrf(3) %>% block_hrf(width = 3, normalize = TRUE)
+hrf_lb_5 <- HRF_GAUSSIAN %>% lag_hrf(5) %>% block_hrf(width = 5, normalize = TRUE)
 
 # Evaluate
 resp_lb_1 <- hrf_lb_1(time_points)
@@ -323,7 +323,7 @@ plot_df_lagged_blocked <- data.frame(
 ggplot(plot_df_lagged_blocked, aes(x = Time, y = Response, color = Settings)) +
   geom_line(linewidth = 1) +
   labs(title = "Gaussian HRFs with Combined Lag and Duration",
-       subtitle = "Using hrf_lagged() %>% block_hrf()",
+       subtitle = "Using lag_hrf() %>% block_hrf()",
        x = "Time (seconds)",
        y = "BOLD Response",
        color = "Settings") +
@@ -426,23 +426,19 @@ plot(time_points, resp_half_cos, type = 'l', lwd = 1.5,
      main = "Half-Cosine HRF Shape (Woolrich et al., 2004)")
 ```
 
-### Daguerre Polynomial Basis Set
+<!-- ### Daguerre Polynomial Basis Set
 
-Daguerre polynomials provide an orthogonal basis set on [0, ∞) suitable for modeling decaying responses. `HRF_DAGUERRE_BASIS` provides the basis functions directly.
+Daguerre polynomials provide an orthogonal basis set on [0, ∞) suitable for modeling decaying responses. This functionality is not yet implemented in the package.
 
-```{r daguerre_basis}
-hrf_dag_3 <- HRF_DAGUERRE_BASIS(n_basis = 3)
-print(hrf_dag_3)
-resp_dag_3 <- hrf_dag_3(time_points)
-matplot(time_points, resp_dag_3, type = 'l', lty = 1, lwd = 1.5,
-        xlab = "Time (seconds)", ylab = "BOLD Response",
-        main = "Daguerre Basis Set (N=3)")
-
-# HRF_DAGUERRE(n_basis=1) provides a canonical-like shape derived from the basis
-hrf_dag_canon <- HRF_DAGUERRE(n_basis = 1)
-resp_dag_canon <- hrf_dag_canon(time_points)
-# plot(time_points, resp_dag_canon, type='l', main="Canonical Daguerre Shape")
-```
+```{r daguerre_basis, eval=FALSE}
+# Future implementation:
+# hrf_dag_3 <- HRF_DAGUERRE_BASIS(n_basis = 3)
+# print(hrf_dag_3)
+# resp_dag_3 <- hrf_dag_3(time_points)
+# matplot(time_points, resp_dag_3, type = 'l', lty = 1, lwd = 1.5,
+#         xlab = "Time (seconds)", ylab = "BOLD Response",
+#         main = "Daguerre Basis Set (N=3)")
+``` -->
 
 ## Other HRF Shapes
 
@@ -495,7 +491,7 @@ For example, we can create a basis set from a series of lagged Gaussian HRFs:
 # Create a list of lagged Gaussian HRFs
 lag_times <- seq(0, 10, by = 2)
 list_of_hrfs <- lapply(lag_times, function(lag) {
-  hrf_lagged(HRF_GAUSSIAN, lag = lag)
+  lag_hrf(HRF_GAUSSIAN, lag = lag)
 })
 
 # Combine them into a single HRF basis set object
@@ -520,7 +516,7 @@ If you have a measured or estimated hemodynamic response profile (e.g., from dec
 sim_times <- 0:24
 set.seed(42) # For reproducibility
 sim_profile <- rowMeans(replicate(20, {
-  h <- hrf_spmg1 %>% hrf_lagged(lag = runif(n = 1, min = -1, max = 1)) %>%
+  h <- HRF_SPMG1 %>% lag_hrf(lag = runif(n = 1, min = -1, max = 1)) %>%
                     block_hrf(width = runif(n = 1, min = 0, max = 2))
   h(sim_times)
 }))
@@ -552,8 +548,8 @@ You can create an empirical *basis set* by applying dimensionality reduction (li
 set.seed(123) # for reproducibility
 n_sim <- 50
 sim_mat <- replicate(n_sim, {
-  hrf_func <- hrf_spmg1 %>%
-              hrf_lagged(lag = runif(1, -2, 2)) %>%
+  hrf_func <- HRF_SPMG1 %>%
+              lag_hrf(lag = runif(1, -2, 2)) %>%
               block_hrf(width = runif(1, 0, 3))
   hrf_func(sim_times)
 })

@@ -31,8 +31,8 @@ new_sampling_frame <- function(blocklens, TR, start_time, precision) {
 #' # The global time (with respect to the first block) of each sample/acquisition
 #' gsam <- samples(frame, global = TRUE)
 #'
-#' Block identifiers for each acquisition can be retrieved using
-#' \code{blockids(frame)}.
+#' # Block identifiers for each acquisition can be retrieved using
+#' # blockids(frame)
 #'
 #' @return A list with class "sampling_frame" describing the block structure and temporal sampling of an fMRI paradigm.
 #' @export
@@ -161,7 +161,7 @@ print.sampling_frame <- function(x, ...) {
 #' @method blockids sampling_frame
 #' @rdname blockids
 #' @export
-blockids.sampling_frame <- function(x) {
+blockids.sampling_frame <- function(x, ...) {
   rep(seq_along(x$blocklens), times = x$blocklens)
 }
 

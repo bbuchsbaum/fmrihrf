@@ -41,7 +41,9 @@ test_that("events with zero amplitude are filtered", {
 })
 
 test_that("NA inputs trigger errors", {
-  expect_error(regressor(onsets = NA_real_, duration = 1), "onsets")
+  # Single NA onset is treated as empty regressor (special case)
+  expect_no_error(regressor(onsets = NA_real_))
+  expect_error(regressor(onsets = c(1, NA)), "onsets")
   expect_error(regressor(onsets = 1, duration = NA_real_), "duration")
   expect_error(regressor(onsets = 1, amplitude = NA_real_), "amplitude")
   expect_error(regressor(onsets = 1, span = NA_real_), "span")

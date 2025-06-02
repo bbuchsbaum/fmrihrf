@@ -35,6 +35,18 @@ as.character.AFNI_HRF <- function(x,...) {
 
 #' construct an native AFNI hrf specification for '3dDeconvolve' with the 'stim_times' argument.
 #' 
+#' @param ... Variables to include in the HRF specification
+#' @param basis Character string specifying the basis function type
+#' @param onsets Numeric vector of event onset times
+#' @param durations Numeric vector of event durations
+#' @param prefix Character string prefix for the term
+#' @param subset Expression for subsetting events
+#' @param nbasis Number of basis functions
+#' @param contrasts Contrast specifications
+#' @param id Character string identifier for the term
+#' @param lag Numeric lag in seconds
+#' @param precision Numeric precision for convolution
+#' @param summate Logical whether to summate overlapping responses
 #' @param start the start of the window for sin/poly/csplin models
 #' @param stop the stop time for sin/poly/csplin models
 #' @export
@@ -94,11 +106,13 @@ afni_hrf <- function(..., basis=c("spmg1", "block", "dmblock",
     id <- termname
   }  
   
-  cset <- if (inherits(contrasts, "contrast_spec")) {
-    contrast_set(con1=contrasts)
-  } else if (inherits(contrasts, "contrast_set")) {
-    contrasts
-  } else { NULL } # Default to NULL if not correct type
+  # contrast_set function not yet implemented
+  cset <- NULL
+  # cset <- if (inherits(contrasts, "contrast_spec")) {
+  #   contrast_set(con1=contrasts)
+  # } else if (inherits(contrasts, "contrast_set")) {
+  #   contrasts
+  # } else { NULL } # Default to NULL if not correct type
   
   ret <- list(
     name=termname,
@@ -123,14 +137,21 @@ afni_hrf <- function(..., basis=c("spmg1", "block", "dmblock",
 
 #' construct a native AFNI hrf specification for '3dDeconvolve' and individually modulated events using the 'stim_times_IM' argument.
 #' 
-#' 
 #' @param label name of regressor
+#' @param basis Character string specifying the basis function type
+#' @param onsets Numeric vector of event onset times
+#' @param durations Numeric vector of event durations (default 0)
+#' @param subset Expression for subsetting events
+#' @param id Character string identifier for the term
+#' @param precision Numeric precision for convolution (default 0.3)
+#' @param summate Logical whether to summate overlapping responses (default TRUE)
 #' @param start start of hrf (for multiple basis hrfs)
 #' @param stop end of hrf (for multiple basis hrfs)
 #' 
-#' 
-#' 
+#' @examples
+#' \dontrun{
 #' tw <- afni_trialwise("trialwise", basis="gamma", onsets=seq(1,100,by=5))
+#' }
 #' 
 #' @export
 #' @return an \code{afni_trialwise_hrfspec} instance
@@ -172,70 +193,34 @@ afni_trialwise <- function(label, basis=c("spmg1", "block", "dmblock", "gamma", 
   
 }
 
+#' Construct AFNI HRF specification
+#' 
+#' Internal method for constructing AFNI HRF specifications.
+#' 
+#' @param x An afni_hrfspec object
+#' @param model_spec Model specification
+#' @param ... Additional arguments
+#' @keywords internal
 #' @export
 construct.afni_hrfspec <- function(x, model_spec, ...) {
-  
-  # Assuming construct_event_term is defined in event_model_helpers.R
-  # Note: construct_event_term might need adaptation if afni_hrfspec structure differs slightly
-  et <- construct_event_term(x, model_spec)
-  
-  ## do not convolve an afni term
-  ##cterm <- convolve(et, x$hrf, model_spec$sampling_frame, summate=x$summate)
-  
-  ret <- list(
-    varname=et$varname,
-    evterm=et,
-    sampling_frame=model_spec$sampling_frame,
-    hrfspec=x,
-    precision = x$precision,
-    summate = x$summate,
-    lag = x$lag,
-    contrasts=x$contrasts,
-    id=if(!is.null(x$id)) x$id else et$varname
-  )
-  
-  class(ret) <- c("afni_hrf_convolved_term", "convolved_term", "fmri_term", "list") 
-  ret
+  # This function requires construct_event_term which is not yet implemented
+  stop("construct_event_term is not yet implemented")
 }
 
 
+#' Construct AFNI trialwise HRF specification
+#' 
+#' Internal method for constructing AFNI trialwise HRF specifications.
+#' 
+#' @param x An afni_trialwise_hrfspec object
+#' @param model_spec Model specification
+#' @param ... Additional arguments
+#' @keywords internal
 #' @export
 construct.afni_trialwise_hrfspec <- function(x, model_spec, ...) {
-  
-  ## compied almost verbatim from construct.hrfspec
-  onsets <- if (!is.null(x$onsets)) x$onsets else model_spec$onsets
-  durations <- if (!is.null(x$durations)) x$durations else model_spec$durations
-  
-  trial_index <- factor(seq(1, length(onsets)))
-  
-  # Use the passed hrfspec varname (label)
-  varlist <- list(trial_index)
-  names(varlist) <- x$varname
-  
-  # Evaluate subset using model_spec$data and formula_env
-  subs <- if (!is.null(x$subset) && !rlang::is_null(x$subset)) {
-            eval_env <- rlang::env_bury(model_spec$formula_env %||% rlang::empty_env(), !!!model_spec$data)
-            tryCatch(rlang::eval_tidy(x$subset, env = eval_env), 
-                     error = function(e) stop(sprintf("Failed to evaluate subset expression for afni_trialwise term '%s': %s", x$name, e$message)))
-          } else {
-            rep(TRUE, length(onsets))
-          }
-  
-  et <- event_term(varlist, onsets, model_spec$blockids, durations, subs)
-  #cterm <- convolve(et, x$hrf, model_spec$sampling_frame)
-  
-  ret <- list(
-    varname=et$varname,
-    evterm=et,
-    sampling_frame=model_spec$sampling_frame,
-    hrfspec=x,
-    precision = x$precision,
-    summate = x$summate,
-    id=x$id
-  )
-  
-  class(ret) <- c("afni_trialwise_convolved_term", "convolved_term", "fmri_term", "list") 
-  ret
+  # This function requires event_term and other event modeling functions
+  # which are not yet implemented
+  stop("construct.afni_trialwise_hrfspec requires event modeling functions that are not yet implemented")
 }
 
 

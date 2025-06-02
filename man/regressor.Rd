@@ -33,15 +33,15 @@ it may be inferred from the `hrf` object or default to 40s. **Note:** Unlike som
 previous versions, the `span` is not automatically adjusted based on `duration`;
 ensure the provided or inferred `span` is sufficient for your longest event duration.}
 
-\item{summate}{Logical; if `TRUE` (default), the HRF response amplitude scales 
-with the duration of sustained events (via internal convolution/summation). If `FALSE`, 
+\item{summate}{Logical scalar; if `TRUE` (default), the HRF response amplitude scales
+with the duration of sustained events (via internal convolution/summation). If `FALSE`,
 the response reflects the peak HRF reached during the event duration.}
 }
 \value{
 An S3 object of class `Reg` and `list`
   containing processed event information and the HRF specification. The
-  object includes a \code{filtered_all} attribute indicating whether all
-  events were removed due to zero or \code{NA} amplitudes.
+  object includes a `filtered_all` attribute indicating whether all events
+  were removed due to zero or `NA` amplitudes.
 }
 \description{
 Creates an object representing event-related regressors for fMRI modeling.

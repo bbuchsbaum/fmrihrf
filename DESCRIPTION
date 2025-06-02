@@ -16,7 +16,14 @@ Imports:
     Rcpp,
     assertthat,
     purrr,
-    stats
+    stats,
+    Matrix,
+    cli,
+    memoise,
+    numDeriv,
+    rlang,
+    splines,
+    pracma
 LinkingTo: Rcpp, RcppArmadillo
 Depends:
     R (>= 3.5.0)
@@ -24,4 +31,9 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    dplyr,
+    tidyr,
+    scales
+VignetteBuilder: knitr
+URL: https://bbuchsbaum.github.io/fmrihrf/

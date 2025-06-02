@@ -12,6 +12,18 @@ nbasis(x, ...)
 
 \method{nbasis}{Reg}(x, ...)
 }
-\description{
+\arguments{
+\item{x}{Object containing HRF or regressor information.}
 
+\item{...}{Additional arguments passed to methods.}
+}
+\value{
+Integer scalar giving the number of basis functions.
+}
+\description{
+Return the number of basis functions represented by an object.
+}
+\details{
+This information is typically used when constructing penalty matrices
+or understanding the complexity of an HRF model or regressor.
 }

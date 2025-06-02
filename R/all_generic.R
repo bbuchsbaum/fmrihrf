@@ -43,20 +43,19 @@ evaluate <- function(x, grid, ...) {
 #'   run = c(1, 1, 1, 1)
 #' )
 #' 
-#' # Create sampling frame
-#' sframe <- sampling_frame(blocklens = 50, TR = 2)
-#' 
 #' # Create regressor from events
 #' reg <- regressor(
 #'   onsets = event_data$onsets,
-#'   sampling_frame = sframe
+#'   hrf = HRF_SPMG1,
+#'   duration = 0,
+#'   amplitude = 1
 #' )
 #' 
 #' # Shift regressor forward by 2 seconds
-#' reg_forward <- shift(reg, offset = 2)
+#' reg_forward <- shift(reg, shift_amount = 2)
 #' 
 #' # Shift regressor backward by 1 second
-#' reg_backward <- shift(reg, offset = -1)
+#' reg_backward <- shift(reg, shift_amount = -1)
 #' 
 #' # Evaluate original and shifted regressors
 #' times <- seq(0, 50, by = 2)
@@ -118,6 +117,7 @@ nbasis <- function(x, ...) UseMethod("nbasis")
 #' }
 #'
 #' @param x The HRF object or basis specification
+#' @param order Integer specifying the order of the penalty (default: 2)
 #' @param ... Additional arguments passed to specific methods
 #' @return A symmetric positive definite penalty matrix of dimension nbasis(x) × nbasis(x)
 #' @details
@@ -209,6 +209,8 @@ onsets <- function(x, ...) UseMethod("onsets")
 #' related object.
 #'
 #' @param x Object describing the sampling grid
+#' @param blockids Integer vector of block identifiers to include (default: all blocks)
+#' @param global Logical indicating whether to return global times (default: FALSE)
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of sample times
 #' @export
@@ -219,6 +221,7 @@ samples <- function(x, ...) UseMethod("samples")
 #' Generic accessor for converting block-wise onsets to global onsets.
 #'
 #' @param x Object describing the sampling frame
+#' @param onsets Numeric vector of onset times within blocks
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of global onset times
 #' @export
@@ -263,12 +266,10 @@ blocklens <- function(x, ...) UseMethod("blocklens")
 #' }
 #'
 #' @param x A regressor object containing event timing information
-#' @param ... Additional arguments passed to methods. Common arguments include:
-#' \describe{
-#'     \item{start}{Numeric; start time of the input function}
-#'     \item{end}{Numeric; end time of the input function} 
-#'     \item{resolution}{Numeric; temporal resolution in seconds (default: 0.33)}
-#' }
+#' @param start Numeric; start time of the input function
+#' @param end Numeric; end time of the input function
+#' @param resolution Numeric; temporal resolution in seconds (default: 0.33)
+#' @param ... Additional arguments passed to methods
 #'
 #' @return A list containing:
 #' \describe{

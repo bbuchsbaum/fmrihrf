@@ -9,6 +9,7 @@ gen_hrf(
   lag = 0,
   width = 0,
   precision = 0.1,
+  half_life = Inf,
   summate = TRUE,
   normalize = FALSE,
   name = NULL,
@@ -24,6 +25,8 @@ gen_hrf(
 \item{width}{Optional block width in seconds. If non-zero, applies `block_hrf`.}
 
 \item{precision}{Sampling precision for block convolution (passed to `block_hrf`). Default is 0.1.}
+
+\item{half_life}{Half-life decay parameter for exponential decay in seconds (passed to `block_hrf`). Default is Inf (no decay).}
 
 \item{summate}{Whether to summate within blocks (passed to `block_hrf`). Default is TRUE.}
 

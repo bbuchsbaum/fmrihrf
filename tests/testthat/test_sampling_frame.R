@@ -34,7 +34,7 @@ test_that("sampling_frame constructor works correctly", {
 
   expect_error(sampling_frame(blocklens = c(100, 100), TR = c(2, 2, 2)),
               "TR must have length 1 or match the number of blocks")
-  expect_error(sampling_frame(blocklens = c(100, 100), start_time = c(0, 0, 0)),
+  expect_error(sampling_frame(blocklens = c(100, 100), TR = 2, start_time = c(0, 0, 0)),
               "start_time must have length 1 or match the number of blocks")
 
 })

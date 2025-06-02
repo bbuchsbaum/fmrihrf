@@ -7,19 +7,27 @@
 make_hrf(basis, lag, nbasis = 1)
 }
 \arguments{
-\item{basis}{Character name of a built-in HRF, a generating function, or an object of class \code{HRF}.}
+\item{basis}{Character name of a built-in HRF, a function that
+generates HRF values, or an object of class `HRF`.}
 
-\item{lag}{Numeric scalar giving the shift in seconds applied to the HRF.}
+\item{lag}{Numeric scalar giving the shift in seconds applied to the
+HRF.}
 
-\item{nbasis}{Integer specifying the number of basis functions when \code{basis} is provided as a name.}
+\item{nbasis}{Integer specifying the number of basis functions when
+`basis` is provided as a name.}
 }
 \value{
-An object of class \code{HRF} representing the lagged basis.
+An object of class `HRF` representing the lagged basis.
 }
 \description{
-\code{make_hrf} resolves a basis specification to an \code{HRF} object and applies an optional temporal lag.
+`make_hrf` resolves a basis specification to an `HRF` object and
+applies an optional temporal lag. The basis may be given as the name
+of a built-in HRF, as a generating function, or as an existing `HRF`
+object.
 }
 \examples{
+# Canonical SPM HRF delayed by 2 seconds
 h <- make_hrf("spmg1", lag = 2)
 h(0:5)
+
 }

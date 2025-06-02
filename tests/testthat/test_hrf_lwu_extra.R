@@ -29,5 +29,5 @@ test_that("hrf_basis_lwu returns derivatives", {
   fd_tau <- (hrf_lwu(t0, tau = theta["tau"] + delta, sigma = theta["sigma"], rho = theta["rho"]) -
               hrf_lwu(t0, tau = theta["tau"] - delta, sigma = theta["sigma"], rho = theta["rho"])) / (2 * delta)
   idx <- which(t == t0)
-  expect_equal(basis[idx, "d_tau"], as.numeric(fd_tau), tolerance = 1e-3)
+  expect_equal(as.numeric(basis[idx, "d_tau"]), as.numeric(fd_tau), tolerance = 1e-3)
 })

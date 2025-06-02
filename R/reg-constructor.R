@@ -1,3 +1,5 @@
+#' Internal Constructor for Regressor Objects
+#' 
 #' @keywords internal
 #' @return An S3 object of class `Reg` (and `list`) with components:
 #'   * `onsets`: Numeric vector of event onset times (seconds).
@@ -63,7 +65,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40, summate
       
       if (filtered_some) {
           onsets    <- onsets[keep_indices]
-          duration_filtered  <- duration[keep_indices]
+          duration  <- duration[keep_indices]
           amplitude <- amplitude[keep_indices]
           n_onsets  <- length(onsets) # Update count after filtering
       }

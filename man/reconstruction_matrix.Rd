@@ -12,9 +12,6 @@ reconstruction_matrix(hrf, sframe, ...)
 \item{sframe}{A `sampling_frame` object or numeric vector of times.}
 
 \item{...}{Additional arguments passed to methods}
-
-\item{precision}{Optional sampling interval in seconds when `sframe`
-is a `sampling_frame`. Defaults to the TR of `sframe`.}
 }
 \value{
 A numeric matrix with one column per basis function.

@@ -40,20 +40,19 @@ event_data <- data.frame(
   run = c(1, 1, 1, 1)
 )
 
-# Create sampling frame
-sframe <- sampling_frame(blocklens = 50, TR = 2)
-
 # Create regressor from events
 reg <- regressor(
   onsets = event_data$onsets,
-  sampling_frame = sframe
+  hrf = HRF_SPMG1,
+  duration = 0,
+  amplitude = 1
 )
 
 # Shift regressor forward by 2 seconds
-reg_forward <- shift(reg, offset = 2)
+reg_forward <- shift(reg, shift_amount = 2)
 
 # Shift regressor backward by 1 second
-reg_backward <- shift(reg, offset = -1)
+reg_backward <- shift(reg, shift_amount = -1)
 
 # Evaluate original and shifted regressors
 times <- seq(0, 50, by = 2)

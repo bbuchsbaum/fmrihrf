@@ -20,9 +20,23 @@ afni_trialwise(
 \arguments{
 \item{label}{name of regressor}
 
+\item{basis}{Character string specifying the basis function type}
+
+\item{onsets}{Numeric vector of event onset times}
+
+\item{durations}{Numeric vector of event durations (default 0)}
+
+\item{subset}{Expression for subsetting events}
+
+\item{id}{Character string identifier for the term}
+
 \item{start}{start of hrf (for multiple basis hrfs)}
 
 \item{stop}{end of hrf (for multiple basis hrfs)}
+
+\item{precision}{Numeric precision for convolution (default 0.3)}
+
+\item{summate}{Logical whether to summate overlapping responses (default TRUE)}
 }
 \value{
 an \code{afni_trialwise_hrfspec} instance
@@ -31,8 +45,8 @@ an \code{afni_trialwise_hrfspec} instance
 construct a native AFNI hrf specification for '3dDeconvolve' and individually modulated events using the 'stim_times_IM' argument.
 }
 \examples{
-
-
+\dontrun{
 tw <- afni_trialwise("trialwise", basis="gamma", onsets=seq(1,100,by=5))
+}
 
 }
