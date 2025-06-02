@@ -170,24 +170,6 @@ When used as objects, they are HRF objects with class <code>c("HRF", "function")
 <span class="r-in"><span>       col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HRF_objects-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Use in model specification</span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># In an event model</span></span></span>
-<span class="r-in"><span><span class="va">evmodel</span> <span class="op">&lt;-</span> <span class="fu">event_model</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">onsets</span> <span class="op">~</span> <span class="fu">hrf</span><span class="op">(</span><span class="va">condition</span>, basis <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">event_data</span>,</span></span>
-<span class="r-in"><span>  sampling_frame <span class="op">=</span> <span class="va">sframe</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in event_model(onsets ~ hrf(condition, basis = HRF_SPMG1), data = event_data,     sampling_frame = sframe):</span> could not find function "event_model"</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># With multiple basis functions</span></span></span>
-<span class="r-in"><span><span class="va">evmodel2</span> <span class="op">&lt;-</span> <span class="fu">event_model</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">onsets</span> <span class="op">~</span> <span class="fu">hrf</span><span class="op">(</span><span class="va">condition</span>, basis <span class="op">=</span> <span class="va">HRF_SPMG3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">event_data</span>,</span></span>
-<span class="r-in"><span>  sampling_frame <span class="op">=</span> <span class="va">sframe</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in event_model(onsets ~ hrf(condition, basis = HRF_SPMG3), data = event_data,     sampling_frame = sframe):</span> could not find function "event_model"</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

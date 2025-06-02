@@ -54,42 +54,60 @@ The HRF consists of an initial dip, a rise to peak, a fall and undershoot, and a
 
 
 <dl><dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>A vector of time values.</p></dd>
+<dd><p>Time points at which to evaluate the HRF</p></dd>
 
 
 <dt id="arg-h-">h1<a class="anchor" aria-label="anchor" href="#arg-h-"></a></dt>
-<dd><p>Duration of the initial dip in seconds.</p></dd>
+<dd><p>Duration of initial fall from f1 to 0 (default: 1)</p></dd>
 
 
 <dt id="arg-h-">h2<a class="anchor" aria-label="anchor" href="#arg-h-"></a></dt>
-<dd><p>Duration of the rise to peak in seconds.</p></dd>
+<dd><p>Duration of rise from 0 to 1 (default: 5)</p></dd>
 
 
 <dt id="arg-h-">h3<a class="anchor" aria-label="anchor" href="#arg-h-"></a></dt>
-<dd><p>Duration of the fall and undershoot in seconds.</p></dd>
+<dd><p>Duration of fall from 1 to 0 (default: 7)</p></dd>
 
 
 <dt id="arg-h-">h4<a class="anchor" aria-label="anchor" href="#arg-h-"></a></dt>
-<dd><p>Duration of the recovery to baseline in seconds.</p></dd>
+<dd><p>Duration of final rise from 0 to f2 (default: 7)</p></dd>
 
 
 <dt id="arg-f-">f1<a class="anchor" aria-label="anchor" href="#arg-f-"></a></dt>
-<dd><p>Height of the starting point.</p></dd>
+<dd><p>Initial baseline level (default: 0)</p></dd>
 
 
 <dt id="arg-f-">f2<a class="anchor" aria-label="anchor" href="#arg-f-"></a></dt>
-<dd><p>Height of the end point.</p></dd>
+<dd><p>Final baseline level (default: 0)</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A vector of HRF values corresponding to the input time values.</p>
+<p>Numeric vector of HRF values at time points t</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Woolrich, M. W., Behrens, T. E., &amp; Smith, S. M. (2004). Constrained linear basis sets for HRF modelling using Variational Bayes. NeuroImage, 21(4), 1748-1761.</p>
+<p>Half-cosine HRF</p>
+<p>Creates a hemodynamic response function using half-cosine segments.
+The function consists of four phases controlled by h1-h4 parameters,
+with transitions between baseline (f1) and peak (1) and final (f2) levels.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Standard half-cosine HRF</span></span></span>
+<span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hrf</span> <span class="op">&lt;-</span> <span class="fu">hrf_half_cosine</span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">hrf</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Half-cosine HRF"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Modified shape with undershoot</span></span></span>
+<span class="r-in"><span><span class="va">hrf_under</span> <span class="op">&lt;-</span> <span class="fu">hrf_half_cosine</span><span class="op">(</span><span class="va">t</span>, h1 <span class="op">=</span> <span class="fl">1</span>, h2 <span class="op">=</span> <span class="fl">4</span>, h3 <span class="op">=</span> <span class="fl">6</span>, h4 <span class="op">=</span> <span class="fl">8</span>, f2 <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">hrf_under</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="hrf_half_cosine-1.png" alt="" width="700" height="433"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

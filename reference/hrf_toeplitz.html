@@ -71,6 +71,19 @@
     <p>A Toeplitz matrix for HRF convolution.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create HRF and time points</span></span></span>
+<span class="r-in"><span><span class="va">hrf_fun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="hrf_spmg1.html">hrf_spmg1</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create Toeplitz matrix</span></span></span>
+<span class="r-in"><span><span class="va">H</span> <span class="op">&lt;-</span> <span class="fu">hrf_toeplitz</span><span class="op">(</span><span class="va">hrf_fun</span>, <span class="va">times</span>, len <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create sparse version</span></span></span>
+<span class="r-in"><span><span class="va">H_sparse</span> <span class="op">&lt;-</span> <span class="fu">hrf_toeplitz</span><span class="op">(</span><span class="va">hrf_fun</span>, <span class="va">times</span>, len <span class="op">=</span> <span class="fl">50</span>, sparse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
