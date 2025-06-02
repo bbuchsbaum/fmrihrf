@@ -100,7 +100,7 @@ legend("topright", c("SPM Canonical", "Gamma", "Gaussian"),
        col = c("blue", "red", "green"), lty = 1)
 
 # Use in model specification
-\dontrun{
+\donttest{
 # In an event model
 evmodel <- event_model(
   onsets ~ hrf(condition, basis = HRF_SPMG1),

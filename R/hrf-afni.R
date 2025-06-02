@@ -149,7 +149,7 @@ afni_hrf <- function(..., basis=c("spmg1", "block", "dmblock",
 #' @param stop end of hrf (for multiple basis hrfs)
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' tw <- afni_trialwise("trialwise", basis="gamma", onsets=seq(1,100,by=5))
 #' }
 #' 

@@ -559,7 +559,7 @@ list_available_hrfs <- function(details = FALSE) {
 #'        col = c("blue", "red", "green"), lty = 1)
 #' 
 #' # Use in model specification
-#' \dontrun{
+#' \donttest{
 #' # In an event model
 #' evmodel <- event_model(
 #'   onsets ~ hrf(condition, basis = HRF_SPMG1),

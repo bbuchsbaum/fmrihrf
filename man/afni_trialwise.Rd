@@ -45,7 +45,7 @@ an \code{afni_trialwise_hrfspec} instance
 construct a native AFNI hrf specification for '3dDeconvolve' and individually modulated events using the 'stim_times_IM' argument.
 }
 \examples{
-\dontrun{
+\donttest{
 tw <- afni_trialwise("trialwise", basis="gamma", onsets=seq(1,100,by=5))
 }
 
