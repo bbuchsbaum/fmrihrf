@@ -27,3 +27,13 @@ Return the number of basis functions represented by an object.
 This information is typically used when constructing penalty matrices
 or understanding the complexity of an HRF model or regressor.
 }
+\examples{
+# Number of basis functions for different HRF types
+nbasis(HRF_SPMG1)   # 1 basis function
+nbasis(HRF_SPMG3)   # 3 basis functions (canonical + 2 derivatives)
+nbasis(HRF_BSPLINE) # 5 basis functions (default)
+
+# For a regressor
+reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG3)
+nbasis(reg)  # 3 (inherits from the HRF)
+}

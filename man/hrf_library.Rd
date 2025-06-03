@@ -22,4 +22,19 @@ A combined HRF object representing the library.
 \description{
 `hrf_library` applies a base HRF generating function to each row of a parameter grid.
 }
+\examples{
+# Create library of gamma HRFs with varying parameters
+param_grid <- expand.grid(
+  alpha = c(6, 8, 10),
+  beta = c(0.9, 1, 1.1)
+)
+gamma_library <- hrf_library(hrf_gamma, param_grid)
+
+# Create library with fixed and varying parameters
+param_grid2 <- expand.grid(lag = c(0, 2, 4))
+lagged_library <- hrf_library(
+  function(lag) gen_hrf(HRF_SPMG1, lag = lag),
+  param_grid2
+)
+}
 \keyword{internal}

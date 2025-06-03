@@ -52,8 +52,19 @@ afni_hrf(
 \item{stop}{the stop time for sin/poly/csplin models}
 }
 \value{
-an \code{afni_hrfspec} instance
+an \code{afni_hrfspec} instance with class "afni_hrfspec"
 }
 \description{
 construct an native AFNI hrf specification for '3dDeconvolve' with the 'stim_times' argument.
+}
+\examples{
+# Create SPM canonical HRF specification
+hrf1 <- afni_hrf(onsets = c(10, 30, 50), basis = "spmg1")
+
+# Create block HRF with duration
+hrf2 <- afni_hrf(onsets = c(10, 30, 50), durations = 5, basis = "block")
+
+# Create tent basis HRF
+hrf3 <- afni_hrf(onsets = c(10, 30, 50), basis = "tent", 
+                 start = 0, stop = 20, nbasis = 10)
 }

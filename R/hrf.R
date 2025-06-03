@@ -179,6 +179,16 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
 #' @param y Values of HRF at time `t[i]`.
 #' @param name Name of the generated HRF.
 #' @return An instance of type `HRF`.
+#' @examples
+#' # Create empirical HRF from data points
+#' t_points <- seq(0, 20, by = 1)
+#' y_values <- c(0, 0.1, 0.5, 0.9, 1.0, 0.8, 0.5, 0.2, 0, -0.1, -0.1, 
+#'               0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+#' emp_hrf <- empirical_hrf(t_points, y_values)
+#' 
+#' # Evaluate at new time points
+#' new_times <- seq(0, 25, by = 0.1)
+#' response <- evaluate(emp_hrf, new_times)
 #' @export
 empirical_hrf <- function(t, y, name = "empirical_hrf") {
   as_hrf(stats::approxfun(t, y, yright = 0, yleft = 0),
@@ -202,6 +212,18 @@ gen_empirical_hrf <- function(...) {
 #' @param ... One or more HRF objects.
 #' @param name The name for the combined HRF set.
 #' @return A combined HRF object.
+#' @examples
+#' # Combine multiple HRF types into a basis set
+#' hrf_basis <- hrf_set(HRF_SPMG1, HRF_GAUSSIAN, HRF_GAMMA)
+#' 
+#' # Create custom basis with different parameters
+#' hrf1 <- gen_hrf(hrf_gamma, alpha = 6, beta = 1)
+#' hrf2 <- gen_hrf(hrf_gamma, alpha = 8, beta = 1)
+#' custom_basis <- hrf_set(hrf1, hrf2, name = "custom_gamma_basis")
+#' 
+#' # Evaluate the basis set
+#' t <- seq(0, 30, by = 0.1)
+#' basis_response <- evaluate(hrf_basis, t)
 #' @export
 hrf_set <- function(..., name = "hrf_set") {
   combined_hrf <- bind_basis(...)
@@ -227,6 +249,20 @@ gen_hrf_set <- function(...) {
 #' @param pgrid A data frame where each row is a set of parameters.
 #' @param ... Additional arguments passed to `fun`.
 #' @return A combined HRF object representing the library.
+#' @examples
+#' # Create library of gamma HRFs with varying parameters
+#' param_grid <- expand.grid(
+#'   alpha = c(6, 8, 10),
+#'   beta = c(0.9, 1, 1.1)
+#' )
+#' gamma_library <- hrf_library(hrf_gamma, param_grid)
+#' 
+#' # Create library with fixed and varying parameters
+#' param_grid2 <- expand.grid(lag = c(0, 2, 4))
+#' lagged_library <- hrf_library(
+#'   function(lag) gen_hrf(HRF_SPMG1, lag = lag),
+#'   param_grid2
+#' )
 #' @importFrom purrr pmap partial
 #' @export
 hrf_library <- function(fun, pgrid, ...) {
@@ -443,6 +479,14 @@ soft_threshold <- function(x, threshold) {
 #'
 #' @param details Logical; if TRUE, attempt to add descriptions (basic for now).
 #' @return A data frame with columns: name, type (object/generator), nbasis_default.
+#' @examples
+#' # List all available HRFs
+#' hrfs <- list_available_hrfs()
+#' print(hrfs)
+#' 
+#' # List with details
+#' hrfs_detailed <- list_available_hrfs(details = TRUE)
+#' print(hrfs_detailed)
 #' @export
 list_available_hrfs <- function(details = FALSE) {
   # Get names directly from the registry
@@ -783,6 +827,19 @@ getHRF <- function(name = "spmg1", # Default to spmg1
 #' @param normalize Logical; scale output so that the peak absolute value is 1 (default: FALSE). Applied *after* amplitude scaling and duration processing.
 #' @param ... Additional arguments (unused).
 #' @return A numeric vector or matrix of HRF values at the specified time points.
+#' @examples
+#' # Evaluate canonical HRF at specific times
+#' times <- seq(0, 20, by = 0.5)
+#' response <- evaluate(HRF_SPMG1, times)
+#' 
+#' # Evaluate with amplitude scaling
+#' response_scaled <- evaluate(HRF_SPMG1, times, amplitude = 2)
+#' 
+#' # Evaluate with duration (block design)
+#' response_block <- evaluate(HRF_SPMG1, times, duration = 5, summate = TRUE)
+#' 
+#' # Multi-basis HRF evaluation
+#' response_multi <- evaluate(HRF_SPMG3, times)  # Returns 3-column matrix
 #' @export
 evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
                          precision = .2, summate = TRUE, normalize = FALSE, ...) {

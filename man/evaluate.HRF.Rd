@@ -39,3 +39,17 @@ A numeric vector or matrix of HRF values at the specified time points.
 This function evaluates a hemodynamic response function (HRF) object for a given set of time points (grid) and other parameters.
 It handles both point evaluation (duration=0) and block evaluation (duration > 0).
 }
+\examples{
+# Evaluate canonical HRF at specific times
+times <- seq(0, 20, by = 0.5)
+response <- evaluate(HRF_SPMG1, times)
+
+# Evaluate with amplitude scaling
+response_scaled <- evaluate(HRF_SPMG1, times, amplitude = 2)
+
+# Evaluate with duration (block design)
+response_block <- evaluate(HRF_SPMG1, times, duration = 5, summate = TRUE)
+
+# Multi-basis HRF evaluation
+response_multi <- evaluate(HRF_SPMG3, times)  # Returns 3-column matrix
+}

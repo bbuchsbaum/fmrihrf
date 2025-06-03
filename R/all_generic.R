@@ -92,6 +92,18 @@ shift <- function(x, ...) {
 #' @param ...  Reserved for future extensions.
 #'
 #' @return A new `HRF` object with `nbasis = 1`.
+#' @examples
+#' # Create a custom HRF from SPMG3 basis coefficients
+#' coeffs <- c(1, 0.2, -0.1)  # Main response + slight temporal shift - dispersion
+#' custom_hrf <- hrf_from_coefficients(HRF_SPMG3, coeffs)
+#' 
+#' # Evaluate the custom HRF
+#' t <- seq(0, 20, by = 0.1)
+#' response <- evaluate(custom_hrf, t)
+#' 
+#' # Create from FIR basis
+#' fir_coeffs <- c(0, 0.2, 0.5, 1, 0.8, 0.4, 0.1, 0, 0, 0, 0, 0)
+#' custom_fir <- hrf_from_coefficients(HRF_FIR, fir_coeffs)
 #' @export
 hrf_from_coefficients <- function(hrf, h, ...) UseMethod("hrf_from_coefficients")
 
@@ -108,6 +120,15 @@ hrf_from_coefficients <- function(hrf, h, ...) UseMethod("hrf_from_coefficients"
 #' @param x Object containing HRF or regressor information.
 #' @param ... Additional arguments passed to methods.
 #' @return Integer scalar giving the number of basis functions.
+#' @examples
+#' # Number of basis functions for different HRF types
+#' nbasis(HRF_SPMG1)   # 1 basis function
+#' nbasis(HRF_SPMG3)   # 3 basis functions (canonical + 2 derivatives)
+#' nbasis(HRF_BSPLINE) # 5 basis functions (default)
+#' 
+#' # For a regressor
+#' reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG3)
+#' nbasis(reg)  # 3 (inherits from the HRF)
 #' @export
 nbasis <- function(x, ...) UseMethod("nbasis")
 

@@ -55,6 +55,19 @@ response <- evaluate(reg, times)
 
 # Plot the response
 plot(times, response, type = "l", xlab = "Time (s)", ylab = "Response")
+# Create a regressor
+reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
+
+# Evaluate with default method (conv)
+times <- seq(0, 80, by = 0.5)
+response <- evaluate(reg, times)
+
+# Try different evaluation methods
+response_fft <- evaluate(reg, times, method = "fft")
+response_loop <- evaluate(reg, times, method = "loop")
+
+# With higher precision
+response_precise <- evaluate(reg, times, precision = 0.1)
 }
 \seealso{
 [single_trial_regressor()], [regressor()]

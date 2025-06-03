@@ -15,3 +15,12 @@ A data frame with columns: name, type (object/generator), nbasis_default.
 \description{
 Reads the internal HRF registry to list available HRF types.
 }
+\examples{
+# List all available HRFs
+hrfs <- list_available_hrfs()
+print(hrfs)
+
+# List with details
+hrfs_detailed <- list_available_hrfs(details = TRUE)
+print(hrfs_detailed)
+}
