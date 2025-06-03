@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generic.R
 \name{reconstruction_matrix}
 \alias{reconstruction_matrix}
-\title{Reconstruction matrix for an HRF basis}
+\title{Combine HRF Basis with Coefficients}
 \usage{
 reconstruction_matrix(hrf, sframe, ...)
 }
@@ -17,6 +17,13 @@ reconstruction_matrix(hrf, sframe, ...)
 A numeric matrix with one column per basis function.
 }
 \description{
+Create a new HRF by linearly weighting the basis functions of an existing HRF.
+This is useful for turning estimated basis coefficients into a single
+functional HRF.
+}
+\details{
+Reconstruction matrix for an HRF basis
+
 Returns a matrix \eqn{\Phi} that converts basis coefficients into a
 sampled HRF shape.
 }

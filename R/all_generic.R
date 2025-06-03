@@ -182,14 +182,6 @@ penalty_matrix <- function(x, ...) UseMethod("penalty_matrix")
 #' This is useful for turning estimated basis coefficients into a single
 #' functional HRF.
 #'
-#' @param hrf An object of class `HRF`.
-#' @param h   Numeric vector of length `nbasis(hrf)` giving the weights.
-#' @param name Optional name for the resulting HRF.
-#' @param ... Additional arguments passed to methods.
-#'
-#' @return A new `HRF` object with `nbasis = 1`.
-#' @export
-hrf_from_coefficients <- function(hrf, h, ...) { UseMethod("hrf_from_coefficients") }
 
 
 #' Reconstruction matrix for an HRF basis

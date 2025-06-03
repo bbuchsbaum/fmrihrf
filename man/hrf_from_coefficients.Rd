@@ -7,8 +7,6 @@
 \usage{
 hrf_from_coefficients(hrf, h, ...)
 
-hrf_from_coefficients(hrf, h, ...)
-
 \method{hrf_from_coefficients}{HRF}(hrf, h, name = NULL, ...)
 }
 \arguments{
@@ -16,23 +14,17 @@ hrf_from_coefficients(hrf, h, ...)
 
 \item{h}{Numeric vector of length `nbasis(hrf)` giving the weights.}
 
-\item{...}{Additional arguments passed to methods.}
+\item{...}{Reserved for future extensions.}
 
 \item{name}{Optional name for the resulting HRF.}
 }
 \value{
-A new `HRF` object with `nbasis = 1`.
-
 A new `HRF` object with `nbasis = 1`.
 }
 \description{
 Create a new HRF by linearly weighting the basis functions of an existing HRF.
 Useful when coefficients have been estimated for an FIR/bspline/SPMG3 basis
 and one wants a single functional HRF.
-
-Create a new HRF by linearly weighting the basis functions of an existing HRF.
-This is useful for turning estimated basis coefficients into a single
-functional HRF.
 }
 \examples{
 # Create a custom HRF from SPMG3 basis coefficients

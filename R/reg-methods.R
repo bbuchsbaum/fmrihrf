@@ -18,7 +18,6 @@
 #'   }
 #' @param sparse Logical indicating whether to return a sparse matrix (from the Matrix package). Default is FALSE.
 #' @param ... Additional arguments passed down (e.g., to `evaluate.HRF` in the loop method).
-#' @return A numeric vector or matrix of evaluated regressor values. If `sparse=TRUE`, a `dgCMatrix` object.
 #' @examples
 #' # Create a regressor
 #' reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)

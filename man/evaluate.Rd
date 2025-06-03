@@ -38,8 +38,6 @@ evaluate(x, grid, ...)
 }
 \value{
 A numeric vector or matrix containing the evaluated regressor values
-
-A numeric vector or matrix of evaluated regressor values. If `sparse=TRUE`, a `dgCMatrix` object.
 }
 \description{
 Generic function to evaluate a regressor object over a specified time grid.
