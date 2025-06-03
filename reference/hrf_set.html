@@ -65,6 +65,23 @@
     <p>A combined HRF object.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Combine multiple HRF types into a basis set</span></span></span>
+<span class="r-in"><span><span class="va">hrf_basis</span> <span class="op">&lt;-</span> <span class="fu">hrf_set</span><span class="op">(</span><span class="va">HRF_SPMG1</span>, <span class="va">HRF_GAUSSIAN</span>, <span class="va">HRF_GAMMA</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create custom basis with different parameters</span></span></span>
+<span class="r-in"><span><span class="va">hrf1</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gamma</span>, alpha <span class="op">=</span> <span class="fl">6</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Could not determine nbasis for function hrf_gamma - defaulting to 1. Evaluation failed.</span>
+<span class="r-in"><span><span class="va">hrf2</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gamma</span>, alpha <span class="op">=</span> <span class="fl">8</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Could not determine nbasis for function hrf_gamma - defaulting to 1. Evaluation failed.</span>
+<span class="r-in"><span><span class="va">custom_basis</span> <span class="op">&lt;-</span> <span class="fu">hrf_set</span><span class="op">(</span><span class="va">hrf1</span>, <span class="va">hrf2</span>, name <span class="op">=</span> <span class="st">"custom_gamma_basis"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Evaluate the basis set</span></span></span>
+<span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">basis_response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">hrf_basis</span>, <span class="va">t</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -114,6 +114,19 @@ Different types of regressors may have different evaluation methods.</p>
 <span class="r-in"><span><span class="co"># Plot the response</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">times</span>, <span class="va">response</span>, type <span class="op">=</span> <span class="st">"l"</span>, xlab <span class="op">=</span> <span class="st">"Time (s)"</span>, ylab <span class="op">=</span> <span class="st">"Response"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="evaluate-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># Create a regressor</span></span></span>
+<span class="r-in"><span><span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Evaluate with default method (conv)</span></span></span>
+<span class="r-in"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">80</span>, by <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu">evaluate</span><span class="op">(</span><span class="va">reg</span>, <span class="va">times</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Try different evaluation methods</span></span></span>
+<span class="r-in"><span><span class="va">response_fft</span> <span class="op">&lt;-</span> <span class="fu">evaluate</span><span class="op">(</span><span class="va">reg</span>, <span class="va">times</span>, method <span class="op">=</span> <span class="st">"fft"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">response_loop</span> <span class="op">&lt;-</span> <span class="fu">evaluate</span><span class="op">(</span><span class="va">reg</span>, <span class="va">times</span>, method <span class="op">=</span> <span class="st">"loop"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># With higher precision</span></span></span>
+<span class="r-in"><span><span class="va">response_precise</span> <span class="op">&lt;-</span> <span class="fu">evaluate</span><span class="op">(</span><span class="va">reg</span>, <span class="va">times</span>, precision <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
