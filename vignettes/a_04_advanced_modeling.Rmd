@@ -506,7 +506,7 @@ For more complex experimental designs with multiple blocks or runs, `regressor_d
 ```{r regressor_design_demo}
 # Create a sampling frame for 2 blocks of 120 seconds each
 sframe <- sampling_frame(
-  blocklens = c(120, 120),  # Two 2-minute blocks
+  blocklens = c(120, 120),  # Two 4-minute blocks (120 scans each at TR = 2s)
   TR = 2                    # 2-second TR
 )
 print(sframe)
@@ -535,7 +535,7 @@ time_points <- samples(sframe)
 design_plot_df <- as.data.frame(design_mat)
 names(design_plot_df) <- c("Faces", "Houses")
 design_plot_df$Time <- time_points
-design_plot_df$Block <- rep(1:2, each = 60) # 60 scans per block
+design_plot_df$Block <- rep(1:2, each = 120) # 120 scans per block
 
 design_plot_long <- pivot_longer(design_plot_df, c("Faces", "Houses"), 
                                 names_to = "Condition", values_to = "Response")
@@ -543,7 +543,7 @@ design_plot_long <- pivot_longer(design_plot_df, c("Faces", "Houses"),
 # Plot with block separation
 ggplot(design_plot_long, aes(x = Time, y = Response, color = Condition)) +
   geom_line(linewidth = 1) +
-  geom_vline(xintercept = 120, linetype = "dashed", alpha = 0.7) +
+  geom_vline(xintercept = 240, linetype = "dashed", alpha = 0.7) +
   scale_color_viridis_d() +
   labs(title = "Multi-Block Experimental Design",
        subtitle = "Two blocks with different event schedules (dashed line = block boundary)",
@@ -595,7 +595,7 @@ param_plot_long <- pivot_longer(param_plot_df, c("Faces", "Houses"),
 
 ggplot(param_plot_long, aes(x = Time, y = Response, color = Condition)) +
   geom_line(linewidth = 1) +
-  geom_vline(xintercept = 120, linetype = "dashed", alpha = 0.7) +
+  geom_vline(xintercept = 240, linetype = "dashed", alpha = 0.7) +
   scale_color_viridis_d() +
   labs(title = "Parametric Modulation in Block Design",
        subtitle = "Event amplitudes modulated by difficulty ratings",
@@ -651,7 +651,7 @@ complex_long <- pivot_longer(complex_df, -Time, names_to = "Regressor", values_t
 
 ggplot(complex_long, aes(x = Time, y = Response, color = Regressor)) +
   geom_line(linewidth = 0.8, alpha = 0.8) +
-  geom_vline(xintercept = c(180, 360), linetype = "dashed", alpha = 0.5) +
+  geom_vline(xintercept = c(360, 720), linetype = "dashed", alpha = 0.5) +
   scale_color_viridis_d() +
   labs(title = "Complex Design: Multiple Conditions × HRF Library",
        subtitle = "2 conditions × 3 HRF variants shown (6 of 18 total regressors)",
