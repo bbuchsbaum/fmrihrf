@@ -96,7 +96,7 @@ number of basis functions (<code>nbasis</code>), and effective duration
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     ifelse(t &lt; 0, 0, exp(-t) * (A1 * t^P1 - 1.274527e-13 * t^P2))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9cdf7478&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x556041ff8660&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:fmrihrf&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
@@ -124,7 +124,7 @@ number of basis functions (<code>nbasis</code>), and effective duration
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     stats::dnorm(t, mean = mean, sd = sd)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9ce5b470&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604205c658&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:fmrihrf&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
@@ -482,8 +482,8 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9a2a55a8&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9a29fd88&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55603f4a71d8&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55603f4a1cc8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -502,8 +502,8 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9a3920d0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9a382de0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55603f593de0&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55603f580c50&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -544,8 +544,8 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_bs_5_3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9b1204b8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55604031e3d0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -568,8 +568,8 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_bs_10_1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9b34d340&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55604054b610&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -596,8 +596,8 @@ waves of different frequencies.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_sin_5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9bc34fb0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x556040e36be0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -661,8 +661,8 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_gam</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9cc347b8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x556041e32970&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -689,8 +689,8 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_mh</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9d0964f0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5560409fe498&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -718,8 +718,8 @@ rise and fall times.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_il</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c71d600&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9186d940&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55604191e740&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x556036a72158&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -759,8 +759,8 @@ Gaussian HRFs:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9a8f2078&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9a8f6dd0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55603faf4ca0&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55603faf3ed8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -808,8 +808,8 @@ provided points.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">emp_hrf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (v) </span></span>
 <span><span class="co">#&gt; .approxfun(x, y, v, method, yleft, yright, f, na.rm)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9c9118e0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d9c9b3e90&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x556041b12cc0&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x556041bb30e8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -895,8 +895,8 @@ simulated HRFs.</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x564d9a8f2078&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x564d97b240d0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55603faf4ca0&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x55603cd4bba0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
