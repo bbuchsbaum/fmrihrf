@@ -1,5 +1,3 @@
-# ---------------------------------------------------------------------
-# low‑level constructor – never exported
 #' @noRd
 #' @keywords internal
 new_sampling_frame <- function(blocklens, TR, start_time, precision) {
@@ -82,8 +80,7 @@ sampling_frame <- function(blocklens, TR, start_time = TR / 2, precision = .1)
   new_sampling_frame(blocklens, TR, start_time, precision)
 }
 
-# ---------------------------------------------------------------------
-# vectorised helpers (no memoise, no lapply)
+
 #' @method samples sampling_frame
 #' @rdname samples
 #' @export
@@ -158,17 +155,15 @@ print.sampling_frame <- function(x, ...) {
   invisible(x)
 }
 
-#' @method blockids sampling_frame
+
 #' @rdname blockids
 #' @export
 blockids.sampling_frame <- function(x, ...) {
   rep(seq_along(x$blocklens), times = x$blocklens)
 }
 
-#' Get block lengths from a sampling frame
-#'
+
 #' @rdname blocklens
-#' @return Numeric vector giving the number of scans in each block.
 #' @export
 blocklens.sampling_frame <- function(x,...) {
     x$blocklens

@@ -16,8 +16,6 @@ blocklens(x, ...)
 }
 \value{
 Numeric vector of block lengths
-
-Numeric vector giving the number of scans in each block.
 }
 \description{
 Generic accessor returning the number of scans in each block of a
