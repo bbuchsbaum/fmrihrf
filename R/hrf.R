@@ -628,6 +628,7 @@ HRF_SPMG2 <- bind_basis(
   as_hrf(hrf_spmg1_deriv, name="SPMG1_temporal_deriv", params=list(P1=5, P2=15, A1=0.0833))
 )
 attr(HRF_SPMG2, "name") <- "SPMG2"
+class(HRF_SPMG2) <- c("SPMG2_HRF", class(HRF_SPMG2))
 
 #' @rdname HRF_objects
 #' @export
@@ -637,6 +638,7 @@ HRF_SPMG3 <- bind_basis(
   as_hrf(hrf_spmg1_second_deriv, name="SPMG1_dispersion_deriv", params=list(P1=5, P2=15, A1=0.0833))
 )
 attr(HRF_SPMG3, "name") <- "SPMG3"
+class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 
 # Define HRF Generators (Functions returning HRF objects) -----
 #' @keywords internal
@@ -681,35 +683,43 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
     return(res_mat)
   }
 
-  as_hrf(
+  obj <- as_hrf(
     f = f_bspline,
     name = "bspline", nbasis = as.integer(effective_nbasis), span = span,
-    params = list(nbasis = effective_nbasis, degree = degree, span = span) 
+    params = list(nbasis = effective_nbasis, degree = degree, span = span)
   )
+  class(obj) <- c("BSpline_HRF", class(obj))
+  obj
 }
 
 hrf_tent_generator <- function(nbasis=5, span=24) {
-  as_hrf(
-    f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1), # hrf_bspline from hrf-functions.R
+  obj <- as_hrf(
+    f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1),
     name="tent", nbasis=as.integer(nbasis), span=span,
     params=list(N=nbasis, degree=1, span=span)
   )
+  class(obj) <- c("Tent_HRF", class(obj))
+  obj
 }
 
 hrf_fourier_generator <- function(nbasis=5, span=24) {
-  as_hrf(
-    f = function(t) hrf_fourier(t, span=span, nbasis=nbasis), # hrf_fourier from hrf-functions.R
+  obj <- as_hrf(
+    f = function(t) hrf_fourier(t, span=span, nbasis=nbasis),
     name="fourier", nbasis=as.integer(nbasis), span=span,
     params=list(nbasis=nbasis, span=span)
   )
+  class(obj) <- c("Fourier_HRF", class(obj))
+  obj
 }
 
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
-  as_hrf(
-    f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale), # daguerre_basis from hrf-functions.R
-    name="daguerre", nbasis=as.integer(nbasis), span=24, # Default span, daguerre is time-scaled
+  obj <- as_hrf(
+    f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale),
+    name="daguerre", nbasis=as.integer(nbasis), span=24,
     params=list(n_basis=nbasis, scale=scale)
   )
+  class(obj) <- c("Daguerre_HRF", class(obj))
+  obj
 }
 
 hrf_fir_generator <- function(nbasis = 12, span = 24) {
@@ -740,13 +750,15 @@ hrf_fir_generator <- function(nbasis = 12, span = 24) {
     return(output_matrix)
   }
 
-  as_hrf(
+  obj <- as_hrf(
     f = f_fir,
     name = "fir",
     nbasis = nbasis,
     span = span,
     params = list(nbasis = nbasis, span = span, bin_width = bin_width)
   )
+  class(obj) <- c("FIR_HRF", class(obj))
+  obj
 }
 
 # Define HRF Registry -----

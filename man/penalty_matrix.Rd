@@ -3,6 +3,13 @@
 \name{penalty_matrix}
 \alias{penalty_matrix}
 \alias{penalty_matrix.HRF}
+\alias{penalty_matrix.BSpline_HRF}
+\alias{penalty_matrix.Tent_HRF}
+\alias{penalty_matrix.FIR_HRF}
+\alias{penalty_matrix.SPMG2_HRF}
+\alias{penalty_matrix.SPMG3_HRF}
+\alias{penalty_matrix.Fourier_HRF}
+\alias{penalty_matrix.Daguerre_HRF}
 \title{Generate penalty matrix for regularization}
 \usage{
 penalty_matrix(x, ...)
@@ -25,9 +32,10 @@ encodes shape priors that discourage implausible or overly wiggly HRF estimates.
 Different HRF types use different penalty structures:
 
 \itemize{
-  \item{FIR/B-spline bases: Roughness penalties based on discrete derivatives}
+  \item{FIR/B-spline/Tent bases: Roughness penalties based on discrete derivatives}
   \item{SPM canonical + derivatives: Differential shrinkage of derivative terms}
   \item{Fourier bases: Penalties on high-frequency components}
+  \item{Daguerre bases: Increasing weights on higher-order terms}
   \item{Default: Identity matrix (ridge penalty)}
 }
 }
