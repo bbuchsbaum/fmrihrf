@@ -5,7 +5,8 @@ articles:
   a_01_hemodynamic_response: a_01_hemodynamic_response.html
   a_02_regressor: a_02_regressor.html
   a_03_hrf_generators: a_03_hrf_generators.html
-last_built: 2025-06-03T18:13Z
+  a_04_advanced_modeling: a_04_advanced_modeling.html
+last_built: 2025-06-07T11:50Z
 urls:
   reference: https://bbuchsbaum.github.io/fmrihrf/reference
   article: https://bbuchsbaum.github.io/fmrihrf/articles

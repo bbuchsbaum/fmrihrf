@@ -3,18 +3,20 @@
 encodes shape priors that discourage implausible or overly wiggly HRF estimates.
 Different HRF types use different penalty structures:
 
-FIR/B-spline bases: Roughness penalties based on discrete derivatives
+FIR/B-spline/Tent bases: Roughness penalties based on discrete derivatives
 SPM canonical + derivatives: Differential shrinkage of derivative terms
 Fourier bases: Penalties on high-frequency components
+Daguerre bases: Increasing weights on higher-order terms
 Default: Identity matrix (ridge penalty)
 
 "><meta property="og:description" content="Generate a penalty matrix for regularizing HRF basis coefficients. The penalty matrix
 encodes shape priors that discourage implausible or overly wiggly HRF estimates.
 Different HRF types use different penalty structures:
 
-FIR/B-spline bases: Roughness penalties based on discrete derivatives
+FIR/B-spline/Tent bases: Roughness penalties based on discrete derivatives
 SPM canonical + derivatives: Differential shrinkage of derivative terms
 Fourier bases: Penalties on high-frequency components
+Daguerre bases: Increasing weights on higher-order terms
 Default: Identity matrix (ridge penalty)
 
 "></head><body>
@@ -39,6 +41,7 @@ Default: Identity matrix (ridge penalty)
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a_01_hemodynamic_response.html">Hemodynamic Response Functions</a></li>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
+    <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -59,9 +62,10 @@ Default: Identity matrix (ridge penalty)
     <p>Generate a penalty matrix for regularizing HRF basis coefficients. The penalty matrix
 encodes shape priors that discourage implausible or overly wiggly HRF estimates.
 Different HRF types use different penalty structures:</p>
-<ul><li><p>FIR/B-spline bases: Roughness penalties based on discrete derivatives</p></li>
+<ul><li><p>FIR/B-spline/Tent bases: Roughness penalties based on discrete derivatives</p></li>
 <li><p>SPM canonical + derivatives: Differential shrinkage of derivative terms</p></li>
 <li><p>Fourier bases: Penalties on high-frequency components</p></li>
+<li><p>Daguerre bases: Increasing weights on higher-order terms</p></li>
 <li><p>Default: Identity matrix (ridge penalty)</p></li>
 </ul></div>
 
