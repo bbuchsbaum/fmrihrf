@@ -23,7 +23,11 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(Matrix)
-library(viridis)
+if (requireNamespace("viridis", quietly = TRUE)) {
+  library(viridis)
+} else {
+  scale_color_viridis_d <- function(...) ggplot2::scale_color_brewer(palette = "Set1")
+}
 ```
 
 ## Introduction

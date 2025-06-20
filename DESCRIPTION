@@ -34,6 +34,7 @@ Suggests:
     ggplot2,
     dplyr,
     tidyr,
+    viridis,
     scales
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
