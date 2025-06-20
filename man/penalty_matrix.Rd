@@ -15,6 +15,20 @@
 penalty_matrix(x, ...)
 
 \method{penalty_matrix}{HRF}(x, order = 2, ...)
+
+\method{penalty_matrix}{BSpline_HRF}(x, order = 2, ...)
+
+\method{penalty_matrix}{Tent_HRF}(x, order = 2, ...)
+
+\method{penalty_matrix}{FIR_HRF}(x, order = 2, ...)
+
+\method{penalty_matrix}{SPMG2_HRF}(x, order = 2, shrink_deriv = 2, ...)
+
+\method{penalty_matrix}{SPMG3_HRF}(x, order = 2, shrink_deriv = 2, ...)
+
+\method{penalty_matrix}{Fourier_HRF}(x, order = 2, ...)
+
+\method{penalty_matrix}{Daguerre_HRF}(x, order = 2, ...)
 }
 \arguments{
 \item{x}{The HRF object or basis specification}

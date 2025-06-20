@@ -168,3 +168,11 @@ blockids.sampling_frame <- function(x, ...) {
 blocklens.sampling_frame <- function(x,...) {
     x$blocklens
 }
+
+
+#' @rdname acquisition_onsets
+#' @method acquisition_onsets sampling_frame
+#' @export
+acquisition_onsets.sampling_frame <- function(x, ...) {
+  samples(x, global = TRUE)
+}
