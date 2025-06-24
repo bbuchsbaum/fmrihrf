@@ -60,7 +60,30 @@ for creating custom HRFs.
 
 \describe{
   \item{\code{HRF_BSPLINE}}{B-spline basis HRF (5 basis functions)}
-  \item{\code{HRF_FIR}}{Finite Impulse Response (FIR) basis HRF (default 12 basis functions)}
+  \item{\code{HRF_FIR}}{Finite Impulse Response (FIR) basis HRF (12 basis functions)}
+}
+}
+
+\section{Creating Custom Basis Sets}{
+
+The pre-defined objects above have fixed numbers of basis functions. To create
+basis sets with custom parameters (e.g., different numbers of basis functions),
+use one of these approaches:
+
+\strong{Using getHRF():}
+\itemize{
+  \item \code{getHRF("fir", nbasis = 20)} - FIR basis with 20 functions
+  \item \code{getHRF("bspline", nbasis = 10, span = 30)} - B-spline with 10 functions
+  \item \code{getHRF("fourier", nbasis = 7)} - Fourier basis with 7 functions
+  \item \code{getHRF("daguerre", nbasis = 5, scale = 3)} - Daguerre basis
+}
+
+\strong{Using generator functions directly:}
+\itemize{
+  \item \code{hrf_fir_generator(nbasis = 20, span = 30)}
+  \item \code{hrf_bspline_generator(nbasis = 10, span = 30)}
+  \item \code{hrf_fourier_generator(nbasis = 7, span = 24)}
+  \item \code{hrf_daguerre_generator(nbasis = 5, scale = 3)}
 }
 }
 
@@ -99,10 +122,25 @@ lines(times, gaussian_response, col = "green")
 legend("topright", c("SPM Canonical", "Gamma", "Gaussian"), 
        col = c("blue", "red", "green"), lty = 1)
 
+# Create custom FIR basis with 20 bins
+custom_fir <- getHRF("fir", nbasis = 20, span = 30)
+fir_response <- evaluate(custom_fir, times)
+matplot(times, fir_response, type = "l", main = "Custom FIR with 20 bins")
+
+# Create custom B-spline basis  
+custom_bspline <- hrf_bspline_generator(nbasis = 8, span = 25)
+bspline_response <- evaluate(custom_bspline, times)
+matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basis functions")
 
 }
 \seealso{
-\code{\link{evaluate.HRF}}, \code{\link{gen_hrf}}, \code{\link{list_available_hrfs}}
+\code{\link{evaluate.HRF}} for evaluating HRF objects,
+\code{\link{gen_hrf}} for creating HRFs with decorators,
+\code{\link{list_available_hrfs}} for listing all HRF types,
+\code{\link{getHRF}} for creating HRFs by name with custom parameters,
+\code{\link{hrf_fir_generator}}, \code{\link{hrf_bspline_generator}}, 
+\code{\link{hrf_fourier_generator}}, \code{\link{hrf_daguerre_generator}} 
+for creating custom basis sets directly
 
 Other hrf: 
 \code{\link{penalty_matrix}()}

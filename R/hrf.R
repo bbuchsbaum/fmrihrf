@@ -556,7 +556,28 @@ list_available_hrfs <- function(details = FALSE) {
 #' @section Flexible Basis Sets:
 #' \describe{
 #'   \item{\code{HRF_BSPLINE}}{B-spline basis HRF (5 basis functions)}
-#'   \item{\code{HRF_FIR}}{Finite Impulse Response (FIR) basis HRF (default 12 basis functions)}
+#'   \item{\code{HRF_FIR}}{Finite Impulse Response (FIR) basis HRF (12 basis functions)}
+#' }
+#' 
+#' @section Creating Custom Basis Sets:
+#' The pre-defined objects above have fixed numbers of basis functions. To create
+#' basis sets with custom parameters (e.g., different numbers of basis functions),
+#' use one of these approaches:
+#' 
+#' \strong{Using getHRF():}
+#' \itemize{
+#'   \item \code{getHRF("fir", nbasis = 20)} - FIR basis with 20 functions
+#'   \item \code{getHRF("bspline", nbasis = 10, span = 30)} - B-spline with 10 functions
+#'   \item \code{getHRF("fourier", nbasis = 7)} - Fourier basis with 7 functions
+#'   \item \code{getHRF("daguerre", nbasis = 5, scale = 3)} - Daguerre basis
+#' }
+#' 
+#' \strong{Using generator functions directly:}
+#' \itemize{
+#'   \item \code{hrf_fir_generator(nbasis = 20, span = 30)}
+#'   \item \code{hrf_bspline_generator(nbasis = 10, span = 30)}
+#'   \item \code{hrf_fourier_generator(nbasis = 7, span = 24)}
+#'   \item \code{hrf_daguerre_generator(nbasis = 5, scale = 3)}
 #' }
 #' 
 #' @section Usage:
@@ -602,11 +623,27 @@ list_available_hrfs <- function(details = FALSE) {
 #' legend("topright", c("SPM Canonical", "Gamma", "Gaussian"), 
 #'        col = c("blue", "red", "green"), lty = 1)
 #' 
+#' # Create custom FIR basis with 20 bins
+#' custom_fir <- getHRF("fir", nbasis = 20, span = 30)
+#' fir_response <- evaluate(custom_fir, times)
+#' matplot(times, fir_response, type = "l", main = "Custom FIR with 20 bins")
+#' 
+#' # Create custom B-spline basis  
+#' custom_bspline <- hrf_bspline_generator(nbasis = 8, span = 25)
+#' bspline_response <- evaluate(custom_bspline, times)
+#' matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basis functions")
 #' 
 #' @name HRF_objects
 #' @aliases HRF_SPMG1 HRF_SPMG2 HRF_SPMG3 HRF_GAMMA HRF_GAUSSIAN HRF_BSPLINE HRF_FIR
 #' @family hrf
-#' @seealso \code{\link{evaluate.HRF}}, \code{\link{gen_hrf}}, \code{\link{list_available_hrfs}}
+#' @seealso 
+#' \code{\link{evaluate.HRF}} for evaluating HRF objects,
+#' \code{\link{gen_hrf}} for creating HRFs with decorators,
+#' \code{\link{list_available_hrfs}} for listing all HRF types,
+#' \code{\link{getHRF}} for creating HRFs by name with custom parameters,
+#' \code{\link{hrf_fir_generator}}, \code{\link{hrf_bspline_generator}}, 
+#' \code{\link{hrf_fourier_generator}}, \code{\link{hrf_daguerre_generator}} 
+#' for creating custom basis sets directly
 NULL
 
 #' @rdname HRF_objects
@@ -641,7 +678,25 @@ attr(HRF_SPMG3, "name") <- "SPMG3"
 class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 
 # Define HRF Generators (Functions returning HRF objects) -----
-#' @keywords internal
+
+#' Create B-spline HRF Basis Set
+#'
+#' Generates an HRF object using B-spline basis functions with custom parameters.
+#' This is the generator function that creates HRF objects with variable numbers
+#' of basis functions, unlike the pre-defined \code{HRF_BSPLINE} which has 5 functions.
+#'
+#' @param nbasis Number of basis functions (default: 5)
+#' @param span Temporal window in seconds (default: 24)
+#' @return An HRF object of class \code{c("BSpline_HRF", "HRF", "function")}
+#' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
+#'   \code{\link{getHRF}} for a unified interface to create HRFs
+#' @examples
+#' # Create B-spline basis with 10 functions
+#' custom_bs <- hrf_bspline_generator(nbasis = 10)
+#' t <- seq(0, 24, by = 0.1)
+#' response <- evaluate(custom_bs, t)
+#' matplot(t, response, type = "l", main = "B-spline HRF with 10 basis functions")
+#' @export
 hrf_bspline_generator <- function(nbasis=5, span=24) {
   # Validate inputs
   if (nbasis < 1) {
@@ -702,6 +757,27 @@ hrf_tent_generator <- function(nbasis=5, span=24) {
   obj
 }
 
+#' Create Fourier HRF Basis Set
+#'
+#' Generates an HRF object using Fourier basis functions (sine and cosine pairs)
+#' with custom parameters.
+#'
+#' @param nbasis Number of basis functions (default: 5). Should be even for complete sine-cosine pairs.
+#' @param span Temporal window in seconds (default: 24)
+#' @return An HRF object of class \code{c("Fourier_HRF", "HRF", "function")}
+#' @details 
+#' The Fourier basis uses alternating sine and cosine functions with increasing
+#' frequencies. This provides a smooth, periodic basis set that can capture
+#' oscillatory components in the HRF.
+#' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
+#'   \code{\link{getHRF}} for a unified interface to create HRFs
+#' @examples
+#' # Create Fourier basis with 8 functions
+#' custom_fourier <- hrf_fourier_generator(nbasis = 8)
+#' t <- seq(0, 24, by = 0.1)
+#' response <- evaluate(custom_fourier, t)
+#' matplot(t, response, type = "l", main = "Fourier HRF with 8 basis functions")
+#' @export
 hrf_fourier_generator <- function(nbasis=5, span=24) {
   obj <- as_hrf(
     f = function(t) hrf_fourier(t, span=span, nbasis=nbasis),
@@ -712,6 +788,28 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
   obj
 }
 
+#' Create Daguerre HRF Basis Set
+#'
+#' Generates an HRF object using Daguerre spherical basis functions with custom parameters.
+#' These are orthogonal polynomials that naturally decay to zero.
+#'
+#' @param nbasis Number of basis functions (default: 3)
+#' @param scale Scale parameter for the time axis (default: 4)
+#' @return An HRF object of class \code{c("Daguerre_HRF", "HRF", "function")}
+#' @details 
+#' Daguerre basis functions are orthogonal polynomials on [0,∞) with respect
+#' to the weight function w(x) = x^2 * exp(-x). They are particularly useful
+#' for modeling hemodynamic responses as they naturally decay to zero and can
+#' capture various response shapes with few parameters.
+#' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
+#'   \code{\link{getHRF}} for a unified interface to create HRFs
+#' @examples
+#' # Create Daguerre basis with 5 functions
+#' custom_dag <- hrf_daguerre_generator(nbasis = 5, scale = 3)
+#' t <- seq(0, 24, by = 0.1)
+#' response <- evaluate(custom_dag, t)
+#' matplot(t, response, type = "l", main = "Daguerre HRF with 5 basis functions")
+#' @export
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
   obj <- as_hrf(
     f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale),
@@ -722,6 +820,36 @@ hrf_daguerre_generator <- function(nbasis=3, scale=4) {
   obj
 }
 
+#' Create FIR HRF Basis Set
+#'
+#' Generates an HRF object using Finite Impulse Response (FIR) basis functions
+#' with custom parameters. Each basis function represents a time bin with a
+#' value of 1 in that bin and 0 elsewhere.
+#'
+#' @param nbasis Number of time bins (default: 12)
+#' @param span Temporal window in seconds (default: 24)
+#' @return An HRF object of class \code{c("FIR_HRF", "HRF", "function")}
+#' @details 
+#' The FIR basis divides the time window into \code{nbasis} equal bins.
+#' Each basis function is an indicator function for its corresponding bin.
+#' This provides maximum flexibility but requires more parameters than
+#' smoother basis sets like B-splines.
+#' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
+#'   \code{\link{getHRF}} for a unified interface to create HRFs,
+#'   \code{\link{hrf_bspline_generator}} for a smoother alternative
+#' @examples
+#' # Create FIR basis with 20 bins over 30 seconds
+#' custom_fir <- hrf_fir_generator(nbasis = 20, span = 30)
+#' t <- seq(0, 30, by = 0.1)
+#' response <- evaluate(custom_fir, t)
+#' matplot(t, response, type = "l", main = "FIR HRF with 20 time bins")
+#' 
+#' # Compare to default FIR with 12 bins
+#' default_fir <- HRF_FIR
+#' response_default <- evaluate(default_fir, t[1:241])  # 24 seconds
+#' matplot(t[1:241], response_default, type = "l", 
+#'         main = "Default FIR HRF (12 bins over 24s)")
+#' @export
 hrf_fir_generator <- function(nbasis = 12, span = 24) {
   assertthat::assert_that(
     is.numeric(nbasis) && length(nbasis) == 1 && nbasis >= 1,
@@ -783,14 +911,47 @@ HRF_REGISTRY$bs  <- HRF_REGISTRY$bspline
 
 # getHRF function using the registry (Minimal Version) -----
 
-#' getHRF
+#' Get HRF by Name
 #'
-#' Retrieves an HRF by name from the registry and applies decorators.
+#' Retrieves an HRF by name from the registry and optionally applies decorators.
+#' This provides a unified interface for creating both pre-defined HRF objects
+#' and custom basis sets with specified parameters.
 #'
-#' @param ... Additional arguments passed to generator functions (e.g., `scale` for daguerre).
-#' @return An HRF object.
-#' @keywords internal
-#' @noRd
+#' @param name Character string specifying the HRF type. Options include:
+#'   \itemize{
+#'     \item \code{"spmg1"}, \code{"spmg2"}, \code{"spmg3"} - SPM canonical HRFs
+#'     \item \code{"gamma"}, \code{"gaussian"} - Simple parametric HRFs
+#'     \item \code{"fir"} - Finite Impulse Response basis
+#'     \item \code{"bspline"} or \code{"bs"} - B-spline basis
+#'     \item \code{"fourier"} - Fourier basis
+#'     \item \code{"daguerre"} - Daguerre spherical basis
+#'     \item \code{"tent"} - Tent (linear spline) basis
+#'   }
+#' @param nbasis Number of basis functions (for basis set types)
+#' @param span Temporal window in seconds (default: 24)
+#' @param lag Time lag in seconds to apply (default: 0)
+#' @param width Block width for block designs (default: 0)
+#' @param summate Whether to sum responses in block designs (default: TRUE)
+#' @param normalize Whether to normalize the HRF (default: FALSE)
+#' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre)
+#' @return An HRF object
+#' @details
+#' For single HRF types (spmg1, gamma, gaussian), the function returns
+#' pre-defined objects. For basis set types (fir, bspline, fourier, daguerre),
+#' it calls the appropriate generator function with the specified parameters.
+#' @examples
+#' # Get pre-defined canonical HRF
+#' canonical <- getHRF("spmg1")
+#' 
+#' # Create custom FIR basis with 20 bins
+#' fir20 <- getHRF("fir", nbasis = 20, span = 30)
+#' 
+#' # Create B-spline basis with lag
+#' bs_lag <- getHRF("bspline", nbasis = 8, lag = 2)
+#' 
+#' # Create blocked Gaussian HRF
+#' block_gauss <- getHRF("gaussian", width = 5)
+#' @export
 getHRF <- function(name = "spmg1", # Default to spmg1
                    nbasis=5, span=24,
                    lag=0, width=0,
