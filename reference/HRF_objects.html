@@ -123,10 +123,26 @@ When used as objects, they are HRF objects with class <code>c("HRF", "function")
 <dd><p>B-spline basis HRF (5 basis functions)</p></dd>
 
   <dt><code>HRF_FIR</code></dt>
-<dd><p>Finite Impulse Response (FIR) basis HRF (default 12 basis functions)</p></dd>
+<dd><p>Finite Impulse Response (FIR) basis HRF (12 basis functions)</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="creating-custom-basis-sets">Creating Custom Basis Sets<a class="anchor" aria-label="anchor" href="#creating-custom-basis-sets"></a></h2>
+
+
+<p>The pre-defined objects above have fixed numbers of basis functions. To create
+basis sets with custom parameters (e.g., different numbers of basis functions),
+use one of these approaches:</p>
+<p><strong>Using getHRF():</strong></p><ul><li><p><code>getHRF("fir", nbasis = 20)</code> - FIR basis with 20 functions</p></li>
+<li><p><code>getHRF("bspline", nbasis = 10, span = 30)</code> - B-spline with 10 functions</p></li>
+<li><p><code>getHRF("fourier", nbasis = 7)</code> - Fourier basis with 7 functions</p></li>
+<li><p><code>getHRF("daguerre", nbasis = 5, scale = 3)</code> - Daguerre basis</p></li>
+</ul><p><strong>Using generator functions directly:</strong></p><ul><li><p><code>hrf_fir_generator(nbasis = 20, span = 30)</code></p></li>
+<li><p><code>hrf_bspline_generator(nbasis = 10, span = 30)</code></p></li>
+<li><p><code>hrf_fourier_generator(nbasis = 7, span = 24)</code></p></li>
+<li><p><code>hrf_daguerre_generator(nbasis = 5, scale = 3)</code></p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h2>
 
@@ -138,7 +154,13 @@ When used as objects, they are HRF objects with class <code>c("HRF", "function")
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="evaluate.HRF.html">evaluate.HRF</a></code>, <code><a href="gen_hrf.html">gen_hrf</a></code>, <code><a href="list_available_hrfs.html">list_available_hrfs</a></code></p>
+    <div class="dont-index"><p><code><a href="evaluate.HRF.html">evaluate.HRF</a></code> for evaluating HRF objects,
+<code><a href="gen_hrf.html">gen_hrf</a></code> for creating HRFs with decorators,
+<code><a href="list_available_hrfs.html">list_available_hrfs</a></code> for listing all HRF types,
+<code><a href="getHRF.html">getHRF</a></code> for creating HRFs by name with custom parameters,
+<code><a href="hrf_fir_generator.html">hrf_fir_generator</a></code>, <code><a href="hrf_bspline_generator.html">hrf_bspline_generator</a></code>,
+<code><a href="hrf_fourier_generator.html">hrf_fourier_generator</a></code>, <code><a href="hrf_daguerre_generator.html">hrf_daguerre_generator</a></code>
+for creating custom basis sets directly</p>
 <p>Other hrf:
 <code><a href="penalty_matrix.html">penalty_matrix</a>()</code></p></div>
     </div>
@@ -171,6 +193,17 @@ When used as objects, they are HRF objects with class <code>c("HRF", "function")
 <span class="r-in"><span>       col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HRF_objects-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create custom FIR basis with 20 bins</span></span></span>
+<span class="r-in"><span><span class="va">custom_fir</span> <span class="op">&lt;-</span> <span class="fu"><a href="getHRF.html">getHRF</a></span><span class="op">(</span><span class="st">"fir"</span>, nbasis <span class="op">=</span> <span class="fl">20</span>, span <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fir_response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">custom_fir</span>, <span class="va">times</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">times</span>, <span class="va">fir_response</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Custom FIR with 20 bins"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="HRF_objects-4.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create custom B-spline basis  </span></span></span>
+<span class="r-in"><span><span class="va">custom_bspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_bspline_generator.html">hrf_bspline_generator</a></span><span class="op">(</span>nbasis <span class="op">=</span> <span class="fl">8</span>, span <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">bspline_response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">custom_bspline</span>, <span class="va">times</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">times</span>, <span class="va">bspline_response</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Custom B-spline with 8 basis functions"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="HRF_objects-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
