@@ -9,3 +9,6 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.claude$
+^CRAN_prompt\.md$
+^repomix-output\.xml$

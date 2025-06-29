@@ -25,13 +25,10 @@ A combined HRF object representing the library.
 \examples{
 # Create library of gamma HRFs with varying parameters
 param_grid <- expand.grid(
-  shape = c(6, 8, 10),
-  rate = c(0.9, 1, 1.1)
+  alpha = c(6, 8, 10),
+  beta = c(0.9, 1, 1.1)
 )
-gamma_library <- hrf_library(
-  function(shape, rate) as_hrf(hrf_gamma, params = list(shape = shape, rate = rate)),
-  param_grid
-)
+gamma_library <- hrf_library(hrf_gamma, param_grid)
 
 # Create library with fixed and varying parameters
 param_grid2 <- expand.grid(lag = c(0, 2, 4))

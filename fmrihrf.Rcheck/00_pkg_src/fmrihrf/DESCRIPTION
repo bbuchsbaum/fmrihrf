@@ -10,30 +10,16 @@ Description: Provides tools for creating, manipulating, and evaluating
     regressors with HRFs.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.2.9000
-Imports:
-    Rcpp,
-    assertthat,
-    purrr,
-    stats,
-    Matrix,
-    cli,
-    memoise,
-    numDeriv,
-    splines,
-    pracma
+Imports: Rcpp, assertthat, purrr, stats, Matrix, cli, memoise,
+        numDeriv, rlang, splines, pracma
 LinkingTo: Rcpp, RcppArmadillo
-Depends:
-    R (>= 3.5.0)
-Suggests:
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown,
-    ggplot2,
-    dplyr,
-    tidyr,
-    viridis,
-    scales
+Depends: R (>= 3.5.0)
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, ggplot2, dplyr, tidyr,
+        scales
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
+NeedsCompilation: yes
+Packaged: 2025-06-03 02:55:52 UTC; bbuchsbaum
+Author: Bradley Buchsbaum [aut, cre]
+Maintainer: Bradley Buchsbaum <brad.buchsbaum@gmail.com>

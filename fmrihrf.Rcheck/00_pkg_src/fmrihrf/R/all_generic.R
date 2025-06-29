@@ -141,16 +141,14 @@ nbasis <- function(x, ...) UseMethod("nbasis")
 #' Different HRF types use different penalty structures:
 #' 
 #' \itemize{
-#'   \item{FIR/B-spline/Tent bases: Roughness penalties based on discrete derivatives}
+#'   \item{FIR/B-spline bases: Roughness penalties based on discrete derivatives}
 #'   \item{SPM canonical + derivatives: Differential shrinkage of derivative terms}
 #'   \item{Fourier bases: Penalties on high-frequency components}
-#'   \item{Daguerre bases: Increasing weights on higher-order terms}
 #'   \item{Default: Identity matrix (ridge penalty)}
 #' }
 #'
 #' @param x The HRF object or basis specification
 #' @param order Integer specifying the order of the penalty (default: 2)
-#' @param shrink_deriv Numeric; penalty weight for derivative terms in SPMG2/SPMG3 bases (default: 2)
 #' @param ... Additional arguments passed to specific methods
 #' @return A symmetric positive definite penalty matrix of dimension nbasis(x) × nbasis(x)
 #' @details
@@ -184,6 +182,14 @@ penalty_matrix <- function(x, ...) UseMethod("penalty_matrix")
 #' This is useful for turning estimated basis coefficients into a single
 #' functional HRF.
 #'
+#' @param hrf An object of class `HRF`.
+#' @param h   Numeric vector of length `nbasis(hrf)` giving the weights.
+#' @param name Optional name for the resulting HRF.
+#' @param ... Additional arguments passed to methods.
+#'
+#' @return A new `HRF` object with `nbasis = 1`.
+#' @export
+hrf_from_coefficients <- function(hrf, h, ...) { UseMethod("hrf_from_coefficients") }
 
 
 #' Reconstruction matrix for an HRF basis
@@ -273,49 +279,6 @@ blockids <- function(x, ...) UseMethod("blockids")
 #' @export
 blocklens <- function(x, ...) UseMethod("blocklens")
 
-#' Get fMRI Acquisition Onset Times
-#'
-#' Calculate the onset time in seconds for each fMRI volume acquisition
-#' from the start of the experiment.
-#'
-#' @param x A sampling_frame object
-#' @param ... Additional arguments (for extensibility)
-#' @return Numeric vector of acquisition onset times in seconds
-#' @details
-#' Returns the temporal onset of each brain volume acquisition, accounting
-#' for TR, start_time, and run structure. This is essentially a convenience
-#' wrapper around \code{samples(x, global = TRUE)} that provides clearer
-#' semantic meaning for the common use case of getting acquisition times.
-#' 
-#' Note: The onset times include the start_time offset (default TR/2),
-#' so the first acquisition typically doesn't start at 0.
-#' 
-#' @seealso \code{\link{samples}} for more flexible timing queries
-#' @export
-#' @examples
-#' # Single block with default start_time (TR/2 = 1)
-#' sf <- sampling_frame(blocklens = 100, TR = 2)
-#' onsets <- acquisition_onsets(sf)
-#' head(onsets)  # Returns: 1, 3, 5, 7, 9, 11, ...
-#' 
-#' # Multiple blocks with same TR
-#' sf2 <- sampling_frame(blocklens = c(100, 120), TR = 2)
-#' onsets2 <- acquisition_onsets(sf2)
-#' # First block: 1, 3, 5, ..., 199
-#' # Second block: 201, 203, 205, ..., 439
-#' 
-#' # Variable TR per block
-#' sf3 <- sampling_frame(blocklens = c(100, 100), TR = c(2, 1.5))
-#' onsets3 <- acquisition_onsets(sf3)
-#' # First block: 1, 3, 5, ..., 199 (TR=2)
-#' # Second block: 200.75, 202.25, 203.75, ... (TR=1.5, start_time=0.75)
-#' 
-#' # Custom start times
-#' sf4 <- sampling_frame(blocklens = c(50, 50), TR = 2, start_time = 0)
-#' onsets4 <- acquisition_onsets(sf4)
-#' head(onsets4)  # Returns: 0, 2, 4, 6, 8, 10, ...
-acquisition_onsets <- function(x, ...) UseMethod("acquisition_onsets")
-
 
 
 
@@ -384,56 +347,3 @@ acquisition_onsets <- function(x, ...) UseMethod("acquisition_onsets")
 #' @export
 neural_input <- function(x, ...) UseMethod("neural_input")
 
-
-#' Compute derivatives of HRF functions
-#'
-#' @description
-#' Calculates the derivative of a Hemodynamic Response Function (HRF) at
-#' specified time points. This is useful for:
-#' \itemize{
-#'   \item{Understanding HRF dynamics and rate of change}
-#'   \item{Creating temporal derivative regressors for fMRI models}
-#'   \item{Analyzing HRF shape characteristics}
-#'   \item{Implementing advanced HRF basis sets}
-#' }
-#'
-#' @param x An HRF object
-#' @param t Numeric vector of time points at which to evaluate the derivative
-#' @param ... Additional arguments passed to specific methods
-#'
-#' @return Numeric vector or matrix of derivative values at the specified time
-#'   points. For multi-basis HRFs, returns a matrix with one column per basis
-#'   function.
-#'
-#' @details
-#' The derivative computation method depends on the HRF type:
-#' \itemize{
-#'   \item{Analytic derivatives are used when available (e.g., SPMG1, SPMG2,
-#'     SPMG3)}
-#'   \item{Numeric finite-difference approximation is used as fallback}
-#' }
-#'
-#' The default implementation uses \code{numDeriv::grad} for numerical
-#' differentiation when analytic derivatives are not available.
-#'
-#' @examples
-#' # Compute derivative of SPM canonical HRF
-#' t <- seq(0, 20, by = 0.1)
-#' hrf_deriv <- deriv(HRF_SPMG1, t)
-#'
-#' # Plot HRF and its derivative
-#' hrf_vals <- evaluate(HRF_SPMG1, t)
-#' plot(t, hrf_vals, type = "l", col = "black",
-#'      ylab = "Response", xlab = "Time (s)")
-#' lines(t, hrf_deriv, col = "red", lty = 2)
-#' legend("topright", c("HRF", "Derivative"),
-#'        col = c("black", "red"), lty = c(1, 2))
-#'
-#' # For multi-basis HRFs, returns matrix
-#' deriv_matrix <- deriv(HRF_SPMG3, t)
-#' # Returns derivatives for all 3 basis functions
-#'
-#' @export
-#' @family hrf
-#' @seealso [evaluate()], [HRF_objects], [numDeriv::grad()]
-deriv <- function(x, t, ...) UseMethod("deriv")
