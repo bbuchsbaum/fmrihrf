@@ -34,6 +34,7 @@ Suggests:
     dplyr,
     tidyr,
     viridis,
-    scales
+    scales,
+    microbenchmark
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
