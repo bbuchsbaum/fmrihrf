@@ -79,6 +79,7 @@ R_spmg3 <- penalty_matrix(spmg3_hrf, shrink_deriv = 4)
 [nbasis()], [HRF_objects]
 
 Other hrf: 
-\code{\link{HRF_objects}}
+\code{\link{HRF_objects}},
+\code{\link{deriv}()}
 }
 \concept{hrf}

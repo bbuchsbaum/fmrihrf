@@ -143,6 +143,7 @@ matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basi
 for creating custom basis sets directly
 
 Other hrf: 
+\code{\link{deriv}()},
 \code{\link{penalty_matrix}()}
 }
 \concept{hrf}
