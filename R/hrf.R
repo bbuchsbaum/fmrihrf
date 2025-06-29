@@ -252,10 +252,13 @@ gen_hrf_set <- function(...) {
 #' @examples
 #' # Create library of gamma HRFs with varying parameters
 #' param_grid <- expand.grid(
-#'   alpha = c(6, 8, 10),
-#'   beta = c(0.9, 1, 1.1)
+#'   shape = c(6, 8, 10),
+#'   rate = c(0.9, 1, 1.1)
 #' )
-#' gamma_library <- hrf_library(hrf_gamma, param_grid)
+#' gamma_library <- hrf_library(
+#'   function(shape, rate) as_hrf(hrf_gamma, params = list(shape = shape, rate = rate)),
+#'   param_grid
+#' )
 #' 
 #' # Create library with fixed and varying parameters
 #' param_grid2 <- expand.grid(lag = c(0, 2, 4))
@@ -903,11 +906,11 @@ HRF_REGISTRY <- list(
   fourier  = hrf_fourier_generator,
   daguerre = hrf_daguerre_generator,
   fir      = hrf_fir_generator,
-  lwu      = hrf_lwu 
+  lwu      = hrf_lwu,
+  # Aliases
+  gam      = HRF_GAMMA,
+  bs       = hrf_bspline_generator
 )
-
-HRF_REGISTRY$gam <- HRF_REGISTRY$gamma
-HRF_REGISTRY$bs  <- HRF_REGISTRY$bspline
 
 # getHRF function using the registry (Minimal Version) -----
 
@@ -1079,6 +1082,31 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
       }
   } else {
     out
+  }
+}
+
+#' Plot an HRF Object
+#'
+#' @param x An HRF object
+#' @param ... Additional arguments passed to plotting functions
+#' @method plot HRF
+#' @export
+plot.HRF <- function(x, ...) {
+  t <- seq(0, attr(x, "span"), by = 0.1)
+  y <- evaluate(x, t)
+  
+  if (is.matrix(y)) {
+    graphics::matplot(t, y, type = "l", xlab = "Time (s)", ylab = "Response", 
+                      main = attr(x, "name"), ...)
+    # Simple legend
+    graphics::legend("topright", paste("Basis", 1:ncol(y)), lty = 1)
+  } else {
+    graphics::plot(t, y, type = "l", xlab = "Time (s)", ylab = "Response", 
+                   main = attr(x, "name"), ...)
+    peak_idx <- which.max(y)
+    graphics::points(t[peak_idx], y[peak_idx], pch = 19, col = "red")
+    graphics::text(t[peak_idx], y[peak_idx], sprintf("Peak: %.1fs", t[peak_idx]), 
+                   pos = 3, offset = 0.5)
   }
 }
 
