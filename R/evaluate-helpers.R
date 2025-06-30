@@ -13,7 +13,7 @@
     }
     times <- seq(0, span, by = dt)
     # Evaluate HRF - ensure it returns a matrix
-    val <- evaluate(hrf, times)
+    val <- fmrihrf::evaluate(hrf, times)
     if (is.vector(val)) matrix(val, ncol = 1) else val
   }
 )
