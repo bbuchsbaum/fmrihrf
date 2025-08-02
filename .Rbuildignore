@@ -12,3 +12,7 @@
 ^\.claude$
 ^CRAN_prompt\.md$
 ^repomix-output\.xml$
+^doc$
+^Meta$
+^golden_tests$
+^dashboard_output$

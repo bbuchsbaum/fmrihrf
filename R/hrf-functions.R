@@ -361,7 +361,7 @@ hrf_toeplitz <- function(hrf, time, len, sparse=FALSE) {
 #' 
 #' @description
 #' Creates a set of Daguerre spherical basis functions. These are orthogonal 
-#' polynomials on [0,∞) with respect to the weight function w(x) = x^2 * exp(-x).
+#' polynomials on [0,Inf) with respect to the weight function w(x) = x^2 * exp(-x).
 #' They are particularly useful for modeling hemodynamic responses as they naturally
 #' decay to zero and can capture various response shapes.
 #'

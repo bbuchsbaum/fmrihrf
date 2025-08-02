@@ -800,7 +800,7 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
 #' @param scale Scale parameter for the time axis (default: 4)
 #' @return An HRF object of class \code{c("Daguerre_HRF", "HRF", "function")}
 #' @details 
-#' Daguerre basis functions are orthogonal polynomials on [0,∞) with respect
+#' Daguerre basis functions are orthogonal polynomials on [0,Inf) with respect
 #' to the weight function w(x) = x^2 * exp(-x). They are particularly useful
 #' for modeling hemodynamic responses as they naturally decay to zero and can
 #' capture various response shapes with few parameters.
