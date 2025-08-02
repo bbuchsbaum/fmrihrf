@@ -27,7 +27,6 @@
 #' response <- evaluate(reg, times)
 #' 
 #' # Try different evaluation methods
-#' response_fft <- evaluate(reg, times, method = "fft")
 #' response_loop <- evaluate(reg, times, method = "loop")
 #' 
 #' # With higher precision

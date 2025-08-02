@@ -1,4 +1,5 @@
 #define ARMA_DONT_PRINT_FAST_MATH_WARNING
+#define ARMA_DONT_USE_WRAPPER
 #include <RcppArmadillo.h>
 // #include <RcppParallel.h> // REMOVED
 #include <unordered_map>

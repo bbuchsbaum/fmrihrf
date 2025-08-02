@@ -1,13 +1,13 @@
 Package: fmrihrf
 Type: Package
-Title: fMRI Hemodynamic Response Function (HRF) and Regressor Tools
+Title: Hemodynamic Response Function Modeling for Functional Magnetic Resonance Imaging
 Version: 0.1.0
 Authors@R: person("Bradley", "Buchsbaum", email = "brad.buchsbaum@gmail.com", role = c("aut", "cre"))
-Description: Provides tools for creating, manipulating, and evaluating
-    Hemodynamic Response Functions (HRFs) and event-related regressors
-    for fMRI data analysis. Includes functions for generating various HRF
-    basis sets, applying decorators (e.g., lag, block), and convolving
-    regressors with HRFs.
+Description: Creates, manipulates, and evaluates hemodynamic response functions
+    and event-related regressors for functional magnetic resonance imaging data
+    analysis. Supports multiple basis sets including SPM canonical, gamma, Gaussian,
+    B-spline, and Fourier bases. Features decorators for time-shifting and blocking,
+    and efficient convolution algorithms for regressor construction.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -24,6 +24,7 @@ Imports:
     splines,
     pracma
 LinkingTo: Rcpp, RcppArmadillo
+SystemRequirements: C++17
 Depends:
     R (>= 3.5.0)
 Suggests:
