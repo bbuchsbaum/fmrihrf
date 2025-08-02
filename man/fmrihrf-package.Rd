@@ -4,9 +4,9 @@
 \name{fmrihrf-package}
 \alias{fmrihrf}
 \alias{fmrihrf-package}
-\title{fmrihrf: fMRI Hemodynamic Response Function (HRF) and Regressor Tools}
+\title{fmrihrf: Hemodynamic Response Function Modeling for Functional Magnetic Resonance Imaging}
 \description{
-Provides tools for creating, manipulating, and evaluating Hemodynamic Response Functions (HRFs) and event-related regressors for fMRI data analysis. Includes functions for generating various HRF basis sets, applying decorators (e.g., lag, block), and convolving regressors with HRFs.
+Creates, manipulates, and evaluates hemodynamic response functions and event-related regressors for functional magnetic resonance imaging data analysis. Supports multiple basis sets including SPM canonical, gamma, Gaussian, B-spline, and Fourier bases. Features decorators for time-shifting and blocking, and efficient convolution algorithms for regressor construction.
 }
 \details{
 The fmrihrf package provides tools for creating, manipulating, and evaluating
@@ -17,6 +17,7 @@ for fMRI data analysis.
 Useful links:
 \itemize{
   \item \url{https://bbuchsbaum.github.io/fmrihrf/}
+  \item Report bugs at \url{https://github.com/bbuchsbaum/fmrihrf/issues}
 }
 
 }

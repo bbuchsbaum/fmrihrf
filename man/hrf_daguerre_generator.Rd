@@ -19,7 +19,7 @@ Generates an HRF object using Daguerre spherical basis functions with custom par
 These are orthogonal polynomials that naturally decay to zero.
 }
 \details{
-Daguerre basis functions are orthogonal polynomials on [0,∞) with respect
+Daguerre basis functions are orthogonal polynomials on [0,Inf) with respect
 to the weight function w(x) = x^2 * exp(-x). They are particularly useful
 for modeling hemodynamic responses as they naturally decay to zero and can
 capture various response shapes with few parameters.

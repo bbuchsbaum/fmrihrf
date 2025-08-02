@@ -56,8 +56,8 @@ Different HRF types use different penalty structures:
 }
 }
 \details{
-The penalty matrix R is used in regularized estimation as λ * h^T R h, where h are
-the basis coefficients and λ is the regularization parameter. Well-designed penalty
+The penalty matrix R is used in regularized estimation as lambda * h^T R h, where h are
+the basis coefficients and lambda is the regularization parameter. Well-designed penalty
 matrices can significantly improve HRF estimation by encoding smoothness or other
 shape constraints.
 }

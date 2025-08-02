@@ -26,12 +26,12 @@ evaluate(x, grid, ...)
 \item{precision}{Numeric sampling precision for internal HRF evaluation and convolution (seconds).}
 
 \item{method}{The evaluation method: 
-\itemize{
-  \item{"conv"}{ (Default) Uses the C++ direct convolution (`evaluate_regressor_convolution`). Generally safer and more predictable.}
-  \item{"fft"}{ Uses the fast C++ FFT convolution (`evaluate_regressor_fast`). Can be faster but may fail with very fine precision or wide grids.  
+\describe{
+  \item{conv}{(Default) Uses the C++ direct convolution (`evaluate_regressor_convolution`). Generally safer and more predictable.}
+  \item{fft}{Uses the fast C++ FFT convolution (`evaluate_regressor_fast`). Can be faster but may fail with very fine precision or wide grids.  
     Extremely fine `precision` or wide `grid` ranges may trigger an internal FFT size exceeding ~1e7, which results in an error.}
-  \item{"Rconv"}{ Uses an R-based convolution (`stats::convolve`). Requires constant event durations and a regular sampling grid. Can be faster than the R loop for many events meeting these criteria.}
-  \item{"loop"}{ Uses a pure R implementation involving looping through onsets. Can be slower, especially for many onsets.}
+  \item{Rconv}{Uses an R-based convolution (`stats::convolve`). Requires constant event durations and a regular sampling grid. Can be faster than the R loop for many events meeting these criteria.}
+  \item{loop}{Uses a pure R implementation involving looping through onsets. Can be slower, especially for many onsets.}
 }}
 
 \item{sparse}{Logical indicating whether to return a sparse matrix (from the Matrix package). Default is FALSE.}
