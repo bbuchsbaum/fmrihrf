@@ -42,9 +42,11 @@ Default: Identity matrix (ridge penalty)
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
+    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -54,7 +56,7 @@ Default: Identity matrix (ridge penalty)
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generate penalty matrix for regularization</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/R/all_generic.R" class="external-link"><code>R/all_generic.R</code></a>, <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/R/penalty_matrix_methods.R" class="external-link"><code>R/penalty_matrix_methods.R</code></a></small>
       <div class="d-none name"><code>penalty_matrix.Rd</code></div>
     </div>
 
@@ -113,6 +115,10 @@ Different HRF types use different penalty structures:</p>
 <dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
 <dd><p>Integer specifying the order of the penalty (default: 2)</p></dd>
 
+
+<dt id="arg-shrink-deriv">shrink_deriv<a class="anchor" aria-label="anchor" href="#arg-shrink-deriv"></a></dt>
+<dd><p>Numeric; penalty weight for derivative terms in SPMG2/SPMG3 bases (default: 2)</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -129,7 +135,8 @@ shape constraints.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>[nbasis()], [HRF_objects]</p>
 <p>Other hrf:
-<code><a href="HRF_objects.html">HRF_objects</a></code></p></div>
+<code><a href="HRF_objects.html">HRF_objects</a></code>,
+<code><a href="deriv.html">deriv</a>()</code></p></div>
     </div>
 
     <div class="section level2">

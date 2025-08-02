@@ -22,9 +22,11 @@
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
+    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -34,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generate an HRF library from a parameter grid</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/R/hrf.R" class="external-link"><code>R/hrf.R</code></a></small>
       <div class="d-none name"><code>hrf_library.Rd</code></div>
     </div>
 
@@ -74,13 +76,13 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create library of gamma HRFs with varying parameters</span></span></span>
 <span class="r-in"><span><span class="va">param_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">1</span>, <span class="fl">1.1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  rate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">1</span>, <span class="fl">1.1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">gamma_library</span> <span class="op">&lt;-</span> <span class="fu">hrf_library</span><span class="op">(</span><span class="va">hrf_gamma</span>, <span class="va">param_grid</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::pmap(pgrid, function(...) {    params &lt;- list(...)    do.call(fun, c(params, extras))}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> unused arguments (alpha = 6, beta = 0.9)</span>
+<span class="r-in"><span><span class="va">gamma_library</span> <span class="op">&lt;-</span> <span class="fu">hrf_library</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">shape</span>, <span class="va">rate</span><span class="op">)</span> <span class="fu"><a href="as_hrf.html">as_hrf</a></span><span class="op">(</span><span class="va">hrf_gamma</span>, params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="va">shape</span>, rate <span class="op">=</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="va">param_grid</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create library with fixed and varying parameters</span></span></span>
 <span class="r-in"><span><span class="va">param_grid2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>

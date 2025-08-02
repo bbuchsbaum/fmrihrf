@@ -37,6 +37,7 @@
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
+    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul>
 </li>
       </ul>
@@ -44,6 +45,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -61,9 +63,9 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2025-06-24</h4>
+            <h4 data-toc-skip class="date">2025-08-02</h4>
       
-
+      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_04_advanced_modeling.Rmd" class="external-link"><code>vignettes/a_04_advanced_modeling.Rmd</code></a></small>
       <div class="d-none name"><code>a_04_advanced_modeling.Rmd</code></div>
     </div>
 
@@ -135,8 +137,8 @@ parameters:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x56416204ea48&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x56416204c428&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5610fe409078&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5610fe407cc8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -202,8 +204,8 @@ different temporal lags:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x56416204ea48&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x5641644c16a8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5610fe409078&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5610fb76fcf0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>

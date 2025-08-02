@@ -6,7 +6,8 @@ articles:
   a_02_regressor: a_02_regressor.html
   a_03_hrf_generators: a_03_hrf_generators.html
   a_04_advanced_modeling: a_04_advanced_modeling.html
-last_built: 2025-06-24T03:03Z
+  performance_benchmark: performance_benchmark.html
+last_built: 2025-08-02T18:27Z
 urls:
   reference: https://bbuchsbaum.github.io/fmrihrf/reference
   article: https://bbuchsbaum.github.io/fmrihrf/articles
