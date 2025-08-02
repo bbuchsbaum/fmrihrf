@@ -125,8 +125,8 @@ FFT-based convolution for efficient computation:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fmrihrf_time</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: microseconds</span></span>
-<span><span class="co">#&gt;     expr     min      lq     mean   median      uq     max neval</span></span>
-<span><span class="co">#&gt;  fmrihrf 870.213 885.151 1254.643 895.4695 919.013 4333.59    10</span></span></code></pre></div>
+<span><span class="co">#&gt;     expr     min      lq     mean   median      uq      max neval</span></span>
+<span><span class="co">#&gt;  fmrihrf 880.293 896.963 1282.471 906.8765 938.892 4504.324    10</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-base-r">Comparison with Base R<a class="anchor" aria-label="anchor" href="#comparison-with-base-r"></a>
@@ -160,8 +160,8 @@ FFT-based convolution for efficient computation:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">base_r_time</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: milliseconds</span></span>
-<span><span class="co">#&gt;    expr      min       lq     mean   median       uq      max neval</span></span>
-<span><span class="co">#&gt;  base_r 7.716708 7.807998 10.54326 7.867794 10.53405 26.64766    10</span></span></code></pre></div>
+<span><span class="co">#&gt;    expr      min       lq     mean   median      uq      max neval</span></span>
+<span><span class="co">#&gt;  base_r 7.840157 7.995247 10.81701 8.019386 11.2394 26.98985    10</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="results-summary">Results Summary<a class="anchor" aria-label="anchor" href="#results-summary"></a>
@@ -174,9 +174,9 @@ FFT-based convolution for efficient computation:</p>
 <span><span class="va">speedup</span> <span class="op">&lt;-</span> <span class="va">base_r_median</span> <span class="op">/</span> <span class="va">fmrihrf_median</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"fmrihrf median time: %.2f ms\n"</span>, <span class="va">fmrihrf_median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fmrihrf median time: 0.90 ms</span></span>
+<span><span class="co">#&gt; fmrihrf median time: 0.91 ms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Base R median time: %.2f ms\n"</span>, <span class="va">base_r_median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Base R median time: 7.87 ms</span></span>
+<span><span class="co">#&gt; Base R median time: 8.02 ms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Speedup factor: %.1fx\n"</span>, <span class="va">speedup</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Speedup factor: 8.8x</span></span></code></pre></div>
 </div>
