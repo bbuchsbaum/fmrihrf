@@ -81,13 +81,11 @@ Default is <code>"none"</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric matrix of dimension <code>length(t) x 4</code>. Columns are:
-  \describe
-    \item\codeh0LWU HRF evaluated at \codetheta0, \eqnh(t; \\tau_0, \\sigma_0, \\rho_0)
-    \item\coded_tauPartial derivative \eqn\\partial h / \\partial \\tau evaluated at \codetheta0
-    \item\coded_sigmaPartial derivative \eqn\\partial h / \\partial \\sigma evaluated at \codetheta0
-    \item\coded_rhoPartial derivative \eqn\\partial h / \\partial \\rho evaluated at \codetheta0</p>
-    </div>
+    <p>A numeric matrix of dimension <code>length(t) x 4</code>. The columns represent:</p><ul><li><p><code>h0</code>: LWU HRF evaluated at theta0</p></li>
+<li><p><code>d_tau</code>: Partial derivative with respect to tau at theta0</p></li>
+<li><p><code>d_sigma</code>: Partial derivative with respect to sigma at theta0</p></li>
+<li><p><code>d_rho</code>: Partial derivative with respect to rho at theta0</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="hrf_lwu.html">hrf_lwu</a></code>, <code><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></code></p>
