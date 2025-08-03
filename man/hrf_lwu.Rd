@@ -15,11 +15,7 @@ hrf_lwu(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none")
 
 \item{rho}{Amplitude of the undershoot Gaussian component, relative to the main component. Must be between 0 and 1.5. Default: 0.35.}
 
-\item{normalize}{Character string specifying normalization type:
-\\describe{
-  \\item{\\code{"none"}}{No normalization is applied (default).}
-  \\item{\\code{"height"}}{The HRF is scaled so that its maximum absolute value is 1.}
-}}
+\item{normalize}{Character string specifying normalization type. Either "none" for no normalization (default) or "height" to scale the HRF so its maximum absolute value is 1.}
 }
 \value{
 A numeric vector representing the LWU HRF values at the given time points `t`.
@@ -27,8 +23,10 @@ A numeric vector representing the LWU HRF values at the given time points `t`.
 \description{
 Computes the Lag-Width-Undershoot (LWU) hemodynamic response function.
 This model uses two Gaussian components to model the main response and an optional undershoot.
-The formula is:
-\\deqn{h(t; \\\\tau, \\\\sigma, \\\\rho) = e^{-\\\\frac{(t-\\\\tau)^2}{2\\\\sigma^{2}}} - \\\\rho e^{-\\\\frac{(t-\\\\tau-2\\\\sigma)^2}{2(1.6\\\\sigma)^{2}}}}{h(t; tau, sigma, rho) = exp(-(t-tau)^2/(2*sigma^2)) - rho * exp(-(t-tau-2*sigma)^2/(2*(1.6*sigma)^2))}
+}
+\details{
+The LWU model formula combines a positive Gaussian peak and a negative undershoot:
+h(t; tau, sigma, rho) = exp(-(t-tau)^2/(2*sigma^2)) - rho * exp(-(t-tau-2*sigma)^2/(2*(1.6*sigma)^2))
 }
 \examples{
 t_points <- seq(0, 30, by = 0.1)

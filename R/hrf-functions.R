@@ -410,18 +410,15 @@ daguerre_basis <- function(t, n_basis = 3, scale = 1) {
 #'
 #' Computes the Lag-Width-Undershoot (LWU) hemodynamic response function.
 #' This model uses two Gaussian components to model the main response and an optional undershoot.
-#' The formula is:
-#' \\deqn{h(t; \\\\tau, \\\\sigma, \\\\rho) = e^{-\\\\frac{(t-\\\\tau)^2}{2\\\\sigma^{2}}} - \\\\rho e^{-\\\\frac{(t-\\\\tau-2\\\\sigma)^2}{2(1.6\\\\sigma)^{2}}}}{h(t; tau, sigma, rho) = exp(-(t-tau)^2/(2*sigma^2)) - rho * exp(-(t-tau-2*sigma)^2/(2*(1.6*sigma)^2))}
+#' 
+#' The LWU model formula combines a positive Gaussian peak and a negative undershoot:
+#' h(t; tau, sigma, rho) = exp(-(t-tau)^2/(2*sigma^2)) - rho * exp(-(t-tau-2*sigma)^2/(2*(1.6*sigma)^2))
 #'
 #' @param t A numeric vector of time points (in seconds).
 #' @param tau Lag of the main Gaussian component (time-to-peak of the positive lobe, in seconds). Default: 6.
 #' @param sigma Width (standard deviation) of the main Gaussian component (in seconds). Must be > 0.05. Default: 2.5.
 #' @param rho Amplitude of the undershoot Gaussian component, relative to the main component. Must be between 0 and 1.5. Default: 0.35.
-#' @param normalize Character string specifying normalization type:
-#'   \\describe{
-#'     \\item{\\code{"none"}}{No normalization is applied (default).}
-#'     \\item{\\code{"height"}}{The HRF is scaled so that its maximum absolute value is 1.}
-#'   }
+#' @param normalize Character string specifying normalization type. Either "none" for no normalization (default) or "height" to scale the HRF so its maximum absolute value is 1.
 #' @return A numeric vector representing the LWU HRF values at the given time points `t`.
 #' @family hrf_functions
 #' @export
@@ -498,12 +495,12 @@ hrf_lwu <- function(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none") {
 #'   peak absolute value of 1. For Taylor expansion fitting as described in Fit_LRU.md,
 #'   this should typically be \code{"none"} as the scaling is absorbed by the beta coefficient.
 #'   Default is \code{"none"}.
-#' @return A numeric matrix of dimension \code{length(t) x 4}. Columns are:
-#'   \\describe{
-#'     \\item{\\code{h0}}{LWU HRF evaluated at \\code{theta0}, \\eqn{h(t; \\\\tau_0, \\\\sigma_0, \\\\rho_0)}}
-#'     \\item{\\code{d_tau}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\tau} evaluated at \\code{theta0}}
-#'     \\item{\\code{d_sigma}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\sigma} evaluated at \\code{theta0}}
-#'     \\item{\\code{d_rho}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\rho} evaluated at \\code{theta0}}
+#' @return A numeric matrix of dimension \code{length(t) x 4}. The columns represent:
+#'   \itemize{
+#'     \item \code{h0}: LWU HRF evaluated at theta0
+#'     \item \code{d_tau}: Partial derivative with respect to tau at theta0
+#'     \item \code{d_sigma}: Partial derivative with respect to sigma at theta0
+#'     \item \code{d_rho}: Partial derivative with respect to rho at theta0
 #'   }
 #' @family hrf_functions
 #' @seealso \code{\link{hrf_lwu}}, \code{\link[numDeriv]{grad}}

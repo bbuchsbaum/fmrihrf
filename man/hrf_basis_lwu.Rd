@@ -19,12 +19,12 @@ this should typically be \code{"none"} as the scaling is absorbed by the beta co
 Default is \code{"none"}.}
 }
 \value{
-A numeric matrix of dimension \code{length(t) x 4}. Columns are:
-  \\describe{
-    \\item{\\code{h0}}{LWU HRF evaluated at \\code{theta0}, \\eqn{h(t; \\\\tau_0, \\\\sigma_0, \\\\rho_0)}}
-    \\item{\\code{d_tau}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\tau} evaluated at \\code{theta0}}
-    \\item{\\code{d_sigma}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\sigma} evaluated at \\code{theta0}}
-    \\item{\\code{d_rho}}{Partial derivative \\eqn{\\\\partial h / \\\\partial \\\\rho} evaluated at \\code{theta0}}
+A numeric matrix of dimension \code{length(t) x 4}. The columns represent:
+  \itemize{
+    \item \code{h0}: LWU HRF evaluated at theta0
+    \item \code{d_tau}: Partial derivative with respect to tau at theta0
+    \item \code{d_sigma}: Partial derivative with respect to sigma at theta0
+    \item \code{d_rho}: Partial derivative with respect to rho at theta0
   }
 }
 \description{
