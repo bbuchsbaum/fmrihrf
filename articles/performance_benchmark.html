@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,8 +125,8 @@ FFT-based convolution for efficient computation:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fmrihrf_time</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: microseconds</span></span>
-<span><span class="co">#&gt;     expr     min      lq     mean median      uq      max neval</span></span>
-<span><span class="co">#&gt;  fmrihrf 871.975 880.441 1294.202 904.06 931.386 4631.552    10</span></span></code></pre></div>
+<span><span class="co">#&gt;     expr     min      lq     mean  median      uq      max neval</span></span>
+<span><span class="co">#&gt;  fmrihrf 854.765 870.696 1243.649 885.468 949.181 4305.106    10</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-base-r">Comparison with Base R<a class="anchor" aria-label="anchor" href="#comparison-with-base-r"></a>
@@ -161,7 +161,7 @@ FFT-based convolution for efficient computation:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">base_r_time</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: milliseconds</span></span>
 <span><span class="co">#&gt;    expr      min       lq     mean   median       uq      max neval</span></span>
-<span><span class="co">#&gt;  base_r 7.429269 7.577645 10.33845 7.618778 10.40609 26.45371    10</span></span></code></pre></div>
+<span><span class="co">#&gt;  base_r 7.475123 7.557366 10.29862 7.606057 10.37372 26.30944    10</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="results-summary">Results Summary<a class="anchor" aria-label="anchor" href="#results-summary"></a>
@@ -174,11 +174,11 @@ FFT-based convolution for efficient computation:</p>
 <span><span class="va">speedup</span> <span class="op">&lt;-</span> <span class="va">base_r_median</span> <span class="op">/</span> <span class="va">fmrihrf_median</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"fmrihrf median time: %.2f ms\n"</span>, <span class="va">fmrihrf_median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fmrihrf median time: 0.90 ms</span></span>
+<span><span class="co">#&gt; fmrihrf median time: 0.89 ms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Base R median time: %.2f ms\n"</span>, <span class="va">base_r_median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Base R median time: 7.62 ms</span></span>
+<span><span class="co">#&gt; Base R median time: 7.61 ms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Speedup factor: %.1fx\n"</span>, <span class="va">speedup</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Speedup factor: 8.4x</span></span></code></pre></div>
+<span><span class="co">#&gt; Speedup factor: 8.6x</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="scaling-performance">Scaling Performance<a class="anchor" aria-label="anchor" href="#scaling-performance"></a>
