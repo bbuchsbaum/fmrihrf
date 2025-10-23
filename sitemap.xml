@@ -7,9 +7,10 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/a_03_hrf_generators.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/a_04_advanced_modeling.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/index.html</loc></url>
-<url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/performance_benchmark.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/authors.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/fmrihrf_cheatsheet_v3.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/index.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/news/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/HRF-class.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/Reg.html</loc></url>
@@ -53,6 +54,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_set.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_tent_generator.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_toeplitz.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/index.html</loc></url>

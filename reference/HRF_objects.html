@@ -26,8 +26,8 @@ for creating custom HRFs."></head><body>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
-    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -52,11 +52,11 @@ for creating custom HRFs.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HRF_GAMMA</span><span class="op">(</span><span class="va">t</span>, shape <span class="op">=</span> <span class="fl">6</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HRF_GAMMA</span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">HRF_GAUSSIAN</span><span class="op">(</span><span class="va">t</span>, mean <span class="op">=</span> <span class="fl">6</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu">HRF_GAUSSIAN</span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">HRF_SPMG1</span><span class="op">(</span><span class="va">t</span>, P1 <span class="op">=</span> <span class="fl">5</span>, P2 <span class="op">=</span> <span class="fl">15</span>, A1 <span class="op">=</span> <span class="fl">0.0833</span><span class="op">)</span></span>
+<span><span class="fu">HRF_SPMG1</span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">HRF_SPMG2</span><span class="op">(</span><span class="va">t</span><span class="op">)</span></span>
 <span></span>
@@ -75,20 +75,20 @@ for creating custom HRFs.</p>
 <dd><p>Numeric vector of time points (in seconds) at which to evaluate the HRF</p></dd>
 
 
-<dt id="arg-shape-rate">shape, rate<a class="anchor" aria-label="anchor" href="#arg-shape-rate"></a></dt>
-<dd><p>Parameters for gamma distribution HRF (default: shape=6, rate=1)</p></dd>
-
-
-<dt id="arg-mean-sd">mean, sd<a class="anchor" aria-label="anchor" href="#arg-mean-sd"></a></dt>
-<dd><p>Parameters for Gaussian HRF (default: mean=6, sd=2)</p></dd>
-
-
 <dt id="arg-p-p-">P1, P2<a class="anchor" aria-label="anchor" href="#arg-p-p-"></a></dt>
 <dd><p>Shape parameters for SPM canonical HRF (default: P1=5, P2=15)</p></dd>
 
 
 <dt id="arg-a-">A1<a class="anchor" aria-label="anchor" href="#arg-a-"></a></dt>
 <dd><p>Amplitude parameter for SPM canonical HRF (default: 0.0833)</p></dd>
+
+
+<dt id="arg-shape-rate">shape, rate<a class="anchor" aria-label="anchor" href="#arg-shape-rate"></a></dt>
+<dd><p>Parameters for gamma distribution HRF (default: shape=6, rate=1)</p></dd>
+
+
+<dt id="arg-mean-sd">mean, sd<a class="anchor" aria-label="anchor" href="#arg-mean-sd"></a></dt>
+<dd><p>Parameters for Gaussian HRF (default: mean=6, sd=2)</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -198,12 +198,14 @@ for creating custom basis sets directly</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create custom FIR basis with 20 bins</span></span></span>
 <span class="r-in"><span><span class="va">custom_fir</span> <span class="op">&lt;-</span> <span class="fu"><a href="getHRF.html">getHRF</a></span><span class="op">(</span><span class="st">"fir"</span>, nbasis <span class="op">=</span> <span class="fl">20</span>, span <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters nbasis, span, bin_width are not arguments to function fir and will be ignored</span>
 <span class="r-in"><span><span class="va">fir_response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">custom_fir</span>, <span class="va">times</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">times</span>, <span class="va">fir_response</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Custom FIR with 20 bins"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HRF_objects-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create custom B-spline basis  </span></span></span>
 <span class="r-in"><span><span class="va">custom_bspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_bspline_generator.html">hrf_bspline_generator</a></span><span class="op">(</span>nbasis <span class="op">=</span> <span class="fl">8</span>, span <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters nbasis, degree, span are not arguments to function bspline and will be ignored</span>
 <span class="r-in"><span><span class="va">bspline_response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">custom_bspline</span>, <span class="va">times</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">times</span>, <span class="va">bspline_response</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Custom B-spline with 8 basis functions"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HRF_objects-5.png" alt="" width="700" height="433"></span>

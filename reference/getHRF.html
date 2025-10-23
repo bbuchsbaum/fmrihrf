@@ -26,8 +26,8 @@ and custom basis sets with specified parameters."></head><body>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
-    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -125,12 +125,16 @@ it calls the appropriate generator function with the specified parameters.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create custom FIR basis with 20 bins</span></span></span>
 <span class="r-in"><span><span class="va">fir20</span> <span class="op">&lt;-</span> <span class="fu">getHRF</span><span class="op">(</span><span class="st">"fir"</span>, nbasis <span class="op">=</span> <span class="fl">20</span>, span <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters nbasis, span, bin_width are not arguments to function fir and will be ignored</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create B-spline basis with lag</span></span></span>
 <span class="r-in"><span><span class="va">bs_lag</span> <span class="op">&lt;-</span> <span class="fu">getHRF</span><span class="op">(</span><span class="st">"bspline"</span>, nbasis <span class="op">=</span> <span class="fl">8</span>, lag <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters nbasis, degree, span are not arguments to function bspline and will be ignored</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters .lag are not arguments to function bspline_lag(2) and will be ignored</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create blocked Gaussian HRF</span></span></span>
 <span class="r-in"><span><span class="va">block_gauss</span> <span class="op">&lt;-</span> <span class="fu">getHRF</span><span class="op">(</span><span class="st">"gaussian"</span>, width <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters mean, sd, .width, .precision, .half_life, .summate, .normalize are not arguments to function gaussian_block(w=5) and will be ignored</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

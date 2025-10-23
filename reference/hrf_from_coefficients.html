@@ -26,8 +26,8 @@ and one wants a single functional HRF."></head><body>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
-    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -88,6 +88,7 @@ and one wants a single functional HRF.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a custom HRF from SPMG3 basis coefficients</span></span></span>
 <span class="r-in"><span><span class="va">coeffs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span>  <span class="co"># Main response + slight temporal shift - dispersion</span></span></span>
 <span class="r-in"><span><span class="va">custom_hrf</span> <span class="op">&lt;-</span> <span class="fu">hrf_from_coefficients</span><span class="op">(</span><span class="va">HRF_SPMG3</span>, <span class="va">coeffs</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters coefficients are not arguments to function SPMG3_from_coef and will be ignored</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Evaluate the custom HRF</span></span></span>
 <span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
@@ -96,6 +97,7 @@ and one wants a single functional HRF.</p>
 <span class="r-in"><span><span class="co"># Create from FIR basis</span></span></span>
 <span class="r-in"><span><span class="va">fir_coeffs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>, <span class="fl">0.1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">custom_fir</span> <span class="op">&lt;-</span> <span class="fu">hrf_from_coefficients</span><span class="op">(</span><span class="va">HRF_FIR</span>, <span class="va">fir_coeffs</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters coefficients are not arguments to function fir_from_coef and will be ignored</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

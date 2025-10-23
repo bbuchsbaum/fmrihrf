@@ -24,8 +24,8 @@ blocking, and normalization decorators based on arguments."></head><body>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
-    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -116,10 +116,15 @@ blocking, and normalization decorators based on arguments.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Lagged SPMG1</span></span></span>
 <span class="r-in"><span><span class="va">grf_lag</span> <span class="op">&lt;-</span> <span class="fu">gen_hrf</span><span class="op">(</span><span class="va">HRF_SPMG1</span>, lag<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters P1, P2, A1, .lag are not arguments to function SPMG1_lag(3) and will be ignored</span>
 <span class="r-in"><span><span class="co"># Blocked Gaussian</span></span></span>
 <span class="r-in"><span><span class="va">grf_block</span> <span class="op">&lt;-</span> <span class="fu">gen_hrf</span><span class="op">(</span><span class="va">hrf_gaussian</span>, width<span class="op">=</span><span class="fl">5</span>, precision<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters .width, .precision, .half_life, .summate, .normalize are not arguments to function hrf_gaussian_block(w=5) and will be ignored</span>
 <span class="r-in"><span><span class="co"># Lagged and Blocked, then Normalized</span></span></span>
 <span class="r-in"><span><span class="va">grf_both_norm</span> <span class="op">&lt;-</span> <span class="fu">gen_hrf</span><span class="op">(</span><span class="va">HRF_SPMG1</span>, lag<span class="op">=</span><span class="fl">2</span>, width<span class="op">=</span><span class="fl">4</span>, normalize<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters P1, P2, A1, .width, .precision, .half_life, .summate, .normalize are not arguments to function SPMG1_block(w=4) and will be ignored</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters .lag are not arguments to function SPMG1_block(w=4)_lag(2) and will be ignored</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters .normalised are not arguments to function SPMG1_block(w=4)_lag(2)_norm and will be ignored</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

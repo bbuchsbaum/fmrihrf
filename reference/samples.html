@@ -24,8 +24,8 @@ related object."></head><body>
     <li><a class="dropdown-item" href="../articles/a_02_regressor.html">Building fMRI Regressors</a></li>
     <li><a class="dropdown-item" href="../articles/a_03_hrf_generators.html">HRF Generators</a></li>
     <li><a class="dropdown-item" href="../articles/a_04_advanced_modeling.html">Advanced HRF Modeling and Design</a></li>
-    <li><a class="dropdown-item" href="../articles/performance_benchmark.html">Performance Benchmarks</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/bbuchsbaum/fmrihrf/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -80,6 +80,33 @@ related object.</p>
     <p>Numeric vector of sample times</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Get sample times from a sampling frame</span></span></span>
+<span class="r-in"><span><span class="va">sframe</span> <span class="op">&lt;-</span> <span class="fu"><a href="sampling_frame.html">sampling_frame</a></span><span class="op">(</span>blocklens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">120</span><span class="op">)</span>, TR <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">samples</span><span class="op">(</span><span class="va">sframe</span>, blockids <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>  <span class="co"># First block only</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]   1   3   5   7   9  11  13  15  17  19  21  23  25  27  29  31  33  35</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [19]  37  39  41  43  45  47  49  51  53  55  57  59  61  63  65  67  69  71</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [37]  73  75  77  79  81  83  85  87  89  91  93  95  97  99 101 103 105 107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] 109 111 113 115 117 119 121 123 125 127 129 131 133 135 137 139 141 143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] 145 147 149 151 153 155 157 159 161 163 165 167 169 171 173 175 177 179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] 181 183 185 187 189 191 193 195 197 199</span>
+<span class="r-in"><span><span class="fu">samples</span><span class="op">(</span><span class="va">sframe</span>, global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># All blocks, global timing</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]   1   3   5   7   9  11  13  15  17  19  21  23  25  27  29  31  33  35</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [19]  37  39  41  43  45  47  49  51  53  55  57  59  61  63  65  67  69  71</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [37]  73  75  77  79  81  83  85  87  89  91  93  95  97  99 101 103 105 107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] 109 111 113 115 117 119 121 123 125 127 129 131 133 135 137 139 141 143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] 145 147 149 151 153 155 157 159 161 163 165 167 169 171 173 175 177 179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] 181 183 185 187 189 191 193 195 197 199 201 203 205 207 209 211 213 215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [109] 217 219 221 223 225 227 229 231 233 235 237 239 241 243 245 247 249 251</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [127] 253 255 257 259 261 263 265 267 269 271 273 275 277 279 281 283 285 287</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [145] 289 291 293 295 297 299 301 303 305 307 309 311 313 315 317 319 321 323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [163] 325 327 329 331 333 335 337 339 341 343 345 347 349 351 353 355 357 359</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [181] 361 363 365 367 369 371 373 375 377 379 381 383 385 387 389 391 393 395</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [199] 397 399 401 403 405 407 409 411 413 415 417 419 421 423 425 427 429 431</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [217] 433 435 437 439</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
