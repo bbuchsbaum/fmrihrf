@@ -14,6 +14,9 @@
 
 \item{...}{Not used.}
 }
+\value{
+No return value, called for side effects (prints to console)
+}
 \description{
 Provides a concise summary of the regressor object using the cli package.
 }

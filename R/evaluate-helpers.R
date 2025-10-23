@@ -1,8 +1,17 @@
 #' @importFrom memoise memoise
 #' @keywords internal
 #' @noRd
-# TODO: Consider implementing bounded cache using cachem package or custom LRU cache
-# to prevent unbounded memory growth in long sessions
+# Bounded in-memory LRU cache for HRF evaluations to prevent
+# unbounded growth in long-running sessions. If cachem isn't
+# available at runtime, fall back to memoise's default memory cache.
+.hrf_eval_cache <- tryCatch(
+  cachem::cache_mem(
+    max_size = getOption("fmrihrf.hrf_cache_max_size", 50 * 1024^2), # 50 MB default
+    evict = "lru"
+  ),
+  error = function(e) memoise::cache_memory()
+)
+
 .memo_hrf <- memoise::memoise(
   function(hrf, span, dt) {
     if (!is.numeric(span) || length(span) != 1 || span <= 0) {
@@ -15,7 +24,8 @@
     # Evaluate HRF - ensure it returns a matrix
     val <- fmrihrf::evaluate(hrf, times)
     if (is.vector(val)) matrix(val, ncol = 1) else val
-  }
+  },
+  cache = .hrf_eval_cache
 )
 
 #' Prepare Inputs for Regressor Evaluation Engines

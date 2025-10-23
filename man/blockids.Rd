@@ -20,3 +20,8 @@ Integer vector of block ids
 \description{
 Generic accessor returning block indices for each sample or onset.
 }
+\examples{
+# Get block identifiers from a sampling frame
+sframe <- sampling_frame(blocklens = c(100, 120, 80), TR = 2)
+blockids(sframe)
+}

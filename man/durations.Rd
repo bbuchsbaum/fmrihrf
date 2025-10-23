@@ -20,3 +20,9 @@ A numeric vector of durations
 \description{
 Get durations of an object
 }
+\examples{
+# Create a regressor with event durations
+reg <- regressor(onsets = c(1, 5, 10), hrf = HRF_SPMG1,
+                 duration = c(2, 3, 1), span = 20)
+durations(reg)
+}

@@ -21,3 +21,8 @@ Numeric vector of block lengths
 Generic accessor returning the number of scans in each block of a
 sampling frame or similar object.
 }
+\examples{
+# Get block lengths from a sampling frame
+sframe <- sampling_frame(blocklens = c(100, 120, 80), TR = 2)
+blocklens(sframe)
+}

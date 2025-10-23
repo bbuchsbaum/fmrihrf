@@ -19,3 +19,9 @@ A matrix of Fourier basis functions with nbasis columns.
 \description{
 Generates a set of Fourier basis functions (sine and cosine pairs) over a given span.
 }
+\examples{
+# Create Fourier basis with 5 functions
+t <- seq(0, 24, by = 0.5)
+basis <- hrf_fourier(t, span = 24, nbasis = 5)
+matplot(t, basis, type = "l", main = "Fourier Basis Functions")
+}

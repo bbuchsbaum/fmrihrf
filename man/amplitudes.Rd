@@ -20,3 +20,10 @@ Numeric vector of amplitudes
 \description{
 Generic accessor returning event amplitudes or scaling factors.
 }
+\examples{
+# Create a regressor with varying amplitudes
+reg <- regressor(onsets = c(1, 5, 10), hrf = HRF_SPMG1,
+                 amplitude = c(1, 0.5, 2), 
+                 span = 20)
+amplitudes(reg)
+}

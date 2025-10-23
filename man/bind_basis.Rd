@@ -16,4 +16,12 @@ A new HRF object representing the combined basis set.
 Combines multiple HRF objects into a single multi-basis HRF object.
 The resulting function evaluates each input HRF at time `t` and returns the results column-bound together.
 }
+\examples{
+# Combine multiple HRF basis functions
+hrf1 <- as_hrf(hrf_gaussian, params = list(mean = 5))
+hrf2 <- as_hrf(hrf_gaussian, params = list(mean = 10))
+basis <- bind_basis(hrf1, hrf2)
+nbasis(basis)  # Returns 2
+
+}
 \keyword{internal}

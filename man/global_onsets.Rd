@@ -25,3 +25,8 @@ Numeric vector of global onset times
 \description{
 Generic accessor for converting block-wise onsets to global onsets.
 }
+\examples{
+# Convert block-relative onsets to global timing
+sframe <- sampling_frame(blocklens = c(100, 120), TR = 2)
+global_onsets(sframe, onsets = c(10, 20), blockids = c(1, 2))
+}

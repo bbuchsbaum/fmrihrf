@@ -195,6 +195,12 @@ penalty_matrix <- function(x, ...) UseMethod("penalty_matrix")
 #' @param sframe A `sampling_frame` object or numeric vector of times.
 #' @param ... Additional arguments passed to methods
 #' @return A numeric matrix with one column per basis function.
+#' @examples
+#' # Create reconstruction matrix for basis functions
+#' hrf <- HRF_SPMG2  # 2-basis HRF
+#' times <- seq(0, 20, by = 0.5)
+#' rmat <- reconstruction_matrix(hrf, times)
+#' dim(rmat)  # Shows dimensions
 #' @export
 reconstruction_matrix <- function(hrf, sframe, ...) { UseMethod("reconstruction_matrix") }
 
@@ -205,6 +211,11 @@ reconstruction_matrix <- function(hrf, sframe, ...) { UseMethod("reconstruction_
 #' @param x The object to get durations from
 #' @param ... Additional arguments passed to methods
 #' @return A numeric vector of durations
+#' @examples
+#' # Create a regressor with event durations
+#' reg <- regressor(onsets = c(1, 5, 10), hrf = HRF_SPMG1,
+#'                  duration = c(2, 3, 1), span = 20)
+#' durations(reg)
 #' @export
 durations <- function(x, ...) UseMethod("durations")
 
@@ -215,6 +226,12 @@ durations <- function(x, ...) UseMethod("durations")
 #' @param x Object containing amplitude information
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of amplitudes
+#' @examples
+#' # Create a regressor with varying amplitudes
+#' reg <- regressor(onsets = c(1, 5, 10), hrf = HRF_SPMG1,
+#'                  amplitude = c(1, 0.5, 2), 
+#'                  span = 20)
+#' amplitudes(reg)
 #' @export
 amplitudes <- function(x, ...) UseMethod("amplitudes")
 
@@ -225,6 +242,10 @@ amplitudes <- function(x, ...) UseMethod("amplitudes")
 #' @param x Object containing onset information
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of onsets
+#' @examples
+#' # Create a regressor with event onsets
+#' reg <- regressor(onsets = c(1, 5, 10, 15), hrf = HRF_SPMG1, span = 20)
+#' onsets(reg)
 #' @export
 onsets <- function(x, ...) UseMethod("onsets")
 
@@ -238,6 +259,11 @@ onsets <- function(x, ...) UseMethod("onsets")
 #' @param global Logical indicating whether to return global times (default: FALSE)
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of sample times
+#' @examples
+#' # Get sample times from a sampling frame
+#' sframe <- sampling_frame(blocklens = c(100, 120), TR = 2)
+#' samples(sframe, blockids = 1)  # First block only
+#' samples(sframe, global = TRUE)  # All blocks, global timing
 #' @export
 samples <- function(x, ...) UseMethod("samples")
 
@@ -249,6 +275,10 @@ samples <- function(x, ...) UseMethod("samples")
 #' @param onsets Numeric vector of onset times within blocks
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of global onset times
+#' @examples
+#' # Convert block-relative onsets to global timing
+#' sframe <- sampling_frame(blocklens = c(100, 120), TR = 2)
+#' global_onsets(sframe, onsets = c(10, 20), blockids = c(1, 2))
 #' @export
 global_onsets <- function(x, ...) UseMethod("global_onsets")
 
@@ -259,6 +289,10 @@ global_onsets <- function(x, ...) UseMethod("global_onsets")
 #' @param x Object containing block structure
 #' @param ... Additional arguments passed to methods
 #' @return Integer vector of block ids
+#' @examples
+#' # Get block identifiers from a sampling frame
+#' sframe <- sampling_frame(blocklens = c(100, 120, 80), TR = 2)
+#' blockids(sframe)
 #' @export
 blockids <- function(x, ...) UseMethod("blockids")
 
@@ -270,6 +304,10 @@ blockids <- function(x, ...) UseMethod("blockids")
 #' @param x Object containing block length information
 #' @param ... Additional arguments passed to methods
 #' @return Numeric vector of block lengths
+#' @examples
+#' # Get block lengths from a sampling frame
+#' sframe <- sampling_frame(blocklens = c(100, 120, 80), TR = 2)
+#' blocklens(sframe)
 #' @export
 blocklens <- function(x, ...) UseMethod("blocklens")
 

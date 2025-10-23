@@ -11,6 +11,14 @@
 
 \item{...}{Additional arguments passed to plotting functions}
 }
+\value{
+No return value, called for side effects (creates a plot)
+}
 \description{
 Plot an HRF Object
+}
+\examples{
+# Plot an HRF
+hrf <- HRF_SPMG1
+plot(hrf)
 }

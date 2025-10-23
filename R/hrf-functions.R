@@ -281,8 +281,9 @@ hrf_inv_logit <- function(t, mu1 = 6, s1 = 1, mu2 = 16, s2 = 1, lag = 0) {
 #' # Modified shape with undershoot
 #' hrf_under <- hrf_half_cosine(t, h1 = 1, h2 = 4, h3 = 6, h4 = 8, f2 = -0.2)
 #' lines(t, hrf_under, col = "red")
-#' @export
-hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
+#' @keywords internal
+#' @noRd
+.hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
   rising_half_cosine <- function(t, f1, t0, w) {
     return(f1/2 * (1 - cos(pi * (t - t0) / w)))
   }
@@ -302,6 +303,41 @@ hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
   return(ret)
 }
 
+#' Half-cosine HRF 
+#'
+#' Segments: 0->f1 (h1), f1->1 (h2), 1->f2 (h3), f2->0 (h4).
+#' Negative f1 gives an initial dip; negative f2 gives an undershoot.
+#' Peak is at t = h1 + h2 (amplitude 1 by construction).
+#'
+#' @param t Numeric vector of times (s)
+#' @param h1,h2,h3,h4 Segment durations (s). Must be > 0.
+#' @param f1 Initial dip level (default 0), typically in [-0.2, 0]
+#' @param f2 Undershoot level (default 0), typically in [-0.3, 0]
+#' @return Numeric vector same length as t
+#' @export
+hrf_half_cosine <- function(t, h1=1, h2=5, h3=7, h4=7, f1=0, f2=0) {
+  stopifnot(h1 > 0, h2 > 0, h3 > 0, h4 > 0)
+  trans <- function(tt, a, b, t0, w) a + 0.5*(b - a) * (1 - cos(pi * (tt - t0)/w))
+  t1 <- h1; t2 <- h1 + h2; t3 <- h1 + h2 + h3; t4 <- t3 + h4
+
+  out <- numeric(length(t))
+  # segment 1: 0 -> f1
+  idx <- t >= 0 & t <= t1
+  out[idx] <- trans(t[idx], 0,  f1, 0,   h1)
+  # segment 2: f1 -> 1
+  idx <- t >  t1 & t <= t2
+  out[idx] <- trans(t[idx], f1, 1,  t1,  h2)
+  # segment 3: 1 -> f2 (undershoot)
+  idx <- t >  t2 & t <= t3
+  out[idx] <- trans(t[idx], 1,  f2, t2,  h3)
+  # segment 4: f2 -> 0 (recovery)
+  idx <- t >  t3 & t <= t4
+  out[idx] <- trans(t[idx], f2, 0,  t3,  h4)
+  # before/after window: 0
+  out[t < 0 | t > t4] <- 0
+  out
+}
+
 #' Fourier basis for HRF modeling
 #'
 #' Generates a set of Fourier basis functions (sine and cosine pairs) over a given span.
@@ -310,6 +346,11 @@ hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
 #' @param span The temporal window over which the basis functions span (default: 24).
 #' @param nbasis The number of basis functions (default: 5). Should be even for full sine-cosine pairs.
 #' @return A matrix of Fourier basis functions with nbasis columns.
+#' @examples
+#' # Create Fourier basis with 5 functions
+#' t <- seq(0, 24, by = 0.5)
+#' basis <- hrf_fourier(t, span = 24, nbasis = 5)
+#' matplot(t, basis, type = "l", main = "Fourier Basis Functions")
 #' @export
 hrf_fourier <- function(t, span = 24, nbasis = 5) {
   freqs <- ceiling(seq_len(nbasis) / 2)

@@ -25,3 +25,9 @@ Numeric vector of sample times
 Generic function retrieving sampling times from a sampling frame or
 related object.
 }
+\examples{
+# Get sample times from a sampling frame
+sframe <- sampling_frame(blocklens = c(100, 120), TR = 2)
+samples(sframe, blockids = 1)  # First block only
+samples(sframe, global = TRUE)  # All blocks, global timing
+}

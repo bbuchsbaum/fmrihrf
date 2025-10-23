@@ -146,6 +146,7 @@ shift.Reg <- function(x, shift_amount, ...) {
 #' 
 #' @param x A `Reg` object.
 #' @param ... Not used.
+#' @return No return value, called for side effects (prints to console)
 #' @importFrom cli cli_h1 cli_text cli_div cli_li
 #' @export
 #' @method print Reg

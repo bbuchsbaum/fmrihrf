@@ -20,3 +20,8 @@ Numeric vector of onsets
 \description{
 Generic accessor returning event onset times in seconds.
 }
+\examples{
+# Create a regressor with event onsets
+reg <- regressor(onsets = c(1, 5, 10, 15), hrf = HRF_SPMG1, span = 20)
+onsets(reg)
+}

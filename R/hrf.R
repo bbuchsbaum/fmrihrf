@@ -1,14 +1,27 @@
 #' Turn any function into an HRF object
 #'
 #' This is the core constructor for creating HRF objects in the refactored system.
-#' It takes a function `f(t)` and attaches standard HRF attributes.
+#' It takes a function `f(t)` and attaches standard HRF attributes. If `params` are
+#' provided, `as_hrf` creates a closure that captures these parameters, ensuring they
+#' are used during evaluation rather than relying on the function's defaults.
 #'
 #' @param f The function to be turned into an HRF object. It must accept a single argument `t` (time).
 #' @param name The name for the HRF object. Defaults to the deparsed name of `f`.
 #' @param nbasis The number of basis functions represented by `f`. Must be \code{>= 1}. Defaults to 1L.
 #' @param span The nominal time span (duration in seconds) of the HRF. Must be positive. Defaults to 24.
-#' @param params A named list of parameters associated with the HRF function `f`. Defaults to an empty list.
+#' @param params A named list of parameters associated with the HRF function `f`. When provided,
+#'   `as_hrf` creates a closure that captures these parameters. Defaults to an empty list.
 #' @return A new HRF object.
+#' @examples
+#' # Create a custom HRF from a function
+#' custom_hrf <- as_hrf(function(t) exp(-t/5),
+#'                      name = "exponential",
+#'                      span = 20)
+#' evaluate(custom_hrf, seq(0, 10, by = 1))
+#'
+#' # Create HRF with specific parameters (closure captures them)
+#' gamma_hrf <- as_hrf(hrf_gamma, params = list(shape = 8, rate = 1.2))
+#' evaluate(gamma_hrf, seq(0, 20, by = 1))
 #' @keywords internal
 #' @export
 as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
@@ -20,6 +33,33 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
   assertthat::assert_that(is.numeric(span), length(span) == 1)
   assertthat::assert_that(span > 0, msg = "span must be > 0")
   assertthat::assert_that(is.list(params))
+
+  # If params are provided, create a closure that captures them
+  if (length(params) > 0) {
+    # Validate that f accepts the provided parameters
+    f_formals <- names(formals(f))
+    param_names <- names(params)
+
+    # Check if all param names are valid arguments to f (excluding 't')
+    # 't' is special and should not be in params
+    invalid_params <- setdiff(param_names, f_formals)
+    if (length(invalid_params) > 0) {
+      warning(sprintf("Parameters %s are not arguments to function %s and will be ignored",
+                      paste(invalid_params, collapse = ", "), name),
+              call. = FALSE)
+      params <- params[param_names %in% f_formals]
+    }
+
+    # Create closure that captures parameters if any remain valid
+    if (length(params) > 0) {
+      # Capture the original function in a local variable to avoid recursion issues
+      orig_f <- f
+      # Create a closure that calls the original function with captured parameters
+      f <- function(t) {
+        do.call(orig_f, c(list(t = t), params))
+      }
+    }
+  }
 
   structure(
     f,
@@ -42,6 +82,13 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 #'
 #' @return A new HRF object representing the combined basis set.
 #'
+#' @examples
+#' # Combine multiple HRF basis functions
+#' hrf1 <- as_hrf(hrf_gaussian, params = list(mean = 5))
+#' hrf2 <- as_hrf(hrf_gaussian, params = list(mean = 10))
+#' basis <- bind_basis(hrf1, hrf2)
+#' nbasis(basis)  # Returns 2
+#' 
 #' @keywords internal
 #' @export
 #' @importFrom assertthat assert_that
@@ -432,7 +479,8 @@ hrf_lagged <- gen_hrf_lagged
 #' @family gen_hrf
 #'
 #' @return A \code{function} representing the blocked HRF.
-#'
+#' @examples
+#' # Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
 #' @importFrom purrr partial
 #' @export
 gen_hrf_blocked <- function(hrf=hrf_gaussian, width=5, precision=.1, 
@@ -750,6 +798,25 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
   obj
 }
 
+#' Create Tent HRF Basis Set
+#'
+#' Generates an HRF object using tent (piecewise linear) basis functions with
+#' custom parameters. This generator mirrors \code{HRF_TENT} but allows callers
+#' to control the number of basis elements and temporal span.
+#'
+#' @param nbasis Number of tent basis functions (default: 5)
+#' @param span Temporal window in seconds (default: 24)
+#' @return An HRF object of class \code{c("Tent_HRF", "HRF", "function")}
+#' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
+#'   \code{\link{getHRF}} for a unified interface to create HRFs,
+#'   \code{\link{hrf_bspline_generator}} for a smoother alternative
+#' @examples
+#' # Create a tent basis with 6 functions over a 20 second window
+#' custom_tent <- hrf_tent_generator(nbasis = 6, span = 20)
+#' t <- seq(0, 20, by = 0.1)
+#' response <- evaluate(custom_tent, t)
+#' matplot(t, response, type = "l", main = "Tent HRF with 6 basis functions")
+#' @export
 hrf_tent_generator <- function(nbasis=5, span=24) {
   obj <- as_hrf(
     f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1),
@@ -1089,6 +1156,11 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
 #'
 #' @param x An HRF object
 #' @param ... Additional arguments passed to plotting functions
+#' @return No return value, called for side effects (creates a plot)
+#' @examples
+#' # Plot an HRF
+#' hrf <- HRF_SPMG1
+#' plot(hrf)
 #' @method plot HRF
 #' @export
 plot.HRF <- function(x, ...) {

@@ -53,6 +53,9 @@ The `gen_hrf_blocked` function creates a blocked HRF by convolving the input HRF
 \item \code{hrf_blocked()}: alias for gen_hrf_blocked
 
 }}
+\examples{
+# Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
+}
 \seealso{
 Other gen_hrf: 
 \code{\link{gen_hrf_lagged}()}
