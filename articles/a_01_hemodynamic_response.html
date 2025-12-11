@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2025-10-23</h4>
+            <h4 data-toc-skip class="date">2025-12-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_01_hemodynamic_response.Rmd" class="external-link"><code>vignettes/a_01_hemodynamic_response.Rmd</code></a></small>
       <div class="d-none name"><code>a_01_hemodynamic_response.Rmd</code></div>
@@ -99,8 +99,8 @@ number of basis functions (<code>nbasis</code>), and effective duration
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(orig_f, c(list(t = t), params))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3cd0f1450&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cd0ed220&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e15d4718&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e15d2e88&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -127,8 +127,8 @@ number of basis functions (<code>nbasis</code>), and effective duration
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(orig_f, c(list(t = t), params))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3cd13e3b0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cd13c2d0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e1656998&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e1651e00&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -175,7 +175,7 @@ specific time points:</p>
 <span>       y <span class="op">=</span> <span class="st">"BOLD Response (normalized)"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"HRF Type"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png" class="r-plt" width="672"></p>
 <p>Note that the <code>span</code> attribute (e.g., 24 seconds)
 indicates the approximate time window over which the HRF is
 non-zero.</p>
@@ -218,7 +218,7 @@ functions, often by modifying the parameters of existing ones.</p>
 <span>       y <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Parameters"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/modify_gaussian_params-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/modify_gaussian_params-1.png" class="r-plt" width="672"></p>
 <p><code>gen_hrf</code> can also directly incorporate lags and durations
 (see later sections).</p>
 </div>
@@ -262,7 +262,7 @@ used for this convolution.</p>
 <span>       y <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Duration"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_hrfs-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_hrfs-1.png" class="r-plt" width="672"></p>
 <div class="section level3">
 <h3 id="normalization">Normalization<a class="anchor" aria-label="anchor" href="#normalization"></a>
 </h3>
@@ -300,7 +300,7 @@ so the peak amplitude is approximately 1, regardless of duration.</p>
 <span>       color <span class="op">=</span> <span class="st">"Duration"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ylim</span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span> <span class="co"># Ensure y-axis starts at 0</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_normalized-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_normalized-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="modeling-saturation-with-summate">Modeling Saturation with <code>summate</code><a class="anchor" aria-label="anchor" href="#modeling-saturation-with-summate"></a>
@@ -340,7 +340,7 @@ stimulation.</p>
 <span>       y <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Duration"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false-1.png" class="r-plt" width="672"></p>
 <p>We can combine <code>summate=FALSE</code> and
 <code>normalize=TRUE</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -373,7 +373,7 @@ stimulation.</p>
 <span>       color <span class="op">=</span> <span class="st">"Duration"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ylim</span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level2">
@@ -413,7 +413,7 @@ response, while a negative lag advances it.</p>
 <span>       y <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Lag"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_hrfs-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_hrfs-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="combining-lag-and-duration">Combining Lag and Duration<a class="anchor" aria-label="anchor" href="#combining-lag-and-duration"></a>
@@ -451,7 +451,7 @@ the pipe operator (<code>%&gt;%</code>) from <code>dplyr</code> (or
 <span>       color <span class="op">=</span> <span class="st">"Settings"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ylim</span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs-1.png" class="r-plt" width="672"></p>
 <p>Alternatively, <code>gen_hrf</code> can apply lag and width
 directly:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -485,8 +485,8 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3ccad3090&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3ccaedc98&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e037e370&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e039d698&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "SPMG2_HRF" "HRF"       "function" </span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -505,8 +505,8 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3cca09558&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cca22600&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e02b0bc0&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e02c21e8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "SPMG3_HRF" "HRF"       "function" </span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -524,7 +524,7 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"SPM + Temporal Derivative Basis Set (HRF_SPMG2)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Canonical"</span>, <span class="st">"Temporal Deriv."</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot SPMG3</span></span>
@@ -532,7 +532,7 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"SPM + Temporal + Dispersion Derivative Basis Set (HRF_SPMG3)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Canonical"</span>, <span class="st">"Temporal Deriv."</span>, <span class="st">"Dispersion Deriv."</span><span class="op">)</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets-2.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets-2.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="b-spline-basis-set">B-Spline Basis Set<a class="anchor" aria-label="anchor" href="#b-spline-basis-set"></a>
@@ -547,8 +547,8 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_bs_5_3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cb896cf8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644df5d65b0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -563,7 +563,7 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_bs_5_3</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"B-spline Basis Set (N=5, degree=3)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># B-spline basis with N=10 basis functions, degree=1 (linear -&gt; tent functions)</span></span>
@@ -571,8 +571,8 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_bs_10_1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cb60b080&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644df283b78&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -587,7 +587,7 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_bs_10_1</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"Tent Function Basis Set (B-spline, N=10, degree=1)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis-2.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis-2.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="sine-basis-set">Sine Basis Set<a class="anchor" aria-label="anchor" href="#sine-basis-set"></a>
@@ -599,8 +599,8 @@ waves of different frequencies.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_sin_5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3cad5e4e8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644da7435f8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -615,7 +615,7 @@ waves of different frequencies.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_sin_5</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"Sine Basis Set (N=5)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/sine_basis-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/sine_basis-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="half-cosine-basis-set-flobs-like">Half-Cosine Basis Set (FLOBS-like)<a class="anchor" aria-label="anchor" href="#half-cosine-basis-set-flobs-like"></a>
@@ -633,7 +633,7 @@ initial dip, rise, fall/undershoot, and recovery.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_half_cos</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Half-Cosine HRF Shape (Woolrich et al., 2004)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/half_cosine-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/half_cosine-1.png" class="r-plt" width="672"></p>
 <!-- ### Daguerre Polynomial Basis Set
 
 Daguerre polynomials provide an orthogonal basis set on [0, ∞) suitable for modeling decaying responses. This functionality is not yet implemented in the package.
@@ -664,8 +664,8 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_gam</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d0554880&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e59df9a0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -680,7 +680,7 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_gam</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Gamma HRF"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/gamma_hrf-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/gamma_hrf-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="mexican-hat-wavelet-hrf">Mexican Hat Wavelet HRF<a class="anchor" aria-label="anchor" href="#mexican-hat-wavelet-hrf"></a>
@@ -692,8 +692,8 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_mh</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d128adc0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e4c3e6e0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -708,7 +708,7 @@ density function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_mh</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Mexican Hat Wavelet HRF"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/mexhat_hrf-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/mexhat_hrf-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="inverse-logit-difference-hrf">Inverse Logit Difference HRF<a class="anchor" aria-label="anchor" href="#inverse-logit-difference-hrf"></a>
@@ -721,8 +721,8 @@ rise and fall times.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_il</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (t) </span></span>
 <span><span class="co">#&gt; hrf(t, ...)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d07f45c0&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d05e2430&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e4cd9b98&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e512aa68&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -737,7 +737,7 @@ rise and fall times.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_il</span>, type <span class="op">=</span> <span class="st">'l'</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Inverse Logit Difference HRF"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/inv_logit_hrf-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/inv_logit_hrf-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level2">
@@ -762,8 +762,8 @@ Gaussian HRFs:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d152e398&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d152d608&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e6065ed8&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e6065148&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -780,7 +780,7 @@ Gaussian HRFs:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">resp_custom_set</span>, type <span class="op">=</span> <span class="st">'l'</span>, lty <span class="op">=</span> <span class="fl">1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"Custom Basis Set (Lagged Gaussians)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/custom_basis_lagged-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/custom_basis_lagged-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="creating-empirical-hrfs">Creating Empirical HRFs<a class="anchor" aria-label="anchor" href="#creating-empirical-hrfs"></a>
@@ -811,8 +811,8 @@ provided points.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">emp_hrf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (v) </span></span>
 <span><span class="co">#&gt; .approxfun(x, y, v, method, yleft, yright, f, na.rm)</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3cd0bdd70&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d2c855a0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e1621e50&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644e77d2d80&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -833,7 +833,7 @@ provided points.</p>
 <span>     xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"BOLD Response"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Empirical HRF from Simulated Average Profile"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">sim_times</span>, <span class="va">sim_profile_norm</span>, pch <span class="op">=</span> <span class="fl">16</span>, col <span class="op">=</span> <span class="st">"red"</span>, cex <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Show original points</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_single-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_single-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="empirical-basis-set-via-pca">Empirical Basis Set via PCA<a class="anchor" aria-label="anchor" href="#empirical-basis-set-via-pca"></a>
@@ -856,7 +856,7 @@ simulated HRFs.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">sim_times</span>, <span class="va">sim_mat</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/alpha.html" class="external-link">alpha</a></span><span class="op">(</span><span class="st">"gray"</span>, <span class="fl">0.7</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"Time (seconds)"</span>, ylab <span class="op">=</span> <span class="st">"Response"</span>, </span>
 <span>        main <span class="op">=</span> <span class="st">"Sample of Simulated HRF Profiles"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca-1.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># 2. Perform PCA on the transpose (each column = one HRF, each row = one time point)</span></span>
@@ -898,8 +898,8 @@ simulated HRFs.</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a3d152e398&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55a3d6745720&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5644e6065ed8&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x5644eb2f2e68&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -931,7 +931,7 @@ simulated HRFs.</p>
 <span>       y <span class="op">=</span> <span class="st">"Component Value"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca-2.png" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca-2.png" class="r-plt" width="672"></p>
 <p>This empirical basis set can then be used in regression models just
 like any other pre-defined or custom basis set.</p>
 </div>
@@ -947,7 +947,7 @@ like any other pre-defined or custom basis set.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

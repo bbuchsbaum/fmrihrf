@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2025-10-23</h4>
+            <h4 data-toc-skip class="date">2025-12-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_04_advanced_modeling.Rmd" class="external-link"><code>vignettes/a_04_advanced_modeling.Rmd</code></a></small>
       <div class="d-none name"><code>a_04_advanced_modeling.Rmd</code></div>
@@ -137,8 +137,8 @@ parameters:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55d50d6bbd08&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55d50d6be788&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x563b8efb13b8&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x563b8efac3d0&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -173,7 +173,7 @@ parameters:</p>
 <span>       y <span class="op">=</span> <span class="st">"HRF Response"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/gamma_library-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/gamma_library-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="example-2-library-of-lagged-spm-hrfs">Example 2: Library of Lagged SPM HRFs<a class="anchor" aria-label="anchor" href="#example-2-library-of-lagged-spm-hrfs"></a>
@@ -204,8 +204,8 @@ different temporal lags:</p>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55d50d6bbd08&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55d5177abb28&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x563b8efb13b8&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x563b9ad0b010&gt;</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
 <span><span class="co">#&gt; attr(,"name")</span></span>
@@ -233,7 +233,7 @@ different temporal lags:</p>
 <span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"HRF Response"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level2">
@@ -271,7 +271,7 @@ interpreting estimated HRFs from fMRI analyses.</p>
 <span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Basis Function Value"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Now demonstrate reconstruction with different coefficient patterns</span></span>
@@ -308,7 +308,7 @@ interpreting estimated HRFs from fMRI analyses.</p>
 <span>       y <span class="op">=</span> <span class="st">"HRF Response"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="interactive-visualization-building-an-hrf-step-by-step">Interactive Visualization: Building an HRF Step by Step<a class="anchor" aria-label="anchor" href="#interactive-visualization-building-an-hrf-step-by-step"></a>
@@ -354,7 +354,7 @@ interpreting estimated HRFs from fMRI analyses.</p>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
 <span>        strip.text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Show coefficient importance</span></span>
@@ -375,7 +375,7 @@ interpreting estimated HRFs from fMRI analyses.</p>
 <span>       y <span class="op">=</span> <span class="st">"Coefficient Value"</span>,</span>
 <span>       fill <span class="op">=</span> <span class="st">"Sign"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_interactive-2.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/reconstruction_interactive-2.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level2">
@@ -440,7 +440,7 @@ the same HRF but has different event timings.</p>
 <span>       y <span class="op">=</span> <span class="st">"Predicted BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Condition"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Add event markers</span></span>
@@ -461,7 +461,7 @@ the same HRF but has different event timings.</p>
 <span>       y <span class="op">=</span> <span class="st">"Predicted BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Condition"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="regressor-design-complex-block-designs">Regressor Design: Complex Block Designs<a class="anchor" aria-label="anchor" href="#regressor-design-complex-block-designs"></a>
@@ -511,16 +511,17 @@ handles block-relative timing and creates design matrices directly.</p>
 <span><span class="co">#&gt; [1] 240   2</span></span>
 <span></span>
 <span><span class="co"># Convert to data frame for plotting</span></span>
-<span><span class="va">time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/samples.html">samples</a></span><span class="op">(</span><span class="va">sframe</span><span class="op">)</span></span>
+<span><span class="co"># Use global=TRUE to get continuous time across blocks</span></span>
+<span><span class="va">time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/samples.html">samples</a></span><span class="op">(</span><span class="va">sframe</span>, global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">design_plot_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">design_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">design_plot_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Faces"</span>, <span class="st">"Houses"</span><span class="op">)</span></span>
 <span><span class="va">design_plot_df</span><span class="op">$</span><span class="va">Time</span> <span class="op">&lt;-</span> <span class="va">time_points</span></span>
 <span><span class="va">design_plot_df</span><span class="op">$</span><span class="va">Block</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, each <span class="op">=</span> <span class="fl">120</span><span class="op">)</span> <span class="co"># 120 scans per block</span></span>
 <span></span>
-<span><span class="va">design_plot_long</span> <span class="op">&lt;-</span> <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">design_plot_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Faces"</span>, <span class="st">"Houses"</span><span class="op">)</span>, </span>
+<span><span class="va">design_plot_long</span> <span class="op">&lt;-</span> <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">design_plot_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Faces"</span>, <span class="st">"Houses"</span><span class="op">)</span>,</span>
 <span>                                names_to <span class="op">=</span> <span class="st">"Condition"</span>, values_to <span class="op">=</span> <span class="st">"Response"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot with block separation</span></span>
+<span><span class="co"># Plot with block separation (block boundary at 240 seconds)</span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">design_plot_long</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span>, color <span class="op">=</span> <span class="va">Condition</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">240</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
@@ -531,7 +532,7 @@ handles block-relative timing and creates design matrices directly.</p>
 <span>       y <span class="op">=</span> <span class="st">"Predicted BOLD Response"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Condition"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png" width="672"></p>
+<p><img src="a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Show global vs block-relative timing</span></span>
@@ -566,7 +567,7 @@ handles block-relative timing and creates design matrices directly.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
