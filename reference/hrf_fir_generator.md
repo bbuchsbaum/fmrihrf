@@ -45,7 +45,6 @@ for a smoother alternative
 ``` r
 # Create FIR basis with 20 bins over 30 seconds
 custom_fir <- hrf_fir_generator(nbasis = 20, span = 30)
-#> Warning: Parameters nbasis, span, bin_width are not arguments to function fir and will be ignored
 t <- seq(0, 30, by = 0.1)
 response <- evaluate(custom_fir, t)
 matplot(t, response, type = "l", main = "FIR HRF with 20 time bins")

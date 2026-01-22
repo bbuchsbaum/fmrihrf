@@ -39,8 +39,8 @@ bs8 <- gen_hrf(hrf_bspline, N = 8, span = 32)
 print(bs8)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x56255215cc40>
-#> <environment: 0x5625521616c0>
+#> <bytecode: 0x56273d637e88>
+#> <environment: 0x56273d63ae10>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")

@@ -48,6 +48,6 @@ lagged_library <- hrf_library(
   function(lag) gen_hrf(HRF_SPMG1, lag = lag),
   param_grid2
 )
-#> Warning: Parameters P1, P2, A1, .lag are not arguments to function SPMG1_lag(2) and will be ignored
-#> Warning: Parameters P1, P2, A1, .lag are not arguments to function SPMG1_lag(4) and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_lag(2) and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_lag(4) and will be ignored
 ```

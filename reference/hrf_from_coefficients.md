@@ -50,5 +50,5 @@ response <- evaluate(custom_hrf, t)
 # Create from FIR basis
 fir_coeffs <- c(0, 0.2, 0.5, 1, 0.8, 0.4, 0.1, 0, 0, 0, 0, 0)
 custom_fir <- hrf_from_coefficients(HRF_FIR, fir_coeffs)
-#> Warning: Parameters coefficients are not arguments to function fir_from_coef and will be ignored
+#> Warning: Parameters nbasis, span, bin_width, coefficients are not arguments to function fir_from_coef and will be ignored
 ```

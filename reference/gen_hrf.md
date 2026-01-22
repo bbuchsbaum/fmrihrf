@@ -77,13 +77,10 @@ A final \`HRF\` object, potentially modified by decorators.
 ``` r
 # Lagged SPMG1
 grf_lag <- gen_hrf(HRF_SPMG1, lag=3)
-#> Warning: Parameters P1, P2, A1, .lag are not arguments to function SPMG1_lag(3) and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_lag(3) and will be ignored
 # Blocked Gaussian
 grf_block <- gen_hrf(hrf_gaussian, width=5, precision=0.2)
-#> Warning: Parameters .width, .precision, .half_life, .summate, .normalize are not arguments to function hrf_gaussian_block(w=5) and will be ignored
 # Lagged and Blocked, then Normalized
 grf_both_norm <- gen_hrf(HRF_SPMG1, lag=2, width=4, normalize=TRUE)
-#> Warning: Parameters P1, P2, A1, .width, .precision, .half_life, .summate, .normalize are not arguments to function SPMG1_block(w=4) and will be ignored
-#> Warning: Parameters .lag are not arguments to function SPMG1_block(w=4)_lag(2) and will be ignored
-#> Warning: Parameters .normalised are not arguments to function SPMG1_block(w=4)_lag(2)_norm and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_block(w=4) and will be ignored
 ```

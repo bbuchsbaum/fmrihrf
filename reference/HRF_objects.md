@@ -179,14 +179,12 @@ legend("topright", c("SPM Canonical", "Gamma", "Gaussian"),
 
 # Create custom FIR basis with 20 bins
 custom_fir <- getHRF("fir", nbasis = 20, span = 30)
-#> Warning: Parameters nbasis, span, bin_width are not arguments to function fir and will be ignored
 fir_response <- evaluate(custom_fir, times)
 matplot(times, fir_response, type = "l", main = "Custom FIR with 20 bins")
 
 
 # Create custom B-spline basis  
 custom_bspline <- hrf_bspline_generator(nbasis = 8, span = 25)
-#> Warning: Parameters nbasis, degree, span are not arguments to function bspline and will be ignored
 bspline_response <- evaluate(custom_bspline, times)
 matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basis functions")
 

@@ -25,10 +25,10 @@ and a Gaussian HRF (`HRF_GAUSSIAN`).
 print(HRF_SPMG1)
 #> function (t) 
 #> {
-#>     do.call(orig_f, c(list(t = t), params))
+#>     do.call(orig_f, c(list(t = t), callable_params_list))
 #> }
-#> <bytecode: 0x5644e15d4718>
-#> <environment: 0x5644e15d2e88>
+#> <bytecode: 0x55f7a59642b8>
+#> <environment: 0x55f7a595ef78>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -53,10 +53,10 @@ print(HRF_SPMG1)
 print(HRF_GAUSSIAN)
 #> function (t) 
 #> {
-#>     do.call(orig_f, c(list(t = t), params))
+#>     do.call(orig_f, c(list(t = t), callable_params_list))
 #> }
-#> <bytecode: 0x5644e1656998>
-#> <environment: 0x5644e1651e00>
+#> <bytecode: 0x55f7a59b7f10>
+#> <environment: 0x55f7a59b08f8>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -433,8 +433,8 @@ print(HRF_SPMG2)
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x5644e037e370>
-#> <environment: 0x5644e039d698>
+#> <bytecode: 0x55f7a5485810>
+#> <environment: 0x55f7a5490e70>
 #> attr(,"class")
 #> [1] "SPMG2_HRF" "HRF"       "function" 
 #> attr(,"name")
@@ -453,8 +453,8 @@ print(HRF_SPMG3)
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x5644e02b0bc0>
-#> <environment: 0x5644e02c21e8>
+#> <bytecode: 0x55f7a53cda48>
+#> <environment: 0x55f7a53e2ce8>
 #> attr(,"class")
 #> [1] "SPMG3_HRF" "HRF"       "function" 
 #> attr(,"name")
@@ -499,8 +499,8 @@ hrf_bs_5_3 <- gen_hrf(hrf_bspline, N = 5, degree = 3, name = "B-spline (N=5, deg
 print(hrf_bs_5_3)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644df5d65b0>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a41eb620>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -526,8 +526,8 @@ hrf_bs_10_1 <- gen_hrf(hrf_bspline, N = 10, degree = 1, name = "Tent Set (N=10)"
 print(hrf_bs_10_1)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644df283b78>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a3fa1678>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -556,8 +556,8 @@ hrf_sin_5 <- gen_hrf(hrf_sine, N = 5, name = "Sine Basis (N=5)")
 print(hrf_sin_5)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644da7435f8>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a36da678>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -609,8 +609,8 @@ hrf_gam <- gen_hrf(hrf_gamma, shape = 6, rate = 1, name = "Gamma (shape=6, rate=
 print(hrf_gam)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644e59df9a0>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a8ee1210>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -639,8 +639,8 @@ hrf_mh <- gen_hrf(hrf_mexhat, mean = 6, sd = 1.5, name = "Mexican Hat (mean=6, s
 print(hrf_mh)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644e4c3e6e0>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a9c17610>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -670,8 +670,8 @@ hrf_il <- gen_hrf(hrf_inv_logit, mu1 = 5, s1 = 1, mu2 = 15, s2 = 1.5, name = "In
 print(hrf_il)
 #> function (t) 
 #> hrf(t, ...)
-#> <bytecode: 0x5644e4cd9b98>
-#> <environment: 0x5644e512aa68>
+#> <bytecode: 0x55f7a92016f0>
+#> <environment: 0x55f7a9b62d00>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -712,8 +712,8 @@ print(hrf_custom_set) # Note: name is default 'hrf_set', nbasis is 6
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x5644e6065ed8>
-#> <environment: 0x5644e6065148>
+#> <bytecode: 0x55f7a9ec9988>
+#> <environment: 0x55f7a9ecc9f0>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -761,8 +761,8 @@ emp_hrf <- gen_empirical_hrf(sim_times, sim_profile_norm)
 print(emp_hrf)
 #> function (v) 
 #> .approxfun(x, y, v, method, yleft, yright, f, na.rm)
-#> <bytecode: 0x5644e1621e50>
-#> <environment: 0x5644e77d2d80>
+#> <bytecode: 0x55f7a59d9488>
+#> <environment: 0x55f7ab459310>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -852,8 +852,8 @@ print(emp_pca_basis)
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x5644e6065ed8>
-#> <environment: 0x5644eb2f2e68>
+#> <bytecode: 0x55f7a9ec9988>
+#> <environment: 0x55f7aea93e90>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")

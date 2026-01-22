@@ -62,7 +62,7 @@ Other HRF_decorator_functions:
 
 ``` r
 blocked_spmg1 <- block_hrf(HRF_SPMG1, width = 5)
-#> Warning: Parameters P1, P2, A1, .width, .precision, .half_life, .summate, .normalize are not arguments to function SPMG1_block(w=5) and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_block(w=5) and will be ignored
 t_vals <- seq(0, 30, by = 0.5)
 plot(t_vals, HRF_SPMG1(t_vals), type = 'l', col = "blue", ylab = "Response", xlab = "Time")
 lines(t_vals, blocked_spmg1(t_vals), col = "red")

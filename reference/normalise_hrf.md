@@ -37,7 +37,6 @@ Other HRF_decorator_functions:
 gauss_unnorm <- as_hrf(function(t) 5 * dnorm(t, 6, 2), name="unnorm_gauss")
 # Normalise it
 gauss_norm <- normalise_hrf(gauss_unnorm)
-#> Warning: Parameters .normalised are not arguments to function unnorm_gauss_norm and will be ignored
 t_vals <- seq(0, 20, by = 0.1)
 max(gauss_unnorm(t_vals)) # Peak is > 1
 #> [1] 0.9973557

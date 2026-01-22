@@ -34,7 +34,7 @@ Other HRF_decorator_functions:
 
 ``` r
 lagged_spmg1 <- lag_hrf(HRF_SPMG1, 5)
-#> Warning: Parameters P1, P2, A1, .lag are not arguments to function SPMG1_lag(5) and will be ignored
+#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_lag(5) and will be ignored
 # Evaluate at time 10; equivalent to HRF_SPMG1(10 - 5)
 lagged_spmg1(10)
 #> [1] 1.753946

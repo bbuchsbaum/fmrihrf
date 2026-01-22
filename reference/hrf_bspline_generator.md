@@ -37,7 +37,6 @@ a unified interface to create HRFs
 ``` r
 # Create B-spline basis with 10 functions
 custom_bs <- hrf_bspline_generator(nbasis = 10)
-#> Warning: Parameters nbasis, degree, span are not arguments to function bspline and will be ignored
 t <- seq(0, 24, by = 0.1)
 response <- evaluate(custom_bs, t)
 matplot(t, response, type = "l", main = "B-spline HRF with 10 basis functions")

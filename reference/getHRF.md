@@ -87,14 +87,12 @@ canonical <- getHRF("spmg1")
 
 # Create custom FIR basis with 20 bins
 fir20 <- getHRF("fir", nbasis = 20, span = 30)
-#> Warning: Parameters nbasis, span, bin_width are not arguments to function fir and will be ignored
 
 # Create B-spline basis with lag
 bs_lag <- getHRF("bspline", nbasis = 8, lag = 2)
-#> Warning: Parameters nbasis, degree, span are not arguments to function bspline and will be ignored
-#> Warning: Parameters .lag are not arguments to function bspline_lag(2) and will be ignored
+#> Warning: Parameters nbasis, degree, span are not arguments to function bspline_lag(2) and will be ignored
 
 # Create blocked Gaussian HRF
 block_gauss <- getHRF("gaussian", width = 5)
-#> Warning: Parameters mean, sd, .width, .precision, .half_life, .summate, .normalize are not arguments to function gaussian_block(w=5) and will be ignored
+#> Warning: Parameters mean, sd are not arguments to function gaussian_block(w=5) and will be ignored
 ```

@@ -62,8 +62,8 @@ print(gamma_lib)
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x563b8efb13b8>
-#> <environment: 0x563b8efac3d0>
+#> <bytecode: 0x55dd2cca91f8>
+#> <environment: 0x55dd2cca67b0>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
@@ -131,8 +131,8 @@ print(spm_lag_lib)
 #> {
 #>     do.call(cbind, lapply(xs, function(f) f(t)))
 #> }
-#> <bytecode: 0x563b8efb13b8>
-#> <environment: 0x563b9ad0b010>
+#> <bytecode: 0x55dd2cca91f8>
+#> <environment: 0x55dd361bd258>
 #> attr(,"class")
 #> [1] "HRF"      "function"
 #> attr(,"name")
