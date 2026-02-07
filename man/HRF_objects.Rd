@@ -27,14 +27,6 @@ HRF_FIR(t)
 }
 \arguments{
 \item{t}{Numeric vector of time points (in seconds) at which to evaluate the HRF}
-
-\item{P1, P2}{Shape parameters for SPM canonical HRF (default: P1=5, P2=15)}
-
-\item{A1}{Amplitude parameter for SPM canonical HRF (default: 0.0833)}
-
-\item{shape, rate}{Parameters for gamma distribution HRF (default: shape=6, rate=1)}
-
-\item{mean, sd}{Parameters for Gaussian HRF (default: mean=6, sd=2)}
 }
 \value{
 When called as functions, return numeric vectors or matrices of HRF values.
