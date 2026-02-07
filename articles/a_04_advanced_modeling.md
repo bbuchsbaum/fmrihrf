@@ -58,22 +58,9 @@ make_gamma_hrf <- function(shape, rate) {
 # Create HRF library
 gamma_lib <- hrf_library(make_gamma_hrf, gamma_params)
 print(gamma_lib)
-#> function (t) 
-#> {
-#>     do.call(cbind, lapply(xs, function(f) f(t)))
-#> }
-#> <bytecode: 0x55dd2cca91f8>
-#> <environment: 0x55dd2cca67b0>
-#> attr(,"class")
-#> [1] "HRF"      "function"
-#> attr(,"name")
-#> [1] "Gamma_4_0.8 + Gamma_6_0.8 + Gamma_8_0.8 + Gamma_4_1 + Gamma_6_1 + Gamma_8_1 + Gamma_4_1.2 + Gamma_6_1.2 + Gamma_8_1.2"
-#> attr(,"nbasis")
-#> [1] 9
-#> attr(,"span")
-#> [1] 24
-#> attr(,"params")
-#> list()
+#> -- HRF: Gamma_4_0.8 + Gamma_6_0.8 + Gamma_8_0.8 + Gamma_4_1 + Gamma_6_1 + Gamma_8_1 + Gamma_4_1.2 + Gamma_6_1.2 + Gamma_8_1.2 - 
+#>    Basis functions: 9 
+#>    Span: 24 s
 nbasis(gamma_lib) # 9 HRFs total (3 x 3 grid)
 #> [1] 9
 
@@ -127,22 +114,9 @@ create_lagged_spm <- function(lag) {
 
 spm_lag_lib <- hrf_library(create_lagged_spm, lag_params)
 print(spm_lag_lib)
-#> function (t) 
-#> {
-#>     do.call(cbind, lapply(xs, function(f) f(t)))
-#> }
-#> <bytecode: 0x55dd2cca91f8>
-#> <environment: 0x55dd361bd258>
-#> attr(,"class")
-#> [1] "HRF"      "function"
-#> attr(,"name")
-#> [1] "SPMG1_lag(-2) + SPMG1_lag(-1) + SPMG1_lag(0) + SPMG1_lag(1) + SPMG1_lag(2) + SPMG1_lag(3) + SPMG1_lag(4)"
-#> attr(,"nbasis")
-#> [1] 7
-#> attr(,"span")
-#> [1] 28
-#> attr(,"params")
-#> list()
+#> -- HRF: SPMG1_lag(-2) + SPMG1_lag(-1) + SPMG1_lag(0) + SPMG1_lag(1) + SPMG1_lag(2) + SPMG1_lag(3) + SPMG1_lag(4) - 
+#>    Basis functions: 7 
+#>    Span: 28 s
 
 # Evaluate and plot
 spm_lag_responses <- spm_lag_lib(time_points)

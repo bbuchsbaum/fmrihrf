@@ -73,6 +73,9 @@
 - [`hrf_basis_lwu()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_basis_lwu.md)
   : LWU HRF Basis for Taylor Expansion
 
+- [`hrf_boxcar()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_boxcar.md)
+  : Boxcar HRF (No Hemodynamic Delay)
+
 - [`hrf_bspline()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline.md)
   : B-spline HRF (hemodynamic response function)
 
@@ -101,7 +104,7 @@
   : Gaussian HRF (hemodynamic response function)
 
 - [`hrf_half_cosine()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_half_cosine.md)
-  : Hemodynamic Response Function with Half-Cosine Basis
+  : Half-cosine HRF
 
 - [`hrf_inv_logit()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_inv_logit.md)
   : hrf_inv_logit
@@ -126,6 +129,9 @@
 
 - [`hrf_toeplitz()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_toeplitz.md)
   : HRF Toeplitz Matrix
+
+- [`hrf_weighted()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.md)
+  : Weighted HRF (No Hemodynamic Delay)
 
 - [`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md)
   : Lag an HRF Object
@@ -153,6 +159,18 @@
 
 - [`plot(`*`<HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/plot.HRF.md)
   : Plot an HRF Object
+
+- [`plot(`*`<Reg>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/plot.Reg.md)
+  : Plot a Regressor Object
+
+- [`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md)
+  : Compare Multiple HRF Functions
+
+- [`plot_regressors()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_regressors.md)
+  : Compare Multiple Regressor Objects
+
+- [`print(`*`<HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/print.HRF.md)
+  : Print an HRF Object
 
 - [`print(`*`<Reg>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/print.md)
   [`print(`*`<sampling_frame>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/print.md)

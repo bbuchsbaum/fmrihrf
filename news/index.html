@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,10 +40,26 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="fmrihrf-development-version">fmrihrf (development version)<a class="anchor" aria-label="anchor" href="#fmrihrf-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="fmrihrf-020">fmrihrf 0.2.0<a class="anchor" aria-label="anchor" href="#fmrihrf-020"></a></h2>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
-<ul><li>Fixed critical bug in <code><a href="../reference/as_hrf.html">as_hrf()</a></code> where parameters stored in the <code>params</code> attribute were never used at evaluation time (#). Previously, calling <code>as_hrf(hrf_gamma, params = list(shape = 8, rate = 1.2))</code> would create an HRF that used the default parameter values instead of the specified ones. This caused <code><a href="../reference/hrf_library.html">hrf_library()</a></code> to produce perfectly collinear basis functions when different parameters were provided. The fix creates a closure that properly captures and applies parameters during evaluation.</li>
+<h3 id="new-features-0-2-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>New <code><a href="../reference/hrf_boxcar.html">hrf_boxcar()</a></code> function for simple boxcar (step function) HRFs with optional normalization.</li>
+<li>New <code><a href="../reference/hrf_weighted.html">hrf_weighted()</a></code> function for arbitrary weighted-window HRFs with constant or linear interpolation.</li>
+<li>
+<code><a href="../reference/regressor.html">regressor()</a></code> now accepts a list of HRF objects for trial-varying HRF designs.</li>
+<li>New <code><a href="../reference/plot.Reg.html">plot.Reg()</a></code> method for visualizing regressor objects.</li>
+<li>New <code><a href="../reference/plot_regressors.html">plot_regressors()</a></code> for comparing multiple regressors on one plot (ggplot2 or base R).</li>
+<li>New <code><a href="../reference/plot_hrfs.html">plot_hrfs()</a></code> for comparing multiple HRF shapes.</li>
+<li>New <code><a href="../reference/print.HRF.html">print.HRF()</a></code> method for concise HRF summaries.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-2-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2-0"></a></h3>
+<ul><li>Revised hemodynamic response and regressor vignettes.</li>
+<li>Expanded test suite for new HRF types and trial-varying regressors.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
+<ul><li>Fixed critical bug in <code><a href="../reference/as_hrf.html">as_hrf()</a></code> where parameters stored in the <code>params</code> attribute were never used at evaluation time. The fix creates a closure that properly captures and applies parameters during evaluation.</li>
 </ul></div>
 </div>
     <div class="section level2">

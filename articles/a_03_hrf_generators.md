@@ -37,20 +37,9 @@ a B-spline basis with 8 functions spanning 32 seconds:
 # Create a B-spline basis using gen_hrf
 bs8 <- gen_hrf(hrf_bspline, N = 8, span = 32)
 print(bs8)
-#> function (t) 
-#> hrf(t, ...)
-#> <bytecode: 0x56273d637e88>
-#> <environment: 0x56273d63ae10>
-#> attr(,"class")
-#> [1] "HRF"      "function"
-#> attr(,"name")
-#> [1] "hrf_bspline"
-#> attr(,"nbasis")
-#> [1] 8
-#> attr(,"span")
-#> [1] 32
-#> attr(,"params")
-#> list()
+#> -- HRF: hrf_bspline --------------------------------------- 
+#>    Basis functions: 8 
+#>    Span: 32 s
 ```
 
 The returned value is a standard `HRF` object, so you can evaluate it or

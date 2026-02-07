@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-01-22</h4>
+            <h4 data-toc-skip class="date">2026-02-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_02_regressor.Rmd" class="external-link"><code>vignettes/a_02_regressor.Rmd</code></a></small>
       <div class="d-none name"><code>a_02_regressor.Rmd</code></div>
@@ -123,18 +123,9 @@ times), we use the <code><a href="../reference/evaluate.html">evaluate()</a></co
 <span><span class="va">TR</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
 <span><span class="va">scan_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">140</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Evaluate the regressor at scan times</span></span>
-<span><span class="va">predicted_bold</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg1</span>, <span class="va">scan_times</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Plot the predicted timecourse using ggplot2</span></span>
-<span><span class="va">plot_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times</span>, Response <span class="op">=</span> <span class="va">predicted_bold</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg1</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Predicted BOLD Response (SPM HRF)"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Plot the regressor using the plot() method</span></span>
+<span><span class="co"># This automatically evaluates and plots with onset markers</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg1</span>, grid <span class="op">=</span> <span class="va">scan_times</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
@@ -152,19 +143,9 @@ length of <code>onsets</code>.</p>
 <span><span class="va">reg_var_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_var_dur</span>, <span class="va">HRF_SPMG1</span>, duration <span class="op">=</span> <span class="va">durations_var</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_var_dur</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Evaluate and plot</span></span>
+<span><span class="co"># Plot the regressor</span></span>
 <span><span class="va">scan_times_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_var_dur</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
-<span><span class="va">pred_var_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_var_dur</span>, <span class="va">scan_times_dur</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_df_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times_dur</span>, Response <span class="op">=</span> <span class="va">pred_var_dur</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_dur</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_var_dur</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Regressor with Varying Event Durations"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Duration increases over time"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_var_dur</span>, grid <span class="op">=</span> <span class="va">scan_times_dur</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/varying_duration-1.png" class="r-plt" alt="" width="672"></p>
 <div class="section level3">
 <h3 id="duration-and-summation">Duration and Summation<a class="anchor" aria-label="anchor" href="#duration-and-summation"></a>
@@ -175,21 +156,15 @@ accumulates if events overlap or have extended duration. Setting
 increases with duration, but the peak amplitude doesn’t necessarily.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create regressor with varying durations, summate=FALSE</span></span>
-<span><span class="va">reg_var_dur_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_var_dur</span>, <span class="va">HRF_SPMG1</span>, </span>
+<span><span class="va">reg_var_dur_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_var_dur</span>, <span class="va">HRF_SPMG1</span>,</span>
 <span>                               duration <span class="op">=</span> <span class="va">durations_var</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Evaluate and plot</span></span>
-<span><span class="va">pred_var_dur_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_var_dur_nosum</span>, <span class="va">scan_times_dur</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_df_dur_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times_dur</span>, Response <span class="op">=</span> <span class="va">pred_var_dur_nosum</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_dur_nosum</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_var_dur_nosum</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Regressor with Varying Durations (summate=FALSE)"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Models saturation, peak height may not increase with duration"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Compare summating vs non-summating using plot_regressors()</span></span>
+<span><span class="fu"><a href="../reference/plot_regressors.html">plot_regressors</a></span><span class="op">(</span><span class="va">reg_var_dur</span>, <span class="va">reg_var_dur_nosum</span>,</span>
+<span>                labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"summate=TRUE"</span>, <span class="st">"summate=FALSE"</span><span class="op">)</span>,</span>
+<span>                grid <span class="op">=</span> <span class="va">scan_times_dur</span>,</span>
+<span>                title <span class="op">=</span> <span class="st">"Effect of Summation on Response"</span>,</span>
+<span>                subtitle <span class="op">=</span> <span class="st">"Same events with varying durations"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/duration_no_summate-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 </div>
@@ -212,22 +187,9 @@ is scaled by the corresponding amplitude value.</p>
 <span><span class="va">reg_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_amp</span>, <span class="va">HRF_SPMG1</span>, amplitude <span class="op">=</span> <span class="va">amplitudes_scaled</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_amp</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Evaluate and plot</span></span>
+<span><span class="co"># Plot the parametric regressor</span></span>
 <span><span class="va">scan_times_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_amp</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
-<span><span class="va">pred_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_amp</span>, <span class="va">scan_times_amp</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_df_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times_amp</span>, Response <span class="op">=</span> <span class="va">pred_amp</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_amp</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_amp</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="co"># Add points showing amplitude (scaled for visibility)</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_amp</span><span class="op">)</span>, Amplitude <span class="op">=</span> <span class="fu"><a href="../reference/amplitudes.html">amplitudes</a></span><span class="op">(</span><span class="va">reg_amp</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>             <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Amplitude</span> <span class="op">*</span> <span class="fl">0.2</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Parametric Regressor with Varying Amplitude"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Amplitude (centered) increases over time"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_amp</span>, grid <span class="op">=</span> <span class="va">scan_times_amp</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
@@ -245,18 +207,9 @@ vectors to model events that vary in both aspects.</p>
 <span>                      amplitude <span class="op">=</span> <span class="va">amps_comb</span>, duration <span class="op">=</span> <span class="va">durs_comb</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_comb</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Evaluate and plot</span></span>
+<span><span class="co"># Plot the combined regressor</span></span>
 <span><span class="va">scan_times_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_comb</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
-<span><span class="va">pred_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_comb</span>, <span class="va">scan_times_comb</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_df_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times_comb</span>, Response <span class="op">=</span> <span class="va">pred_comb</span><span class="op">)</span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_comb</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_comb</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Regressor with Varying Duration and Amplitude"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_comb</span>, grid <span class="op">=</span> <span class="va">scan_times_comb</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/duration_amplitude-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
@@ -283,20 +236,8 @@ matrix.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pred_basis_matrix</span><span class="op">)</span> <span class="co"># rows = time points, cols = basis functions</span></span>
 <span><span class="co">#&gt; [1] 76  5</span></span>
 <span></span>
-<span><span class="co"># Or plot manually with ggplot</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pred_basis_matrix</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Basis_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pred_basis_matrix</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">plot_df_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">pred_basis_matrix</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Time <span class="op">=</span> <span class="va">scan_times_basis</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="va">Time</span>, names_to <span class="op">=</span> <span class="st">"Basis"</span>, values_to <span class="op">=</span> <span class="st">"Response"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_basis</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span>, color <span class="op">=</span> <span class="va">Basis</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_basis</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Regressor using B-Spline Basis Set (N=5)"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span>,</span>
-<span>       color <span class="op">=</span> <span class="st">"Basis Function"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Plot using the plot() method - automatically handles multi-basis</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_basis</span>, grid <span class="op">=</span> <span class="va">scan_times_basis</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/basis_set_regressor-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
@@ -316,27 +257,13 @@ matrix.</p>
 <span><span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_shifted</span><span class="op">)</span> <span class="co"># Onsets are now 15, 35, 55</span></span>
 <span><span class="co">#&gt; [1] 15 35 55</span></span>
 <span></span>
-<span><span class="co"># Plot both</span></span>
+<span><span class="co"># Compare original and shifted using plot_regressors()</span></span>
 <span><span class="va">scan_times_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">80</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
-<span><span class="va">pred_orig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_orig</span>, <span class="va">scan_times_shift</span><span class="op">)</span></span>
-<span><span class="va">pred_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg_shifted</span>, <span class="va">scan_times_shift</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_df_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Time <span class="op">=</span> <span class="va">scan_times_shift</span>,</span>
-<span>  Original <span class="op">=</span> <span class="va">pred_orig</span>,</span>
-<span>  Shifted_p5s <span class="op">=</span> <span class="va">pred_shifted</span></span>
-<span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="va">Time</span>, names_to <span class="op">=</span> <span class="st">"Regressor"</span>, values_to <span class="op">=</span> <span class="st">"Response"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df_shift</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span>, y <span class="op">=</span> <span class="va">Response</span>, color <span class="op">=</span> <span class="va">Regressor</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_line</span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_orig</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg_shifted</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"blue"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shifting a Regressor"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Original (red lines) vs. Shifted +5s (blue lines)"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Time (seconds)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Predicted Response"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_regressors.html">plot_regressors</a></span><span class="op">(</span><span class="va">reg_orig</span>, <span class="va">reg_shifted</span>,</span>
+<span>                labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Original"</span>, <span class="st">"Shifted +5s"</span><span class="op">)</span>,</span>
+<span>                grid <span class="op">=</span> <span class="va">scan_times_shift</span>,</span>
+<span>                show_onsets <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Show onsets for both</span></span>
+<span>                title <span class="op">=</span> <span class="st">"Shifting a Regressor"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_02_regressor_files/figure-html/shift_regressor-1.png" class="r-plt" alt="" width="672"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-01-22</h4>
+            <h4 data-toc-skip class="date">2026-02-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_04_advanced_modeling.Rmd" class="external-link"><code>vignettes/a_04_advanced_modeling.Rmd</code></a></small>
       <div class="d-none name"><code>a_04_advanced_modeling.Rmd</code></div>
@@ -133,22 +133,9 @@ parameters:</p>
 <span><span class="co"># Create HRF library</span></span>
 <span><span class="va">gamma_lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_library.html">hrf_library</a></span><span class="op">(</span><span class="va">make_gamma_hrf</span>, <span class="va">gamma_params</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamma_lib</span><span class="op">)</span></span>
-<span><span class="co">#&gt; function (t) </span></span>
-<span><span class="co">#&gt; {</span></span>
-<span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
-<span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55dd2cca91f8&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55dd2cca67b0&gt;</span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
-<span><span class="co">#&gt; attr(,"name")</span></span>
-<span><span class="co">#&gt; [1] "Gamma_4_0.8 + Gamma_6_0.8 + Gamma_8_0.8 + Gamma_4_1 + Gamma_6_1 + Gamma_8_1 + Gamma_4_1.2 + Gamma_6_1.2 + Gamma_8_1.2"</span></span>
-<span><span class="co">#&gt; attr(,"nbasis")</span></span>
-<span><span class="co">#&gt; [1] 9</span></span>
-<span><span class="co">#&gt; attr(,"span")</span></span>
-<span><span class="co">#&gt; [1] 24</span></span>
-<span><span class="co">#&gt; attr(,"params")</span></span>
-<span><span class="co">#&gt; list()</span></span>
+<span><span class="co">#&gt; -- HRF: Gamma_4_0.8 + Gamma_6_0.8 + Gamma_8_0.8 + Gamma_4_1 + Gamma_6_1 + Gamma_8_1 + Gamma_4_1.2 + Gamma_6_1.2 + Gamma_8_1.2 - </span></span>
+<span><span class="co">#&gt;    Basis functions: 9 </span></span>
+<span><span class="co">#&gt;    Span: 24 s</span></span>
 <span><span class="fu"><a href="../reference/nbasis.html">nbasis</a></span><span class="op">(</span><span class="va">gamma_lib</span><span class="op">)</span> <span class="co"># 9 HRFs total (3 x 3 grid)</span></span>
 <span><span class="co">#&gt; [1] 9</span></span>
 <span></span>
@@ -200,22 +187,9 @@ different temporal lags:</p>
 <span></span>
 <span><span class="va">spm_lag_lib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_library.html">hrf_library</a></span><span class="op">(</span><span class="va">create_lagged_spm</span>, <span class="va">lag_params</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">spm_lag_lib</span><span class="op">)</span></span>
-<span><span class="co">#&gt; function (t) </span></span>
-<span><span class="co">#&gt; {</span></span>
-<span><span class="co">#&gt;     do.call(cbind, lapply(xs, function(f) f(t)))</span></span>
-<span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55dd2cca91f8&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x55dd361bd258&gt;</span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "HRF"      "function"</span></span>
-<span><span class="co">#&gt; attr(,"name")</span></span>
-<span><span class="co">#&gt; [1] "SPMG1_lag(-2) + SPMG1_lag(-1) + SPMG1_lag(0) + SPMG1_lag(1) + SPMG1_lag(2) + SPMG1_lag(3) + SPMG1_lag(4)"</span></span>
-<span><span class="co">#&gt; attr(,"nbasis")</span></span>
-<span><span class="co">#&gt; [1] 7</span></span>
-<span><span class="co">#&gt; attr(,"span")</span></span>
-<span><span class="co">#&gt; [1] 28</span></span>
-<span><span class="co">#&gt; attr(,"params")</span></span>
-<span><span class="co">#&gt; list()</span></span>
+<span><span class="co">#&gt; -- HRF: SPMG1_lag(-2) + SPMG1_lag(-1) + SPMG1_lag(0) + SPMG1_lag(1) + SPMG1_lag(2) + SPMG1_lag(3) + SPMG1_lag(4) - </span></span>
+<span><span class="co">#&gt;    Basis functions: 7 </span></span>
+<span><span class="co">#&gt;    Span: 28 s</span></span>
 <span></span>
 <span><span class="co"># Evaluate and plot</span></span>
 <span><span class="va">spm_lag_responses</span> <span class="op">&lt;-</span> <span class="fu">spm_lag_lib</span><span class="op">(</span><span class="va">time_points</span><span class="op">)</span></span>

@@ -26,10 +26,21 @@ regressor(
 - hrf:
 
   The hemodynamic response function (HRF) to convolve with the events.
-  This can be a pre-defined \`HRF\` object (e.g., \`HRF_SPMG1\`), a
-  custom \`HRF\` object created with \`as_hrf\`, a function \`f(t)\`, or
-  a character string referring to a known HRF type (e.g., "spmg1",
-  "gaussian"). Defaults to \`HRF_SPMG1\`.
+  This can be:
+
+  - A pre-defined \`HRF\` object (e.g., \`HRF_SPMG1\`)
+
+  - A custom \`HRF\` object created with \`as_hrf\`
+
+  - A function \`f(t)\`
+
+  - A character string referring to a known HRF type (e.g., "spmg1",
+    "gaussian")
+
+  - A \*\*list of HRF objects\*\* for trial-varying HRFs (one per event,
+    or length 1 to recycle)
+
+  Defaults to \`HRF_SPMG1\`.
 
 - duration:
 
@@ -47,7 +58,8 @@ regressor(
   The temporal window (in seconds) over which the HRF is defined or
   evaluated. This influences the length of the convolution. If not
   provided, it may be inferred from the \`hrf\` object or default to
-  40s. \*\*Note:\*\* Unlike some previous versions, the \`span\` is not
+  40s. For list HRFs, the maximum span across all HRFs is used.
+  \*\*Note:\*\* Unlike some previous versions, the \`span\` is not
   automatically adjusted based on \`duration\`; ensure the provided or
   inferred \`span\` is sufficient for your longest event duration.
 
@@ -63,7 +75,8 @@ regressor(
 An S3 object of class \`Reg\` and \`list\` containing processed event
 information and the HRF specification. The object includes a
 \`filtered_all\` attribute indicating whether all events were removed
-due to zero or \`NA\` amplitudes.
+due to zero or \`NA\` amplitudes, and an \`hrf_is_list\` attribute
+indicating whether trial-varying HRFs are used.
 
 ## Details
 
@@ -73,6 +86,14 @@ performs validation and efficient storage. The resulting object can be
 evaluated at specific time points using the \`evaluate()\` function.
 
 Events with an amplitude of 0 are automatically filtered out.
+
+\## Trial-Varying HRFs
+
+When \`hrf\` is a list of HRF objects, each event can have its own HRF.
+This is useful for trial-wise analyses where different events may have
+different temporal characteristics (e.g., different boxcar windows,
+different weights). The list must have either length 1 (recycled to all
+events) or length equal to the number of onsets.
 
 ## Examples
 
@@ -94,4 +115,14 @@ reg_gamma <- regressor(onsets = c(10, 30), hrf = "gamma")
 # Evaluate regressor at specific time points
 times <- seq(0, 60, by = 0.1)
 response <- evaluate(reg, times)
+
+# Trial-varying HRFs: different boxcar windows for each event
+hrf1 <- hrf_boxcar(width = 4, normalize = TRUE)
+#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[4] and will be ignored
+hrf2 <- hrf_boxcar(width = 6, normalize = TRUE)
+#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[6] and will be ignored
+reg_varying <- regressor(
+  onsets = c(10, 30),
+  hrf = list(hrf1, hrf2)
+)
 ```

@@ -49,6 +49,7 @@ A numeric matrix of dimension `length(t) x 4`. The columns represent:
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html)
 
 Other hrf_functions:
+[`hrf_boxcar()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_boxcar.md),
 [`hrf_bspline()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline.md),
 [`hrf_gamma()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_gamma.md),
 [`hrf_gaussian()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_gaussian.md),
@@ -57,7 +58,8 @@ Other hrf_functions:
 [`hrf_mexhat()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_mexhat.md),
 [`hrf_sine()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.md),
 [`hrf_spmg1()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1.md),
-[`hrf_time()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.md)
+[`hrf_time()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.md),
+[`hrf_weighted()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.md)
 
 ## Examples
 

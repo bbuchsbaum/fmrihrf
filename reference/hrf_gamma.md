@@ -34,6 +34,7 @@ A numeric vector representing the gamma HRF at the given time points
 
 Other hrf_functions:
 [`hrf_basis_lwu()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_basis_lwu.md),
+[`hrf_boxcar()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_boxcar.md),
 [`hrf_bspline()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline.md),
 [`hrf_gaussian()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_gaussian.md),
 [`hrf_inv_logit()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_inv_logit.md),
@@ -41,7 +42,8 @@ Other hrf_functions:
 [`hrf_mexhat()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_mexhat.md),
 [`hrf_sine()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.md),
 [`hrf_spmg1()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1.md),
-[`hrf_time()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.md)
+[`hrf_time()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.md),
+[`hrf_weighted()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.md)
 
 ## Examples
 

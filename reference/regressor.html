@@ -11,7 +11,7 @@ response function (HRF) to generate predicted time courses."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,9 +72,12 @@ response function (HRF) to generate predicted time courses.</p>
 
 <dt id="arg-hrf">hrf<a class="anchor" aria-label="anchor" href="#arg-hrf"></a></dt>
 <dd><p>The hemodynamic response function (HRF) to convolve with the events.
-This can be a pre-defined `HRF` object (e.g., `HRF_SPMG1`), a custom `HRF`
-object created with `as_hrf`, a function `f(t)`, or a character string
-referring to a known HRF type (e.g., "spmg1", "gaussian"). Defaults to `HRF_SPMG1`.</p></dd>
+This can be:</p><ul><li><p>A pre-defined `HRF` object (e.g., `HRF_SPMG1`)</p></li>
+<li><p>A custom `HRF` object created with `as_hrf`</p></li>
+<li><p>A function `f(t)`</p></li>
+<li><p>A character string referring to a known HRF type (e.g., "spmg1", "gaussian")</p></li>
+<li><p>A **list of HRF objects** for trial-varying HRFs (one per event, or length 1 to recycle)</p></li>
+</ul><p>Defaults to `HRF_SPMG1`.</p></dd>
 
 
 <dt id="arg-duration">duration<a class="anchor" aria-label="anchor" href="#arg-duration"></a></dt>
@@ -90,8 +93,9 @@ for each event. If scalar, it's applied to all events. Defaults to 1.</p></dd>
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
 <dd><p>The temporal window (in seconds) over which the HRF is defined
 or evaluated. This influences the length of the convolution. If not provided,
-it may be inferred from the `hrf` object or default to 40s. **Note:** Unlike some
-previous versions, the `span` is not automatically adjusted based on `duration`;
+it may be inferred from the `hrf` object or default to 40s. For list HRFs,
+the maximum span across all HRFs is used. **Note:** Unlike some previous
+versions, the `span` is not automatically adjusted based on `duration`;
 ensure the provided or inferred `span` is sufficient for your longest event duration.</p></dd>
 
 
@@ -106,7 +110,8 @@ the response reflects the peak HRF reached during the event duration.</p></dd>
     <p>An S3 object of class `Reg` and `list`
   containing processed event information and the HRF specification. The
   object includes a `filtered_all` attribute indicating whether all events
-  were removed due to zero or `NA` amplitudes.</p>
+  were removed due to zero or `NA` amplitudes, and an `hrf_is_list` attribute
+  indicating whether trial-varying HRFs are used.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -115,6 +120,12 @@ Internally, it utilizes the `Reg()` constructor which performs validation and
 efficient storage. The resulting object can be evaluated at specific time points
 using the `evaluate()` function.</p>
 <p>Events with an amplitude of 0 are automatically filtered out.</p>
+<p>## Trial-Varying HRFs</p>
+<p>When `hrf` is a list of HRF objects, each event can have its own HRF. This is
+useful for trial-wise analyses where different events may have different
+temporal characteristics (e.g., different boxcar windows, different weights).
+The list must have either length 1 (recycled to all events) or length equal
+to the number of onsets.</p>
     </div>
 
     <div class="section level2">
@@ -136,6 +147,16 @@ using the `evaluate()` function.</p>
 <span class="r-in"><span><span class="co"># Evaluate regressor at specific time points</span></span></span>
 <span class="r-in"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg</span>, <span class="va">times</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Trial-varying HRFs: different boxcar windows for each event</span></span></span>
+<span class="r-in"><span><span class="va">hrf1</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters width, amplitude, normalize are not arguments to function boxcar[4] and will be ignored</span>
+<span class="r-in"><span><span class="va">hrf2</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">6</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters width, amplitude, normalize are not arguments to function boxcar[6] and will be ignored</span>
+<span class="r-in"><span><span class="va">reg_varying</span> <span class="op">&lt;-</span> <span class="fu">regressor</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  hrf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">hrf1</span>, <span class="va">hrf2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

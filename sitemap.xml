@@ -8,7 +8,6 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/a_04_advanced_modeling.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/articles/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/authors.html</loc></url>
-<url><loc>https://bbuchsbaum.github.io/fmrihrf/fmrihrf_cheatsheet_v3.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/news/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/HRF-class.html</loc></url>
@@ -37,6 +36,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/getHRF.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/global_onsets.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_basis_lwu.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_boxcar.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline_generator.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_daguerre_generator.html</loc></url>
@@ -57,6 +57,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_tent_generator.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_toeplitz.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/list_available_hrfs.html</loc></url>
@@ -67,6 +68,10 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/onsets.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/penalty_matrix.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot.HRF.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot.Reg.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot_regressors.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/print.HRF.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/print.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/reconstruction_matrix.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/regressor.html</loc></url>
