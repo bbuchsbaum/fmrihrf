@@ -55,8 +55,89 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-Creates, manipulates, and evaluates hemodynamic response functions and event-related regressors for functional magnetic resonance imaging data analysis. Supports multiple basis sets including Canonical, Gamma, Gaussian, B-spline, and Fourier bases. Features decorators for time-shifting and blocking, and efficient convolution algorithms for regressor construction. Methods are based on standard fMRI analysis techniques as described in Jezzard et al. (2001, ISBN:9780192630711).
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="fmrihrf">fmrihrf<a class="anchor" aria-label="anchor" href="#fmrihrf"></a>
+</h1></div>
+<!-- badges: start -->
+
+<p>Hemodynamic response functions and event-related regressors for fMRI analysis in R.</p>
+<p><strong>fmrihrf</strong> provides a composable toolkit for constructing, modifying, and convolving HRFs with experimental designs. It ships with standard basis sets (SPM canonical, B-spline, Fourier, FIR, Gamma, Gaussian, and more), decorators for time-shifting and blocking, and a fast C++ convolution backend.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># From CRAN</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fmrihrf"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Development version</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bbuchsbaum/fmrihrf"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bbuchsbaum.github.io/fmrihrf/">fmrihrf</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Evaluate the SPM canonical HRF over 0-30 seconds</span></span>
+<span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, <span class="va">t</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">y</span>, type <span class="op">=</span> <span class="st">"l"</span>, xlab <span class="op">=</span> <span class="st">"Time (s)"</span>, ylab <span class="op">=</span> <span class="st">"Response"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Build a regressor from event onsets</span></span>
+<span><span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">18</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span>,</span>
+<span>                 duration <span class="op">=</span> <span class="fl">0</span>, amplitude <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                 span <span class="op">=</span> <span class="fl">24</span>, sampling_frame <span class="op">=</span> <span class="fu"><a href="reference/sampling_frame.html">sampling_frame</a></span><span class="op">(</span>blocklens <span class="op">=</span> <span class="fl">100</span>, TR <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="key-features">Key features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+</h2>
+<p><strong>Multiple basis sets</strong> — Use a single canonical HRF or a flexible basis set to capture response variability.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">HRF_SPMG1</span>                                    <span class="co"># SPM canonical (double gamma)</span></span>
+<span><span class="va">HRF_SPMG3</span>                                    <span class="co"># canonical + temporal &amp; dispersion derivatives</span></span>
+<span><span class="fu"><a href="reference/hrf_bspline.html">hrf_bspline</a></span><span class="op">(</span><span class="va">t</span>, N <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>                        <span class="co"># B-spline basis</span></span>
+<span><span class="fu"><a href="reference/hrf_fourier.html">hrf_fourier</a></span><span class="op">(</span><span class="va">t</span>, N <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>                        <span class="co"># Fourier basis</span></span></code></pre></div>
+<p><strong>Decorators</strong> — Modify any HRF through functional composition.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, lag <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>                  <span class="co"># shift peak by 2 s</span></span>
+<span><span class="fu"><a href="reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>             <span class="co"># sustained/blocked response</span></span>
+<span><span class="fu"><a href="reference/normalise_hrf.html">normalise_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span><span class="op">)</span>                     <span class="co"># unit peak-normalised</span></span></code></pre></div>
+<p><strong>Custom HRFs</strong> — Wrap any <code>f(t)</code> into the HRF system.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_hrf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_hrf.html">as_hrf</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">t</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"exponential"</span>, span <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">my_hrf</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Regressor construction</strong> — Convolve events with HRFs to produce design-matrix columns, with support for variable durations, amplitudes, and multi-basis expansion.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sampling_frame.html">sampling_frame</a></span><span class="op">(</span>blocklens <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">200</span><span class="op">)</span>, TR <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span>,</span>
+<span>                 duration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">0</span><span class="op">)</span>, amplitude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                 sampling_frame <span class="op">=</span> <span class="va">sf</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">reg</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Fast convolution</strong> — Core routines are implemented in C++ (Rcpp / RcppArmadillo) for efficient large-scale design matrix generation.</p>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>Full documentation is available at <a href="https://bbuchsbaum.github.io/fmrihrf/" class="uri">https://bbuchsbaum.github.io/fmrihrf/</a>.</p>
+<p>Vignettes cover the main workflows:</p>
+<ul>
+<li>
+<a href="https://bbuchsbaum.github.io/fmrihrf/articles/a_01_hemodynamic_response.html">Hemodynamic Response Functions</a> — overview of built-in HRFs and the basis-set system</li>
+<li>
+<a href="https://bbuchsbaum.github.io/fmrihrf/articles/a_02_regressor.html">Building Regressors</a> — constructing design-matrix regressors from event timing</li>
+<li>
+<a href="https://bbuchsbaum.github.io/fmrihrf/articles/a_03_hrf_generators.html">HRF Generators</a> — programmatically generating families of HRFs</li>
+<li>
+<a href="https://bbuchsbaum.github.io/fmrihrf/articles/a_04_advanced_modeling.html">Advanced Modeling and Design</a> — multi-basis designs, trial-varying HRFs, and more</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>MIT</p>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -90,7 +171,13 @@ Creates, manipulates, and evaluates hemodynamic response functions and event-rel
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=fmrihrf" class="external-link"><img src="https://www.r-pkg.org/badges/version/fmrihrf" alt="CRAN status"></a></li>
+<li><a href="https://github.com/bbuchsbaum/fmrihrf/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/bbuchsbaum/fmrihrf/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
