@@ -23,3 +23,7 @@ Segments: 0->f1 (h1), f1->1 (h2), 1->f2 (h3), f2->0 (h4).
 Negative f1 gives an initial dip; negative f2 gives an undershoot.
 Peak is at t = h1 + h2 (amplitude 1 by construction).
 }
+\examples{
+t <- seq(0, 30, by = 0.1)
+y <- hrf_half_cosine(t)
+}

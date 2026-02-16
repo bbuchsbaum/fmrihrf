@@ -121,7 +121,7 @@ plot_hrfs(hrf_spm_w1_norm, hrf_spm_w2_norm, hrf_spm_w4_norm,
 
 ### Modeling Saturation with `summate`
 
-The `summate` argument in `block_hrf` controls whether the response accumulates over the duration (`summate=TRUE`, default) or saturates (`summate=FALSE`). Saturation implies that the response reaches a plateau and doesn't increase further with longer stimulation.
+The `summate` argument in `block_hrf` controls whether the response accumulates over the duration (`summate=TRUE`, default) or stays constant (`summate=FALSE`). When `summate=FALSE`, the temporal profile is identical to the summated version but the peak amplitude does not grow with block duration.
 
 ```{r blocked_summate_false}
 # Create non-summating blocked HRFs
