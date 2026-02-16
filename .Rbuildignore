@@ -19,3 +19,4 @@
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
 check_rd_tags.R
+.omc
