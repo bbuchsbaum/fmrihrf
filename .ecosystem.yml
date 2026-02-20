@@ -1,11 +1,48 @@
 ecosystem: true
 package: fmrihrf
 language: R
-role: ingest
+role: model
 tags:
-  - bids
+  - hemodynamic
+  - regressor
+  - hrf
+  - convolve
   - neuroimaging
   - fmri
-entrypoints: []
+  - glm
+  - design-matrix
+  - bold
+  - basis-set
+entrypoints:
+  - fmrihrf::regressor
+  - fmrihrf::single_trial_regressor
+  - fmrihrf::sampling_frame
+  - fmrihrf::evaluate
+  - fmrihrf::getHRF
+  - fmrihrf::gen_hrf
+  - fmrihrf::HRF_SPMG1
+  - fmrihrf::HRF_SPMG2
+  - fmrihrf::HRF_SPMG3
+  - fmrihrf::HRF_GAMMA
+  - fmrihrf::HRF_GAUSSIAN
+  - fmrihrf::HRF_BSPLINE
+  - fmrihrf::HRF_FIR
+  - fmrihrf::as_hrf
+  - fmrihrf::bind_basis
+  - fmrihrf::hrf_set
+  - fmrihrf::hrf_library
+  - fmrihrf::lag_hrf
+  - fmrihrf::block_hrf
+  - fmrihrf::normalise_hrf
+  - fmrihrf::empirical_hrf
+  - fmrihrf::hrf_bspline_generator
+  - fmrihrf::hrf_fir_generator
+  - fmrihrf::hrf_fourier_generator
+  - fmrihrf::hrf_tent_generator
+  - fmrihrf::hrf_lwu
+  - fmrihrf::hrf_boxcar
+  - fmrihrf::hrf_weighted
+  - fmrihrf::plot_hrfs
+  - fmrihrf::list_available_hrfs
 release_tag: eco-atlas
 asset: atlas-pack.tgz
