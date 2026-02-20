@@ -72,7 +72,7 @@ extract_roxygen_summary <- function(file_lines, func_start_line) {
 }
 
 pairlist_to_signature <- function(fn_call) {
-  if (!is.call(fn_call) || as.character(fn_call[[1]]) != "function") return(NULL)
+  if (!is.call(fn_call) || !is.symbol(fn_call[[1]]) || as.character(fn_call[[1]]) != "function") return(NULL)
   args <- fn_call[[2]]
   args_str <- paste(deparse(args), collapse = " ")
   args_str <- sub("^pairlist\\(", "", args_str)
@@ -100,7 +100,7 @@ collect_r_defs <- function(r_files) {
       if (!is.symbol(lhs)) next
       nm <- as.character(lhs)
 
-      if (!is.call(rhs) || as.character(rhs[[1]]) != "function") next
+      if (!is.call(rhs) || !is.symbol(rhs[[1]]) || as.character(rhs[[1]]) != "function") next
 
       sr <- attr(ex, "srcref")
       start_line <- NA_integer_
