@@ -88,9 +88,9 @@ plot(reg_var_dur, grid = scan_times_dur)
 ### Duration and Summation
 
 By default (`summate=TRUE`), the predicted response accumulates if
-events overlap or have extended duration. Setting `summate=FALSE` models
-saturation, where the response width increases with duration, but the
-peak amplitude doesn’t necessarily.
+events overlap or have extended duration. Setting `summate=FALSE`
+preserves the same temporal profile but the peak amplitude does not grow
+with duration.
 
 ``` r
 # Create regressor with varying durations, summate=FALSE

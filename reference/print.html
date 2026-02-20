@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +70,22 @@
     <p>No return value, called for side effects (prints to console)</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span>,</span></span>
+<span class="r-in"><span>               duration <span class="op">=</span> <span class="fl">0</span>, amplitude <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>               span <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">fMRI Regressor Object</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • Type: <span style="color: #0000BB;">&lt;Reg&gt;</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • Events: 3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • Onset Range: 1s to 20s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • HRF: SPMG1 (1 basis function)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • HRF Span: 24s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   • Summation: TRUE</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -39,9 +39,9 @@ block_hrf(
 
 - summate:
 
-  Logical; if TRUE (default), the responses from each time point within
-  the block are summed. If FALSE, the maximum response at each time
-  point is taken.
+  Logical; if TRUE (default), responses within the block are integrated
+  (summed). If FALSE, the integrated response is divided by the total
+  block weight so amplitude does not grow with block width.
 
 - normalize:
 

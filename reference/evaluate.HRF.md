@@ -47,8 +47,8 @@ evaluate(
 - summate:
 
   Logical; whether the HRF response should accumulate over the duration
-  (default: TRUE). If FALSE, the maximum response within the duration
-  window is taken (currently only supported for single-basis HRFs).
+  (default: TRUE). If FALSE, the convolution is averaged so the temporal
+  profile is preserved but peak amplitude does not grow with duration.
 
 - normalize:
 

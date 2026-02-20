@@ -134,19 +134,13 @@ MIT
   : Get block lengths
 
 - [`deriv(`*`<HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.HRF.md)
+  [`deriv(`*`<SPMG1_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.HRF.md)
+  [`deriv(`*`<SPMG2_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.HRF.md)
+  [`deriv(`*`<SPMG3_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.HRF.md)
   : Default derivative method for HRF objects
 
 - [`deriv()`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.md) :
   Compute derivatives of HRF functions
-
-- [`deriv(`*`<SPMG1_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.SPMG1_HRF.md)
-  : Derivative method for SPMG1 HRF
-
-- [`deriv(`*`<SPMG2_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.SPMG2_HRF.md)
-  : Derivative method for SPMG2 HRF
-
-- [`deriv(`*`<SPMG3_HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.SPMG3_HRF.md)
-  : Derivative method for SPMG3 HRF
 
 - [`durations()`](https://bbuchsbaum.github.io/fmrihrf/reference/durations.md)
   : Get durations of an object

@@ -11,7 +11,7 @@ response function (HRF) to generate predicted time courses."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,8 +101,9 @@ ensure the provided or inferred `span` is sufficient for your longest event dura
 
 <dt id="arg-summate">summate<a class="anchor" aria-label="anchor" href="#arg-summate"></a></dt>
 <dd><p>Logical scalar; if `TRUE` (default), the HRF response amplitude scales
-with the duration of sustained events (via internal convolution/summation). If `FALSE`,
-the response reflects the peak HRF reached during the event duration.</p></dd>
+with the duration of sustained events (via weighted integration). If `FALSE`,
+weighted integration is normalized by total block weight so amplitude does
+not grow with duration.</p></dd>
 
 </dl></div>
     <div class="section level2">

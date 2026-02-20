@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,20 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="fmrihrf-020">fmrihrf 0.2.0<a class="anchor" aria-label="anchor" href="#fmrihrf-020"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.1" id="fmrihrf-021">fmrihrf 0.2.1<a class="anchor" aria-label="anchor" href="#fmrihrf-021"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-1"></a></h3>
+<ul><li>Fixed <code><a href="../reference/hrf_bspline.html">hrf_bspline()</a></code> support handling so values for <code>t &gt; span</code> (and <code>t &lt; 0</code>) are zeroed instead of wrapping to onset-like values.</li>
+<li>Fixed <code><a href="../reference/block_hrf.html">block_hrf()</a></code> block integration to include quadrature step-size scaling, making amplitudes stable across <code>precision</code>.</li>
+<li>Fixed <code><a href="../reference/hrf_sine.html">hrf_sine()</a></code> and <code><a href="../reference/hrf_fourier.html">hrf_fourier()</a></code> to clamp support to <code>[0, span]</code> and return zero outside the modeled window.</li>
+<li>Fixed <code><a href="../reference/normalise_hrf.html">normalise_hrf()</a></code> to use fixed normalization constants computed on the HRF support, avoiding data-dependent scaling across evaluation grids.</li>
+<li>Fixed <code><a href="../reference/evaluate.HRF.html">evaluate.HRF()</a></code> block-duration summation to use the same weighted integration scheme as <code><a href="../reference/block_hrf.html">block_hrf()</a></code>.</li>
+<li>Fixed <code>evaluate.Reg(normalize = TRUE)</code> to normalize regressor outputs consistently across evaluation methods, including single-trial regressors with different durations.</li>
+<li>Fixed <code>block_hrf(summate = FALSE)</code> to return normalized block integration (for both single- and multi-basis HRFs) instead of the legacy pointwise-maximum behavior.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="fmrihrf-020">fmrihrf 0.2.0<a class="anchor" aria-label="anchor" href="#fmrihrf-020"></a></h2><p class="text-muted">CRAN release: 2026-02-09</p>
 <div class="section level3">
 <h3 id="new-features-0-2-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li>New <code><a href="../reference/hrf_boxcar.html">hrf_boxcar()</a></code> function for simple boxcar (step function) HRFs with optional normalization.</li>

@@ -9,7 +9,7 @@ blocking, and normalization decorators based on arguments."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,9 @@ blocking, and normalization decorators based on arguments.</p>
 
 
 <dt id="arg-summate">summate<a class="anchor" aria-label="anchor" href="#arg-summate"></a></dt>
-<dd><p>Whether to summate within blocks (passed to `block_hrf`). Default is TRUE.</p></dd>
+<dd><p>Passed to `block_hrf()` when `width &gt; 0`. If `TRUE` (default),
+block responses are integrated; if `FALSE`, the integrated response is
+scaled by total block weight so amplitude does not grow with block width.</p></dd>
 
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>

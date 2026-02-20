@@ -9,7 +9,7 @@ stimulus by convolving the input HRF with a boxcar function of a given width."><
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,9 @@ stimulus by convolving the input HRF with a boxcar function of a given width.</p
 
 
 <dt id="arg-summate">summate<a class="anchor" aria-label="anchor" href="#arg-summate"></a></dt>
-<dd><p>Logical; if TRUE (default), the responses from each time point within the block are summed. If FALSE, the maximum response at each time point is taken.</p></dd>
+<dd><p>Logical; if TRUE (default), responses within the block are
+integrated (summed). If FALSE, the integrated response is divided by the
+total block weight so amplitude does not grow with block width.</p></dd>
 
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>

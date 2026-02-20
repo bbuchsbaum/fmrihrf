@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-02-10</h4>
+            <h4 data-toc-skip class="date">2026-02-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_01_hemodynamic_response.Rmd" class="external-link"><code>vignettes/a_01_hemodynamic_response.Rmd</code></a></small>
       <div class="d-none name"><code>a_01_hemodynamic_response.Rmd</code></div>
@@ -178,10 +178,10 @@ so the peak amplitude is approximately 1, regardless of duration.</p>
 </h3>
 <p>The <code>summate</code> argument in <code>block_hrf</code> controls
 whether the response accumulates over the duration
-(<code>summate=TRUE</code>, default) or saturates
-(<code>summate=FALSE</code>). Saturation implies that the response
-reaches a plateau and doesn’t increase further with longer
-stimulation.</p>
+(<code>summate=TRUE</code>, default) or stays constant
+(<code>summate=FALSE</code>). When <code>summate=FALSE</code>, the
+temporal profile is identical to the summated version but the peak
+amplitude does not grow with block duration.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create non-summating blocked HRFs</span></span>
 <span><span class="va">hrf_spm_w2_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -637,7 +637,7 @@ simulated HRFs.</p>
 <span><span class="va">variance_explained</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pca_res</span><span class="op">)</span><span class="op">$</span><span class="va">importance</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_components</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variance explained by top"</span>, <span class="va">n_components</span>, <span class="st">"components:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">variance_explained</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variance explained by top 3 components: 67.1% 29.9% 2.7%</span></span>
+<span><span class="co">#&gt; Variance explained by top 3 components: 67.5% 29.6% 2.7%</span></span>
 <span></span>
 <span><span class="co"># Extract the top principal components</span></span>
 <span><span class="va">pc_vectors</span> <span class="op">&lt;-</span> <span class="va">pca_res</span><span class="op">$</span><span class="va">rotation</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_components</span><span class="op">]</span></span>

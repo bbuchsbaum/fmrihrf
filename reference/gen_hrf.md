@@ -46,8 +46,10 @@ gen_hrf(
 
 - summate:
 
-  Whether to summate within blocks (passed to \`block_hrf\`). Default is
-  TRUE.
+  Passed to \`block_hrf()\` when \`width \> 0\`. If \`TRUE\` (default),
+  block responses are integrated; if \`FALSE\`, the integrated response
+  is scaled by total block weight so amplitude does not grow with block
+  width.
 
 - normalize:
 

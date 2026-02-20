@@ -31,3 +31,10 @@ hrf_half_cosine(t, h1 = 1, h2 = 5, h3 = 7, h4 = 7, f1 = 0, f2 = 0)
 ## Value
 
 Numeric vector same length as t
+
+## Examples
+
+``` r
+t <- seq(0, 30, by = 0.1)
+y <- hrf_half_cosine(t)
+```

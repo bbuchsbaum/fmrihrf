@@ -118,9 +118,10 @@ hrf_spm_w4_norm <- block_hrf(HRF_SPMG1, width = 4, normalize = TRUE)
 ### Modeling Saturation with `summate`
 
 The `summate` argument in `block_hrf` controls whether the response
-accumulates over the duration (`summate=TRUE`, default) or saturates
-(`summate=FALSE`). Saturation implies that the response reaches a
-plateau and doesn’t increase further with longer stimulation.
+accumulates over the duration (`summate=TRUE`, default) or stays
+constant (`summate=FALSE`). When `summate=FALSE`, the temporal profile
+is identical to the summated version but the peak amplitude does not
+grow with block duration.
 
 ``` r
 # Create non-summating blocked HRFs
@@ -602,7 +603,7 @@ n_components <- 3
 variance_explained <- summary(pca_res)$importance[2, 1:n_components]
 cat("Variance explained by top", n_components, "components:",
     paste0(round(variance_explained * 100, 1), "%"), "\n")
-#> Variance explained by top 3 components: 67.1% 29.9% 2.7%
+#> Variance explained by top 3 components: 67.5% 29.6% 2.7%
 
 # Extract the top principal components
 pc_vectors <- pca_res$rotation[, 1:n_components]

@@ -53,8 +53,9 @@ hrf_blocked(
 
 - summate:
 
-  A logical value indicating whether to allow each impulse response
-  function to "add" up. Default is \`TRUE\`.
+  Logical; if TRUE (default), responses accumulate (peak grows with
+  duration). If FALSE, the convolution is averaged so the temporal
+  profile is preserved but peak amplitude does not grow with duration.
 
 - normalize:
 
