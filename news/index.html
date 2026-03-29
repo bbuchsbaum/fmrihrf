@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,18 @@
       <small>Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="fmrihrf-030">fmrihrf 0.3.0<a class="anchor" aria-label="anchor" href="#fmrihrf-030"></a></h2><p class="text-muted">CRAN release: 2026-03-28</p>
+<div class="section level3">
+<h3 id="improvements-0-3-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-3-0"></a></h3>
+<ul><li>Consolidated derivative method Rd aliases into parent help pages, reducing documentation redundancy.</li>
+<li>Added explicit <code>importFrom(utils, tail)</code> to avoid R CMD check NOTEs.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-3-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-0"></a></h3>
+<ul><li>Guarded <code><a href="https://rdrr.io/r/base/name.html" class="external-link">is.symbol()</a></code> before <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> in internal eco atlas extraction to prevent errors on non-symbol inputs.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="fmrihrf-021">fmrihrf 0.2.1<a class="anchor" aria-label="anchor" href="#fmrihrf-021"></a></h2>
 <div class="section level3">

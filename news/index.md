@@ -1,5 +1,21 @@
 # Changelog
 
+## fmrihrf 0.3.0
+
+CRAN release: 2026-03-28
+
+### Improvements
+
+- Consolidated derivative method Rd aliases into parent help pages,
+  reducing documentation redundancy.
+- Added explicit `importFrom(utils, tail)` to avoid R CMD check NOTEs.
+
+### Bug Fixes
+
+- Guarded [`is.symbol()`](https://rdrr.io/r/base/name.html) before
+  [`as.character()`](https://rdrr.io/r/base/character.html) in internal
+  eco atlas extraction to prevent errors on non-symbol inputs.
+
 ## fmrihrf 0.2.1
 
 ### Bug Fixes

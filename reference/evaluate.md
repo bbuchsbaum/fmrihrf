@@ -16,6 +16,7 @@ evaluate(
   precision = 0.33,
   method = c("conv", "fft", "Rconv", "loop"),
   sparse = FALSE,
+  normalize = FALSE,
   ...
 )
 ```
@@ -73,6 +74,12 @@ evaluate(
 
   Logical indicating whether to return a sparse matrix (from the Matrix
   package). Default is FALSE.
+
+- normalize:
+
+  Logical; if TRUE, scale evaluated regressor output to unit peak
+  (maximum absolute value of 1). For multi-basis regressors, each basis
+  column is normalized independently.
 
 ## Value
 

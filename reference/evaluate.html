@@ -9,7 +9,7 @@ Different types of regressors may have different evaluation methods."></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +58,7 @@ Different types of regressors may have different evaluation methods.</p>
 <span>  precision <span class="op">=</span> <span class="fl">0.33</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conv"</span>, <span class="st">"fft"</span>, <span class="st">"Rconv"</span>, <span class="st">"loop"</span><span class="op">)</span>,</span>
 <span>  sparse <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  normalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -102,6 +103,12 @@ Different types of regressors may have different evaluation methods.</p>
 
 <dt id="arg-sparse">sparse<a class="anchor" aria-label="anchor" href="#arg-sparse"></a></dt>
 <dd><p>Logical indicating whether to return a sparse matrix (from the Matrix package). Default is FALSE.</p></dd>
+
+
+<dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
+<dd><p>Logical; if TRUE, scale evaluated regressor output to unit peak
+(maximum absolute value of 1). For multi-basis regressors, each basis column
+is normalized independently.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -68,7 +68,7 @@ penalty_matrix(x, order = 2, ...)
 
 ## Value
 
-A symmetric positive definite penalty matrix of dimension nbasis(x) ×
+A symmetric positive definite penalty matrix of dimension nbasis(x) x
 nbasis(x)
 
 ## Details
