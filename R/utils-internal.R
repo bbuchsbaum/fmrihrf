@@ -21,6 +21,7 @@ recycle_or_error <- function(x, n, name) {
   if (is.null(a)) b else a
 }
 
+#' @importFrom utils tail
 #' @keywords internal
 #' @noRd
 .block_offsets_weights <- function(width, precision) {

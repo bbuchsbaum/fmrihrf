@@ -1,3 +1,14 @@
+# fmrihrf 0.3.0
+
+## Improvements
+
+* Consolidated derivative method Rd aliases into parent help pages, reducing documentation redundancy.
+* Added explicit `importFrom(utils, tail)` to avoid R CMD check NOTEs.
+
+## Bug Fixes
+
+* Guarded `is.symbol()` before `as.character()` in internal eco atlas extraction to prevent errors on non-symbol inputs.
+
 # fmrihrf 0.2.1
 
 ## Bug Fixes

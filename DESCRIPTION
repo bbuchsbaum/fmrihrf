@@ -1,7 +1,7 @@
 Package: fmrihrf
 Type: Package
 Title: Hemodynamic Response Functions for fMRI Data Analysis
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: person("Bradley", "Buchsbaum", email = "brad.buchsbaum@gmail.com", role = c("aut", "cre"))
 Description: Creates, manipulates, and evaluates hemodynamic response functions
     and event-related regressors for functional magnetic resonance imaging data
@@ -41,3 +41,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
 BugReports: https://github.com/bbuchsbaum/fmrihrf/issues
+Config/Needs/website: https://github.com/bbuchsbaum/albersdown

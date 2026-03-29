@@ -20,3 +20,7 @@
 ^CRAN-SUBMISSION$
 check_rd_tags.R
 .omc
+^manual_cards\.jsonl$
+^\.ecosystem\.yml$
+^\.rcmdcheck_result\.rds$
+^\.tmpcheck$
