@@ -9,14 +9,14 @@
 Source:
 [`inst/CITATION`](https://github.com/bbuchsbaum/fmrihrf/blob/main/inst/CITATION)
 
-Buchsbaum B (2024). *fmrihrf: fMRI Hemodynamic Response Function (HRF)
-and Regressor Tools*. R package version 0.1.0,
+Buchsbaum B (2026). *fmrihrf: Hemodynamic Response Functions for fMRI
+Data Analysis*. R package version 0.3.0,
 <https://bbuchsbaum.github.io/fmrihrf/>.
 
     @Manual{,
-      title = {fmrihrf: fMRI Hemodynamic Response Function (HRF) and Regressor Tools},
+      title = {fmrihrf: Hemodynamic Response Functions for fMRI Data Analysis},
       author = {Bradley Buchsbaum},
-      year = {2024},
-      note = {R package version 0.1.0},
+      year = {2026},
+      note = {R package version 0.3.0},
       url = {https://bbuchsbaum.github.io/fmrihrf/},
     }
