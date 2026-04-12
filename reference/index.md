@@ -47,6 +47,9 @@
 - [`evaluate()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.md)
   : Evaluate a regressor object over a time grid
 
+- [`fmrihrf_cli()`](https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf_cli.md)
+  : Command line entrypoint for fmrihrf
+
 - [`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md)
   : Construct an HRF Instance using Decorators
 
@@ -126,6 +129,9 @@
 
 - [`hrf_weighted()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.md)
   : Weighted HRF (No Hemodynamic Delay)
+
+- [`install_cli()`](https://bbuchsbaum.github.io/fmrihrf/reference/install_cli.md)
+  : Install fmrihrf command line wrappers
 
 - [`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md)
   : Lag an HRF Object

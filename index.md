@@ -98,6 +98,76 @@ Vignettes cover the main workflows:
   Design](https://bbuchsbaum.github.io/fmrihrf/articles/a_04_advanced_modeling.html)
   — multi-basis designs, trial-varying HRFs, and more
 
+## Command Line
+
+Install the package:
+
+``` r
+install.packages("fmrihrf")
+```
+
+Install the command wrapper:
+
+``` r
+fmrihrf::install_cli("~/.local/bin", overwrite = TRUE)
+```
+
+If needed, add the directory to `PATH`:
+
+``` sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Check the command:
+
+``` sh
+fmrihrf --help
+```
+
+List available HRFs:
+
+``` sh
+fmrihrf list --details
+```
+
+Evaluate a canonical HRF:
+
+``` sh
+fmrihrf eval --hrf spmg1 --from 0 --to 30 --by 0.5
+```
+
+Evaluate a flexible basis set as JSON:
+
+``` sh
+fmrihrf eval --hrf bspline --nbasis 6 --span 24 --json
+```
+
+Evaluate one event regressor on an acquisition grid:
+
+``` sh
+fmrihrf regressor \
+  --onsets 0,12,24 \
+  --blocklens 200 \
+  --tr 2 \
+  --hrf spmg1 \
+  --output regressor.csv
+```
+
+Build a design matrix from an event table:
+
+``` sh
+fmrihrf design \
+  --events events.csv \
+  --blocklens 200,200 \
+  --tr 2 \
+  --hrf spmg1 \
+  --output design.csv
+```
+
+The default event columns are `onset`, `condition`, `block`, `duration`,
+and `amplitude`. Use `--onset`, `--condition`, `--block`, `--duration`,
+and `--amplitude` when a table uses different column names.
+
 ## License
 
 MIT

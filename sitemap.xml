@@ -27,6 +27,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.HRF.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf-package.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf_cli.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_blocked.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_lagged.html</loc></url>
@@ -56,6 +57,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_toeplitz.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_weighted.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/index.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/install_cli.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/list_available_hrfs.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/make_hrf.html</loc></url>
