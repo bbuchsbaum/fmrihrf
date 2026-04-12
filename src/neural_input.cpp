@@ -5,9 +5,10 @@
 #include <unordered_map>
 #include <mutex> // For HRFworker error_mutex, can be removed if HRFworker is fully removed
 #include <sstream> // For HRFworker error messages, can be removed if HRFworker is fully removed
+#include <limits>
 
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::depends(RcppParallel)]] // REMOVED
+// RcppParallel support was removed; keep compilation single-threaded.
 // We compile as C++17 (set in src/Makevars)
 
 using arma::uword;
@@ -216,11 +217,21 @@ static arma::vec buildImpulseTrain(const arma::vec& on,
   2.  tiny helper: portable next‑pow‑2 (works on Armadillo < 13)
 ──────────────────────────────────────────────────────────────────────*/
 inline uword nextPow2(uword v) {
-    --v; v |= v>>1; v |= v>>2; v |= v>>4; v |= v>>8; v |= v>>16;
-#if ULONG_MAX > 0xffffffff
-    v |= v>>32;
-#endif
-    return ++v;
+    if (v <= 1) {
+        return 1;
+    }
+
+    uword out = 1;
+    const uword max_before_shift = std::numeric_limits<uword>::max() >> 1;
+
+    while (out < v) {
+        if (out > max_before_shift) {
+            return std::numeric_limits<uword>::max();
+        }
+        out <<= 1;
+    }
+
+    return out;
 }
 
 /*──────────────────────────────────────────────────────────────────────

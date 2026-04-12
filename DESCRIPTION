@@ -38,7 +38,6 @@ Suggests:
     tidyr,
     viridis,
     scales,
-    microbenchmark,
     pkgload
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/

@@ -23,4 +23,5 @@ check_rd_tags.R
 ^manual_cards\.jsonl$
 ^\.ecosystem\.yml$
 ^\.rcmdcheck_result\.rds$
+^.*\.Rcheck$
 ^\.tmpcheck$

@@ -1,3 +1,15 @@
+# fmrihrf 0.3.1
+
+## New Features
+
+* Added a package-owned command line interface with installed `fmrihrf` wrapper,
+  `fmrihrf_cli()`, and `install_cli()`.
+
+## Improvements
+
+* Removed an unused suggested dependency and tightened build-ignore rules for
+  local check artifacts.
+
 # fmrihrf 0.3.0
 
 ## Improvements
