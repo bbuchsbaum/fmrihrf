@@ -1,5 +1,20 @@
 # Changelog
 
+## fmrihrf 0.3.1
+
+### New Features
+
+- Added a package-owned command line interface with installed `fmrihrf`
+  wrapper,
+  [`fmrihrf_cli()`](https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf_cli.md),
+  and
+  [`install_cli()`](https://bbuchsbaum.github.io/fmrihrf/reference/install_cli.md).
+
+### Improvements
+
+- Removed an unused suggested dependency and tightened build-ignore
+  rules for local check artifacts.
+
 ## fmrihrf 0.3.0
 
 CRAN release: 2026-03-28
