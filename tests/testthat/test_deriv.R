@@ -16,7 +16,7 @@ test_that("deriv works for SPMG1 HRF", {
   if (is.null(params)) {
     params <- list(P1 = 5, P2 = 15, A1 = 0.0833)
   }
-  expected <- hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
+  expected <- fmrihrf:::hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
   expect_equal(deriv_vals, expected)
 })
 
@@ -33,11 +33,11 @@ test_that("deriv works for SPMG2 HRF", {
   
   # First column should match SPMG1 derivative
   params <- list(P1 = 5, P2 = 15, A1 = 0.0833)
-  expected_col1 <- hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
+  expected_col1 <- fmrihrf:::hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
   expect_equal(deriv_vals[, 1], expected_col1)
   
   # Second column should match second derivative
-  expected_col2 <- hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
+  expected_col2 <- fmrihrf:::hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
   expect_equal(deriv_vals[, 2], expected_col2)
 })
 
@@ -54,10 +54,10 @@ test_that("deriv works for SPMG3 HRF", {
   
   # First two columns should match SPMG2 derivatives
   params <- list(P1 = 5, P2 = 15, A1 = 0.0833)
-  expected_col1 <- hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
+  expected_col1 <- fmrihrf:::hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
   expect_equal(deriv_vals[, 1], expected_col1)
   
-  expected_col2 <- hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
+  expected_col2 <- fmrihrf:::hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
   expect_equal(deriv_vals[, 2], expected_col2)
   
   # Third column should be numeric (third derivative)
