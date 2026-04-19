@@ -1,5 +1,17 @@
 # Changelog
 
+## fmrihrf (development version)
+
+### Improvements
+
+- Factored the duplicated single-basis / multi-basis branching in
+  [`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md),
+  [`evaluate.HRF()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.HRF.md),
+  and
+  [`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md)
+  into three internal helpers (`.weighted_combine`, `.normalise_result`,
+  `.get_peaks`). No user-visible behavior change.
+
 ## fmrihrf 0.3.1
 
 ### New Features
