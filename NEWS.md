@@ -1,5 +1,26 @@
 # fmrihrf (development version)
 
+## New Features
+
+* `make_hrf()` is now the unified entry point for HRF construction. It
+  accepts a character registry name, a plain function, or an existing HRF
+  object, and exposes the full decorator pipeline (`width`, `precision`,
+  `half_life`, `summate`, `lag`, `normalize`, `span`, `...`). Its previous
+  `(basis, lag, nbasis)` signature is preserved positionally, so existing
+  downstream calls continue to work unchanged.
+
+## Deprecations
+
+* `gen_hrf()` and `getHRF()` are deprecated in favor of `make_hrf()`. They
+  remain exported as thin wrappers that forward to `make_hrf()` with a
+  `.Deprecated()` notice. Migration: replace `gen_hrf(x, ...)` and
+  `getHRF("name", ...)` with `make_hrf(x, ...)` / `make_hrf("name", ...)`.
+* `gen_hrf_lagged()` is deprecated in favor of `lag_hrf()`. The wrapper
+  now returns an HRF object (previously it returned a bare function); callers
+  that treated the result as a plain function should either migrate to
+  `lag_hrf()` (which has always returned an HRF) or invoke the HRF
+  directly, which also returns numeric values.
+
 ## Improvements
 
 * Factored the duplicated single-basis / multi-basis branching in

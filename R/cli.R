@@ -227,7 +227,7 @@ install_cli <- function(dest_dir = "~/.local/bin",
   ))
 
   grid <- .grid_from_options(opts)
-  hrf <- getHRF(
+  hrf <- make_hrf(
     opts$hrf,
     nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
     span = .as_scalar_numeric(opts$span, "span"),
@@ -264,9 +264,9 @@ install_cli <- function(dest_dir = "~/.local/bin",
   ))
 
   events <- .events_for_regressor(opts)
-  hrf <- getHRF(opts$hrf,
-                nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
-                span = .as_scalar_numeric(opts$span, "span"))
+  hrf <- make_hrf(opts$hrf,
+                  nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
+                  span = .as_scalar_numeric(opts$span, "span"))
   reg <- regressor(
     onsets = events$onset,
     hrf = hrf,
@@ -307,9 +307,9 @@ install_cli <- function(dest_dir = "~/.local/bin",
   duration <- if (opts$duration %in% names(events)) events[[opts$duration]] else 0
   amplitude <- if (opts$amplitude %in% names(events)) events[[opts$amplitude]] else 1
   sframe <- .sampling_frame_from_options(opts)
-  hrf <- getHRF(opts$hrf,
-                nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
-                span = .as_scalar_numeric(opts$span, "span"))
+  hrf <- make_hrf(opts$hrf,
+                  nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
+                  span = .as_scalar_numeric(opts$span, "span"))
 
   design <- regressor_design(
     onsets = events[[opts$onset]],

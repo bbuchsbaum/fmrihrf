@@ -146,98 +146,64 @@ bind_basis <- function(...) {
 
 
 #' Construct an HRF Instance using Decorators
-#' 
+#'
 #' @description
-#' `gen_hrf` takes a base HRF function or object and applies optional lag,
-#' blocking, and normalization decorators based on arguments.
+#' `gen_hrf()` is a deprecated alias for [make_hrf()]. It is retained for
+#' backward compatibility and delegates to `make_hrf()`.
 #'
 #' @param hrf A function `f(t)` or an existing `HRF` object.
-#' @param lag Optional lag in seconds. If non-zero, applies `lag_hrf`.
-#' @param width Optional block width in seconds. If non-zero, applies `block_hrf`.
-#' @param precision Sampling precision for block convolution (passed to `block_hrf`). Default is 0.1.
-#' @param half_life Half-life decay parameter for exponential decay in seconds (passed to `block_hrf`). Default is Inf (no decay).
-#' @param summate Passed to `block_hrf()` when `width > 0`. If `TRUE` (default),
-#'   block responses are integrated; if `FALSE`, the integrated response is
-#'   scaled by total block weight so amplitude does not grow with block width.
-#' @param normalize If TRUE, applies `normalise_hrf` at the end. Default is FALSE.
-#' @param name Optional name for the *final* HRF object. If NULL (default), a name is generated based on the base HRF and applied decorators.
-#' @param span Optional span for the *final* HRF object. If NULL (default), the span is determined by the base HRF and decorators.
-#' @param ... Extra arguments passed to the *base* HRF function if `hrf` is a function.
+#' @param lag Optional lag in seconds.
+#' @param width Optional block width in seconds.
+#' @param precision Sampling precision for block convolution.
+#' @param half_life Half-life for exponential decay.
+#' @param summate See [block_hrf()].
+#' @param normalize If TRUE, applies [normalise_hrf()].
+#' @param name Optional name for the final HRF object.
+#' @param span Optional span for the final HRF object.
+#' @param ... Extra arguments passed to the base HRF function.
 #'
-#' @return A final `HRF` object, potentially modified by decorators.
-#' 
-#' @examples 
-#' # Lagged SPMG1
-#' grf_lag <- gen_hrf(HRF_SPMG1, lag=3)
-#' # Blocked Gaussian
-#' grf_block <- gen_hrf(hrf_gaussian, width=5, precision=0.2)
-#' # Lagged and Blocked, then Normalized
-#' grf_both_norm <- gen_hrf(HRF_SPMG1, lag=2, width=4, normalize=TRUE)
+#' @return A final `HRF` object.
 #'
+#' @examples
+#' # Use make_hrf() instead:
+#' grf_lag <- make_hrf("spmg1", lag = 3)
+#'
+#' @seealso [make_hrf()]
 #' @export
-gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
-                    summate=TRUE, normalize=FALSE, name=NULL, span=NULL, ...) {
-
-  # 1. Ensure we start with an HRF object
-  if (is.function(hrf) && !inherits(hrf, "HRF")) {
-    # If it's a plain function, convert it using as_hrf
-    # Determine nbasis by evaluating the function
-    test_t <- 1:10 # A small sample range
-    test_val <- try(hrf(test_t, ...), silent = TRUE)
+#' @keywords internal
+gen_hrf <- function(hrf, lag = 0, width = 0, precision = 0.1, half_life = Inf,
+                    summate = TRUE, normalize = FALSE, name = NULL, span = NULL,
+                    ...) {
+  .Deprecated("make_hrf")
+  # make_hrf uses substitute(basis) for the function-basis name. Pre-wrap
+  # plain functions into HRFs so we get a sensible name attribute equivalent
+  # to the old gen_hrf behavior.
+  result <- if (is.function(hrf) && !inherits(hrf, "HRF")) {
+    dots <- list(...)
+    test_val <- try(do.call(hrf, c(list(1:10), dots)), silent = TRUE)
     determined_nbasis <- if (!inherits(test_val, "try-error") && !is.null(test_val)) {
       if (is.matrix(test_val)) ncol(test_val) else 1L
     } else {
-      warning(paste("Could not determine nbasis for function", deparse(substitute(hrf)), "- defaulting to 1. Evaluation failed."))
+      warning(paste("Could not determine nbasis for function",
+                    deparse(substitute(hrf)), "- defaulting to 1."))
       1L
     }
-    
-    # Pass extra args (...) here if they are meant for the base function construction
-    base_hrf <- as_hrf(f = function(t) hrf(t, ...),
-                       name = deparse(substitute(hrf)),
-                       nbasis = determined_nbasis) # Pass determined nbasis
-                       # Let as_hrf determine default span, params
-  } else if (inherits(hrf, "HRF")) {
-    # If already an HRF object, use it directly
-    base_hrf <- hrf
-    if (length(list(...)) > 0) {
-      warning("Ignoring extra arguments (...) because 'hrf' is already an HRF object.")
-    }
+    base <- as_hrf(
+      f = if (length(dots) > 0) function(t) do.call(hrf, c(list(t), dots)) else hrf,
+      name = deparse(substitute(hrf)),
+      nbasis = determined_nbasis
+    )
+    make_hrf(base, lag = lag, width = width, precision = precision,
+             half_life = half_life, summate = summate, normalize = normalize)
   } else {
-    stop("'hrf' must be a function or an HRF object.")
+    make_hrf(hrf, lag = lag, width = width, precision = precision,
+             half_life = half_life, summate = summate, normalize = normalize,
+             ...)
   }
 
-  # Apply decorators conditionally
-  decorated_hrf <- base_hrf
-
-  # Apply width decorator first if needed
-  if (width != 0) {
-    # Check positivity *before* applying
-    stopifnot(width > 0)
-    # Note: block_hrf handles normalize=FALSE internally by default
-    decorated_hrf <- block_hrf(decorated_hrf, width=width, precision=precision,
-                               half_life=half_life, summate=summate, normalize=FALSE)
-  }
-
-  # Apply lag decorator if needed
-  if (lag != 0) {
-    decorated_hrf <- lag_hrf(decorated_hrf, lag=lag)
-  }
-
-  # Apply normalization decorator last if needed
-  if (normalize) {
-    decorated_hrf <- normalise_hrf(decorated_hrf)
-  }
-
-  # Override name and span if provided by user
-  if (!is.null(name)) {
-    attr(decorated_hrf, "name") <- name
-  }
-  if (!is.null(span)) {
-    attr(decorated_hrf, "span") <- span
-  }
-
-  # Return the final (potentially decorated) HRF object
-  return(decorated_hrf)
+  if (!is.null(name)) attr(result, "name") <- name
+  if (!is.null(span)) attr(result, "span") <- span
+  result
 }
 
 
@@ -464,20 +430,22 @@ makeDeriv <- function(HRF, n=1) {
 #' }
 #'
 #' @export
-gen_hrf_lagged <- function(hrf, lag=2, normalize=FALSE, ...) {
+#' @keywords internal
+gen_hrf_lagged <- function(hrf, lag = 2, normalize = FALSE, ...) {
+  .Deprecated("lag_hrf")
   force(hrf)
-  # TODO deal with nbasis arg in ...
-  if (length(lag)>1) {
-    do.call(gen_hrf_set, lapply(lag, function(l) gen_hrf_lagged(hrf, l,...)))
+  if (length(lag) > 1) {
+    do.call(hrf_set, lapply(lag, function(l) gen_hrf_lagged(hrf, l, normalize = normalize, ...)))
   } else {
-    function(t) {
-      ret <- hrf(t-lag,...)
-      if (normalize) {
-        ret <- ret/max(abs(ret))
-      } 
-      
-      ret
+    base <- if (inherits(hrf, "HRF")) {
+      hrf
+    } else if (is.function(hrf)) {
+      make_hrf(hrf, lag = 0, ...)
+    } else {
+      stop("'hrf' must be a function or an HRF object.")
     }
+    lagged <- lag_hrf(base, lag = lag)
+    if (normalize) normalise_hrf(lagged) else lagged
   }
 }
 
@@ -1046,38 +1014,15 @@ HRF_REGISTRY <- list(
 #' # Create blocked Gaussian HRF
 #' block_gauss <- getHRF("gaussian", width = 5)
 #' @export
-getHRF <- function(name = "spmg1", # Default to spmg1
-                   nbasis=5, span=24,
-                   lag=0, width=0,
-                   summate=TRUE, normalize=FALSE, ...) {
-
-  key   <- match.arg(tolower(name), names(HRF_REGISTRY))
-  entry <- HRF_REGISTRY[[key]]
-
-  base <- if (inherits(entry, "HRF")) {
-            entry # Use pre-defined object
-      } else {
-            # Call generator, passing nbasis, span, and any relevant ... args
-            gen_args <- c(list(nbasis=as.integer(nbasis), span=span), list(...))
-            # Only pass args the generator actually accepts
-            valid_args <- gen_args[names(gen_args) %in% names(formals(entry))]
-            do.call(entry, valid_args)
-          }
-
-  # Apply decorators
-  if (width != 0) {
-      stopifnot(width > 0)
-      base <- block_hrf(base, width = width, summate = summate)
-  }
-  if (lag != 0) {
-      base <- lag_hrf(base, lag = lag)
-  }
-  if (normalize) {
-      base <- normalise_hrf(base)
-  }
-
-  attr(base, "name") <- key # Set name attribute to the matched registry key
-  base
+#' @keywords internal
+#' @seealso [make_hrf()]
+getHRF <- function(name = "spmg1",
+                   nbasis = 5, span = 24,
+                   lag = 0, width = 0,
+                   summate = TRUE, normalize = FALSE, ...) {
+  .Deprecated("make_hrf")
+  make_hrf(name, lag = lag, nbasis = nbasis, width = width,
+           summate = summate, normalize = normalize, span = span, ...)
 }
 
 #' Evaluate an HRF Object
