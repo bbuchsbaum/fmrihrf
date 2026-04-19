@@ -12,6 +12,13 @@
 #' @param params A named list of parameters associated with the HRF function `f`. When provided,
 #'   `as_hrf` creates a closure that captures these parameters. Defaults to an empty list.
 #' @return A new HRF object.
+#' @section Metadata parameters:
+#' Parameter names prefixed with a dot (e.g. `.lag`, `.width`, `.normalised`) are
+#' treated as internal metadata: they are stored in the `params` attribute but
+#' excluded from `param_names`, and they are not passed to `f` at evaluation
+#' time. Decorators (`lag_hrf`, `block_hrf`, `normalise_hrf`) use this
+#' convention to record bookkeeping state without polluting the callable
+#' parameter namespace.
 #' @examples
 #' # Create a custom HRF from a function
 #' custom_hrf <- as_hrf(function(t) exp(-t/5),
@@ -70,13 +77,19 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
     }
   }
 
+  # param_names lists only callable (user-facing) parameters. Metadata keys
+  # prefixed with "." are reserved for internal bookkeeping by decorators
+  # (e.g. .lag, .width, .normalised) and are stored in `params` but excluded
+  # from `param_names` so introspection does not leak the private namespace.
+  callable_names <- names(params)[!startsWith(names(params), ".")]
+
   structure(
     f,
     class        = c("HRF", "function"),
     name         = name,
     nbasis       = as.integer(nbasis),
     span         = span,
-    param_names  = names(params),
+    param_names  = callable_names,
     params       = params
   )
 }

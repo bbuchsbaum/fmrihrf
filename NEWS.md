@@ -6,6 +6,10 @@
   `block_hrf()`, `evaluate.HRF()`, and `normalise_hrf()` into three internal
   helpers (`.weighted_combine`, `.normalise_result`, `.get_peaks`). No
   user-visible behavior change.
+* Formalized the `"."`-prefixed metadata namespace used by decorators
+  (`.lag`, `.width`, `.normalised`, etc.). Such keys are stored in the `params`
+  attribute but are now excluded from `param_names`, so introspection no
+  longer leaks decorator bookkeeping.
 
 # fmrihrf 0.3.1
 
