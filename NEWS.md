@@ -11,6 +11,16 @@
   attribute but are now excluded from `param_names`, so introspection no
   longer leaks decorator bookkeeping.
 
+## Bug Fixes
+
+* `lag_hrf()`, `block_hrf()`, and `normalise_hrf()` no longer emit a spurious
+  "Parameters ... are not arguments to function" warning when decorating HRFs
+  whose base function has named parameters (e.g. `HRF_SPMG1`'s `P1`, `P2`,
+  `A1`). Decorators now forward only the base HRF's dotted metadata, so
+  `as_hrf()`'s formals validation does not fire. Dotted bookkeeping
+  (`.width`, `.summate`, `.normalize`, etc.) is correctly preserved on the
+  decorated HRF's `params` attribute.
+
 # fmrihrf 0.3.1
 
 ## New Features

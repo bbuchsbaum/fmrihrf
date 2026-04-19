@@ -97,6 +97,19 @@ recycle_or_error <- function(x, n, name) {
   }
 }
 
+# Keep only the metadata (dot-prefixed) entries of a params list. Used by
+# decorators to forward bookkeeping state from a base HRF without passing its
+# callable parameters through the wrapper closure (which would trip
+# as_hrf()'s formals validation and emit a spurious warning).
+#' @keywords internal
+#' @noRd
+.dotted_only <- function(params) {
+  if (length(params) == 0) return(list())
+  nm <- names(params)
+  if (is.null(nm)) return(list())
+  params[startsWith(nm, ".")]
+}
+
 # Compute per-basis peak absolute values from a reference evaluation. Zero or
 # NA peaks are replaced with 1 so downstream division is a no-op. Returns a
 # vector of length ncol(x) for matrices, or a scalar for vectors.

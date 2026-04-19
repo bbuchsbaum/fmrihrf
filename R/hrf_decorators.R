@@ -25,20 +25,22 @@ lag_hrf <- function(hrf, lag) {
   orig_name <- attr(hrf, "name")
   orig_span <- attr(hrf, "span")
   orig_nbasis <- nbasis(hrf)
-  orig_params <- attr(hrf, "params")
+  # Forward only dotted metadata from the base HRF. The base's callable
+  # parameters are already captured by its own closure, so passing them
+  # through would trip as_hrf()'s formals validation (t-only wrapper).
+  orig_meta <- .dotted_only(attr(hrf, "params"))
 
   # Create the lagged function
   lagged_func <- function(t) {
     hrf(t - lag)
   }
 
-  # Create new HRF object using as_hrf
   as_hrf(
     f = lagged_func,
     name = paste0(orig_name, "_lag(", lag, ")"),
     nbasis = orig_nbasis,
-    span = orig_span + max(0, lag), # Increase span if lag is positive
-    params = c(orig_params, list(.lag = lag)) # Add lag to params for bookkeeping
+    span = orig_span + max(0, lag),
+    params = c(orig_meta, list(.lag = lag))
   )
 }
 
@@ -88,7 +90,7 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
   orig_name <- attr(hrf, "name")
   orig_span <- attr(hrf, "span")
   orig_nbasis <- nbasis(hrf)
-  orig_params <- attr(hrf, "params")
+  orig_meta <- .dotted_only(attr(hrf, "params"))
 
   # Create the blocked function
   blocked_func <- function(t) {
@@ -120,13 +122,12 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
       .normalize = normalize
   )
   
-  # Create new HRF object using as_hrf
   as_hrf(
     f = blocked_func,
     name = paste0(orig_name, "_block(w=", width, ")"),
     nbasis = orig_nbasis,
-    span = orig_span + width, # Span increases by the block width
-    params = c(orig_params, block_params) # Add block params for bookkeeping
+    span = orig_span + width,
+    params = c(orig_meta, block_params)
   )
 }
 
@@ -158,7 +159,7 @@ normalise_hrf <- function(hrf) {
   orig_name <- attr(hrf, "name")
   orig_span <- attr(hrf, "span")
   orig_nbasis <- nbasis(hrf)
-  orig_params <- attr(hrf, "params")
+  orig_meta <- .dotted_only(attr(hrf, "params"))
 
   # Compute normalization constants once on a fixed support grid so scaling is
   # invariant to the specific evaluation points requested later.
@@ -186,12 +187,11 @@ normalise_hrf <- function(hrf) {
     return(res)
   }
 
-  # Create new HRF object using as_hrf
   as_hrf(
     f = normalised_func,
     name = paste0(orig_name, "_norm"),
     nbasis = orig_nbasis,
     span = orig_span,
-    params = c(orig_params, list(.normalised = TRUE)) # Add flag for bookkeeping
+    params = c(orig_meta, list(.normalised = TRUE))
   )
-} 
+}

@@ -366,11 +366,11 @@ test_that("block_hrf correctly blocks an HRF object", {
   expect_equal(nbasis(blocked_hrf_sum), nbasis(base_hrf))
   expect_equal(attr(blocked_hrf_sum, "span"), attr(base_hrf, "span") + width)
   expect_true(grepl(paste0("_block\\(w=", width, "\\)"), attr(blocked_hrf_sum, "name")))
-  # Note: decorator params may not be preserved after wrapping, but functionality works
-  # expect_equal(attr(blocked_hrf_sum, "params")$.width, width)
-  # expect_equal(attr(blocked_hrf_sum, "params")$.summate, TRUE)
-  # expect_equal(attr(blocked_hrf_nosum, "params")$.summate, FALSE)
-  # expect_equal(attr(blocked_hrf_norm, "params")$.normalize, TRUE)
+  # Decorator bookkeeping is preserved in the params attribute under dotted keys.
+  expect_equal(attr(blocked_hrf_sum, "params")$.width, width)
+  expect_equal(attr(blocked_hrf_sum, "params")$.summate, TRUE)
+  expect_equal(attr(blocked_hrf_nosum, "params")$.summate, FALSE)
+  expect_equal(attr(blocked_hrf_norm, "params")$.normalize, TRUE)
 
   # Test function evaluation - Compare with evaluate.HRF which uses similar logic
   eval_res_sum <- evaluate(base_hrf, t, duration = width, precision = precision, summate = TRUE, normalize = FALSE)
