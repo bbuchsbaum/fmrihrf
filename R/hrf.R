@@ -1113,57 +1113,16 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
 
   # Evaluate based on duration
   out <- if (duration < precision) {
-      # Point evaluation
+    # Point evaluation
     base(grid)
   } else {
-      # Block evaluation
+    # Block evaluation
     quad <- .block_offsets_weights(duration, precision)
-    offs <- quad$offsets
-    weights <- quad$weights
-      # Evaluate HRF at shifted time points for each offset
-      # Use lapply to handle potential matrix output from multi-basis HRFs
-      hlist <- lapply(offs, function(o) base(grid - o))
-      
-      # Check if the result for the first offset is a matrix (multi-basis)
-      is_multi_basis <- is.matrix(hlist[[1]])
-      
-      if (is_multi_basis) {
-          weighted <- Map(function(vals, wt) vals * wt, hlist, weights)
-          res <- Reduce("+", weighted)
-          if (!summate) {
-            weight_sum <- sum(weights)
-            if (weight_sum > 0) {
-              res <- res / weight_sum
-            }
-          }
-          res
-      } else {
-          # Single basis HRF: hlist contains vectors, bind them into a matrix
-        hmat <- do.call(cbind, hlist)
-          res <- as.vector(hmat %*% weights)
-          if (!summate) {
-            weight_sum <- sum(weights)
-            if (weight_sum > 0) {
-              res <- res / weight_sum
-            }
-          }
-          res
-      }
+    hlist <- lapply(quad$offsets, function(o) base(grid - o))
+    .weighted_combine(hlist, quad$weights, summate = summate)
   }
 
-  # Apply normalization if requested, handling matrix/vector case
-  if (normalize) {
-      if (is.matrix(out)) {
-          peaks <- apply(out, 2, function(col) max(abs(col), na.rm = TRUE))
-          peaks[peaks == 0 | is.na(peaks)] <- 1
-          out <- sweep(out, 2, peaks, "/")
-      } else {
-          peak_val <- max(abs(out), na.rm = TRUE)
-          if (!is.na(peak_val) && peak_val != 0) out / peak_val else out
-      }
-  } else {
-    out
-  }
+  if (normalize) .normalise_result(out) else out
 }
 
 #' Plot an HRF Object

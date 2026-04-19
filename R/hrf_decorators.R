@@ -97,55 +97,16 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
       res <- hrf(t)
     } else {
       quad <- .block_offsets_weights(width, precision)
-      samples <- quad$offsets
-      weights <- quad$weights
-
-      hmat_list <- lapply(samples, function(offset) {
+      hmat_list <- lapply(quad$offsets, function(offset) {
         decay_factor <- if (is.infinite(half_life)) 1 else exp(-log(2) * offset / half_life)
         hrf(t - offset) * decay_factor
       })
-      
-      # Combine results for each time point t across offsets
-      if (orig_nbasis == 1) {
-        hmat <- do.call(cbind, hmat_list) # Matrix with rows=time, cols=offsets
-        res <- as.vector(hmat %*% weights)
-        if (!summate) {
-          # Same convolution shape but amplitude doesn't grow with duration
-          weight_sum <- sum(weights)
-          if (weight_sum > 0) {
-            res <- res / weight_sum
-          }
-        }
-      } else {
-         weighted_list <- Map(function(vals, wt) vals * wt, hmat_list, weights)
-         res <- Reduce("+", weighted_list)
-         if (!summate) {
-           weight_sum <- sum(weights)
-           if (weight_sum > 0) {
-             res <- res / weight_sum
-           }
-         }
-      }
+      res <- .weighted_combine(hmat_list, quad$weights,
+                                nbasis = orig_nbasis, summate = summate)
     }
-    
-    # Apply normalization if requested
+
     if (normalize) {
-      if (orig_nbasis == 1) {
-        peak_val <- max(abs(res), na.rm = TRUE)
-        if (!is.na(peak_val) && peak_val != 0) {
-          res <- res / peak_val
-        }
-      } else {
-        # Normalize each basis column independently
-        res <- apply(res, 2, function(basis_col) {
-           peak_val <- max(abs(basis_col), na.rm = TRUE)
-           if (!is.na(peak_val) && peak_val != 0) {
-             basis_col / peak_val
-           } else {
-             basis_col
-           }
-        })
-      }
+      res <- .normalise_result(res)
     }
     return(res)
   }
@@ -205,16 +166,12 @@ normalise_hrf <- function(hrf) {
   ref_grid <- seq(0, orig_span, length.out = ref_n)
   ref_vals <- hrf(ref_grid)
 
-  if (orig_nbasis == 1) {
-    peak_val <- max(abs(as.numeric(ref_vals)), na.rm = TRUE)
-    peak_val <- if (is.na(peak_val) || peak_val == 0) 1 else peak_val
+  peak_val <- if (orig_nbasis == 1) {
+    .get_peaks(as.numeric(ref_vals))
   } else if (is.matrix(ref_vals)) {
-    peak_val <- apply(ref_vals, 2, function(basis_col) {
-      max(abs(basis_col), na.rm = TRUE)
-    })
-    peak_val[is.na(peak_val) | peak_val == 0] <- 1
+    .get_peaks(ref_vals)
   } else {
-    peak_val <- 1
+    1
   }
 
   # Create the normalised function
