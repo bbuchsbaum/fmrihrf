@@ -770,30 +770,28 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
   degree <- 3 # Default cubic B-splines
   effective_nbasis <- max(1, nbasis) 
   
+  # Delegate to hrf_bspline() so the knot sequence is fixed by `span` at
+  # construction rather than inferred by splines::bs() from whatever `t` the
+  # caller happens to supply. Evaluating on a coarse grid, a grid that stops
+  # short of `span`, or a single time point must not change the basis.
   f_bspline <- function(t) {
-    valid_t_idx <- t >= 0 & t <= span
-    if (!any(valid_t_idx)) {
-      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
-    }
-    
-    res_mat <- matrix(0, nrow = length(t), ncol = effective_nbasis)
-    
     bs_matrix <- tryCatch({
-        splines::bs(t[valid_t_idx], df = effective_nbasis, degree = degree, 
-                    Boundary.knots = c(0, span), intercept = FALSE)
+        hrf_bspline(t, span = span, N = effective_nbasis, degree = degree)
     }, error = function(e) {
-        warning(sprintf("splines::bs failed for effective_nbasis=%d, span=%d: %s", 
+        warning(sprintf("splines::bs failed for effective_nbasis=%d, span=%g: %s",
                         effective_nbasis, span, e$message), call. = FALSE)
-        NULL 
+        NULL
     })
 
-    if (!is.null(bs_matrix) && ncol(bs_matrix) == effective_nbasis) {
-      res_mat[valid_t_idx, ] <- bs_matrix
-    } else if (!is.null(bs_matrix)) {
-       warning(sprintf("splines::bs returned %d columns, expected %d for effective_nbasis=%d, span=%d. Returning zeros.", 
-                      ncol(bs_matrix), effective_nbasis, effective_nbasis, span), call. = FALSE)
+    if (is.null(bs_matrix)) {
+      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
     }
-    return(res_mat)
+    if (ncol(bs_matrix) != effective_nbasis) {
+      warning(sprintf("splines::bs returned %d columns, expected %d for effective_nbasis=%d, span=%g. Returning zeros.",
+                      ncol(bs_matrix), effective_nbasis, effective_nbasis, span), call. = FALSE)
+      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
+    }
+    matrix(as.numeric(bs_matrix), nrow = length(t), ncol = effective_nbasis)
   }
 
   obj <- as_hrf(
@@ -891,7 +889,7 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
 #' @export
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
   obj <- as_hrf(
-    f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale),
+    f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale, span=24),
     name="daguerre", nbasis=as.integer(nbasis), span=24,
     params=list(n_basis=nbasis, scale=scale)
   )
@@ -1075,9 +1073,18 @@ getHRF <- function(name = "spmg1", # Default to spmg1
 #' @param x The HRF object (inherits from `HRF` and `function`).
 #' @param grid A numeric vector of time points at which to evaluate the HRF.
 #' @param amplitude The scaling value for the event (default: 1).
-#' @param duration The duration of the event (seconds). If > 0, the HRF is evaluated over this duration (default: 0).
-#' @param precision The temporal resolution for evaluating responses when duration > 0 (default: 0.2).
-#' @param summate Logical; whether the HRF response should accumulate over the duration (default: TRUE). If FALSE, the convolution is averaged so the temporal profile is preserved but peak amplitude does not grow with duration.
+#' @param duration The duration of the event (seconds). A duration of 0 is an
+#'   impulse of unit mass and returns the HRF itself; a duration > 0 is a
+#'   unit-height boxcar and returns its integral against the HRF (default: 0).
+#' @param precision The quadrature step used to integrate over the block when
+#'   duration > 0 (default: 0.2). It controls numerical accuracy only: the
+#'   result converges as `precision` decreases and does not otherwise depend on
+#'   it.
+#' @param summate Logical; whether the HRF response should accumulate over the duration (default: TRUE),
+#'   giving the integral over a unit-height block, so peak amplitude grows with duration. If FALSE, the
+#'   result is divided by the block duration, giving the duration-averaged (unit-mass) response: the
+#'   temporal profile is preserved, peak amplitude does not grow with duration, and the value approaches
+#'   the impulse response as duration approaches 0.
 #' @param normalize Logical; scale output so that the peak absolute value is 1 (default: FALSE). Applied *after* amplitude scaling and duration processing.
 #' @param ... Additional arguments (unused).
 #' @return A numeric vector or matrix of HRF values at the specified time points.
@@ -1111,9 +1118,16 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
   # Base function incorporating amplitude
   base <- function(g) amplitude * x(g)
 
-  # Evaluate based on duration
-  out <- if (duration < precision) {
-      # Point evaluation
+  # Evaluate based on duration.
+  #
+  # The branch is on duration alone, not on duration relative to `precision`.
+  # Keying it to `precision` let a numerical setting decide which model was
+  # fitted: at precision = 0.2 a duration of 0.19 was evaluated as an impulse
+  # (peak 1.75) and a duration of 0.20 as a block (peak 0.35), a 5x jump driven
+  # by nothing but the quadrature step.
+  out <- if (duration <= 0) {
+      # Point evaluation: an impulse of unit mass, so the response is the HRF
+      # itself and carries the units of the HRF.
     base(grid)
   } else {
       # Block evaluation

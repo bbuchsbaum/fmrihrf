@@ -278,7 +278,7 @@ install_cli <- function(dest_dir = "~/.local/bin",
   values <- evaluate(
     reg, grid = grid,
     precision = .as_scalar_numeric(opts$precision, "precision"),
-    method = .match_choice(opts$method, c("conv", "fft", "Rconv", "loop"), "method"),
+    method = .match_choice(opts$method, c("conv", "loop", "fft", "Rconv"), "method"),
     normalize = isTRUE(opts$normalize)
   )
 
@@ -321,7 +321,7 @@ install_cli <- function(dest_dir = "~/.local/bin",
     amplitude = amplitude,
     span = .as_scalar_numeric(opts$span, "span"),
     precision = .as_scalar_numeric(opts$precision, "precision"),
-    method = .match_choice(opts$method, c("conv", "fft", "Rconv", "loop"), "method"),
+    method = .match_choice(opts$method, c("conv", "loop", "fft", "Rconv"), "method"),
     sparse = isTRUE(opts$sparse)
   )
 

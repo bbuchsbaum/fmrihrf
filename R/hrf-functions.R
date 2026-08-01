@@ -113,7 +113,7 @@ hrf_gamma <- function(t, shape=6, rate=1) {
 #' hrf_gaussian_vals <- hrf_gaussian(seq(0, 20, by = .5), mean = 6, sd = 2)
 #' @export
 hrf_gaussian <- function(t, mean=6, sd=2) {
-	stats::dnorm(t, mean=mean, sd=sd)
+	.causal(t, stats::dnorm(t, mean=mean, sd=sd))
 }
 
 
@@ -135,7 +135,7 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
   t0 <- t - mean
   a <- (1 - (t0 / sd)^2) * exp(-t0^2 / (2 * sd^2))
   scale <- sqrt(2 / (3 * sd * pi^(1/4)))
-  return(scale * a)
+  return(.causal(t, scale * a))
 }
 
 #' hrf_spmg1
@@ -221,6 +221,9 @@ hrf_sine <- function(t, span = 24, N = 5) {
   sine_basis <- vapply(1:N, function(n) {
     sin(2 * pi * n * t / span)
   }, numeric(length(t)))
+  # vapply drops to a plain vector when length(t) == 1; restore the matrix
+  # shape so the support mask below can subscript by row.
+  sine_basis <- matrix(sine_basis, nrow = length(t), ncol = N)
   if (any(!in_support)) {
     sine_basis[!in_support, ] <- 0
   }
@@ -245,7 +248,7 @@ hrf_sine <- function(t, span = 24, N = 5) {
 hrf_inv_logit <- function(t, mu1 = 6, s1 = 1, mu2 = 16, s2 = 1, lag = 0) {
   inv_logit1 <- 1 / (1 + exp(-(t - lag - mu1) / s1))
   inv_logit2 <- 1 / (1 + exp(-(t - lag - mu2) / s2))
-  return(inv_logit1 - inv_logit2)
+  return(.causal(t, inv_logit1 - inv_logit2))
 }
 
 
@@ -373,6 +376,9 @@ hrf_fourier <- function(t, span = 24, nbasis = 5) {
       cos(2 * pi * n * t / span)
     }
   }, numeric(length(t)))
+  # vapply drops to a plain vector when length(t) == 1; restore the matrix
+  # shape so the support mask below can subscript by row.
+  basis <- matrix(basis, nrow = length(t), ncol = nbasis)
   if (any(!in_support)) {
     basis[!in_support, ] <- 0
   }
@@ -423,41 +429,51 @@ hrf_toeplitz <- function(hrf, time, len, sparse=FALSE) {
 #' @param t Time points at which to evaluate the basis functions
 #' @param n_basis Number of basis functions to generate (default: 3)
 #' @param scale Scale parameter for the time axis (default: 1)
+#' @param span Temporal window defining the reference grid used for column
+#'   normalization (default: 24). Fixing this makes the basis a function of `t`
+#'   alone rather than of the grid the caller happens to pass.
 #' @return A matrix with columns containing the basis functions
 #' @keywords internal
 #' @noRd
-daguerre_basis <- function(t, n_basis = 3, scale = 1) {
-  # Scale time
-  x <- t/scale
-  
-  # Initialize basis matrix
-  basis <- matrix(0, length(x), n_basis)
-  
-  # First basis function (n=0)
-  basis[,1] <- exp(-x/2)
-  
-  if(n_basis > 1) {
-    # Second basis function (n=1)
-    basis[,2] <- (1 - x) * exp(-x/2)
-  }
-  
-  if(n_basis > 2) {
-    # Higher order basis functions using recurrence relation
-    for(n in 3:n_basis) {
-      k <- n - 1
-      basis[,n] <- ((2*k - 1 - x) * basis[,n-1] - (k - 1) * basis[,n-2]) / k
+daguerre_basis <- function(t, n_basis = 3, scale = 1, span = 24) {
+  raw <- function(tt) {
+    x <- tt / scale
+    basis <- matrix(0, length(x), n_basis)
+
+    # First basis function (n=0)
+    basis[, 1] <- exp(-x / 2)
+
+    if (n_basis > 1) {
+      # Second basis function (n=1)
+      basis[, 2] <- (1 - x) * exp(-x / 2)
     }
-  }
-  
-  # Normalize basis functions
-  for(i in 1:n_basis) {
-    # Avoid division by zero if a basis function is all zero
-    max_abs_val <- max(abs(basis[,i]))
-    if (max_abs_val > 1e-10) {
-      basis[,i] <- basis[,i] / max_abs_val
+
+    if (n_basis > 2) {
+      # Higher order basis functions using recurrence relation
+      for (n in 3:n_basis) {
+        k <- n - 1
+        basis[, n] <- ((2 * k - 1 - x) * basis[, n - 1] - (k - 1) * basis[, n - 2]) / k
+      }
     }
+
+    # These are HRF basis functions, so they carry no response before the event.
+    # Left ungated, exp(-x/2) grows without bound as t goes negative.
+    basis[!is.na(tt) & tt < 0, ] <- 0
+    basis
   }
-  
+
+  # Normalize against a fixed reference grid over the support rather than
+  # against `t`. Normalizing against the argument made the returned values
+  # depend on the query: a grid extending to negative lag inflated the divisor
+  # and shrank every reported value.
+  ref <- raw(seq(0, span, length.out = 512))
+  norms <- apply(abs(ref), 2, max)
+  norms[!is.finite(norms) | norms <= 1e-10] <- 1
+
+  basis <- raw(t)
+  for (i in seq_len(n_basis)) {
+    basis[, i] <- basis[, i] / norms[i]
+  }
   basis
 }
 
@@ -523,7 +539,7 @@ hrf_lwu <- function(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none") {
   term2_exponent <- -((t - (tau + 2 * sigma))^2) / (2 * (1.6 * sigma)^2)
   term2 <- rho * exp(term2_exponent)
 
-  response <- term1 - term2
+  response <- .causal(t, term1 - term2)
 
   if (normalize == "height") {
     max_abs_val <- max(abs(response), na.rm = TRUE)

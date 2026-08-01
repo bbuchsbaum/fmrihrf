@@ -1110,11 +1110,13 @@ test_that("list-of-HRFs works with all evaluation methods", {
 
   t <- seq(0, 50, by = 0.5)
 
-  # All methods should work (fft, conv, Rconv fall back to loop for list HRFs)
+  # conv falls back to loop for list HRFs; the deprecated aliases route to conv
   result_loop <- evaluate(reg, t, method = "loop")
   result_conv <- evaluate(reg, t, method = "conv")
-  result_fft <- evaluate(reg, t, method = "fft")
-  result_Rconv <- evaluate(reg, t, method = "Rconv")
+  suppressWarnings({
+    result_fft <- evaluate(reg, t, method = "fft")
+    result_Rconv <- evaluate(reg, t, method = "Rconv")
+  })
 
   # All should produce same results
   expect_equal(result_conv, result_loop)
