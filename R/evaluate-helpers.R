@@ -80,7 +80,12 @@ prep_reg_inputs <- function(x, grid, precision) {
   onset_max_bound <- grid[length(grid)]
 
   # Start with potentially already filtered data from Reg constructor
-  keep_indices <- which(x$onsets >= onset_min_bound & x$onsets <= onset_max_bound)
+  # A block can begin before the ordinary point-event bound and still overlap
+  # the requested grid through its duration. Filter on the end of the neural
+  # input, not only on its onset, so late block tails remain available.
+  event_ends <- x$onsets + pmax(x$duration, 0)
+  keep_indices <- which(event_ends >= onset_min_bound &
+                        x$onsets <= onset_max_bound)
 
   # Note: Amplitude filtering already done in Reg(), no need to repeat here
   valid_ons <- x$onsets[keep_indices]

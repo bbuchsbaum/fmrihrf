@@ -39,7 +39,10 @@ convolution engine.
 
 * `method = "loop"` no longer truncates blocked events at `hrf_span`. It now
   extends to `hrf_span + duration`, removing a residual error that did not
-  shrink as `precision` decreased.
+  shrink as `precision` decreased. Its support calculation no longer assumes
+  a multi-point regular grid, so one-point and irregular grids work as well.
+  Blocks whose onset precedes the requested grid are retained when their
+  duration carries the response into it.
 
 ## Bug Fixes
 

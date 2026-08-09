@@ -39,6 +39,76 @@ test_that("point-event regressors stay precision invariant", {
                tolerance = 1e-6)
 })
 
+test_that("off-grid point events remain close to the exact loop oracle", {
+  grid <- seq(0, 40, by = 0.1)
+  reg <- regressor(onsets = 10.299, hrf = HRF_SPMG1, duration = 0)
+
+  exact <- evaluate(reg, grid, method = "loop", precision = 0.33)
+  convolved <- evaluate(reg, grid, method = "conv", precision = 0.33)
+  relative_peak_error <- max(abs(convolved - exact)) / max(abs(exact))
+
+  # Floor-snapping this onset produced about 12% peak-relative error. Splitting
+  # it across the two surrounding bins must keep the error below 1%.
+  expect_lt(relative_peak_error, 0.01)
+})
+
+test_that("off-grid block convolution matches an integration oracle", {
+  linear_shape <- function(t) ifelse(t >= 0 & t <= 10, t, 0)
+  linear_hrf <- as_hrf(linear_shape, name = "linear", span = 10)
+  onset <- 2.07
+  duration <- 1.17
+  grid <- c(4, 4.5)
+
+  oracle <- vapply(grid, function(t) {
+    stats::integrate(function(u) linear_shape(t - onset - u),
+                     lower = 0, upper = duration)$value
+  }, numeric(1))
+
+  accumulated <- regressor(onset, linear_hrf, duration = duration)
+  averaged <- regressor(onset, linear_hrf, duration = duration,
+                        summate = FALSE)
+
+  for (method in c("conv", "loop")) {
+    expect_equal(evaluate(accumulated, grid, method = method,
+                          precision = 0.33),
+                 oracle, tolerance = 1e-6,
+                 info = paste("method =", method))
+    expect_equal(evaluate(averaged, grid, method = method,
+                          precision = 0.33),
+                 oracle / duration, tolerance = 1e-6,
+                 info = paste("method =", method, "summate = FALSE"))
+  }
+})
+
+test_that("loop evaluation supports a one-point grid", {
+  triangular_shape <- function(t) ifelse(t >= 0 & t <= 1, 1 - t, 0)
+  triangular_hrf <- as_hrf(triangular_shape, name = "triangle", span = 1)
+  reg <- regressor(onsets = 2, hrf = triangular_hrf)
+
+  scalar <- evaluate(reg, 2.5, method = "loop", precision = 0.01)
+  vector <- evaluate(reg, c(2.5, 3), method = "loop", precision = 0.01)
+
+  expect_length(scalar, 1)
+  expect_equal(scalar, vector[[1]], tolerance = 1e-12)
+  expect_equal(scalar, 0.5, tolerance = 1e-12)
+})
+
+test_that("loop retains the late tail of a blocked event", {
+  triangular_shape <- function(t) ifelse(t >= 0 & t <= 1, 1 - t, 0)
+  triangular_hrf <- as_hrf(triangular_shape, name = "triangle", span = 1)
+  reg <- regressor(onsets = 0, hrf = triangular_hrf, duration = 2)
+  grid <- c(0, 2.5)
+
+  expected_tail <- stats::integrate(
+    function(u) triangular_shape(2.5 - u),
+    lower = 0, upper = 2
+  )$value
+  result <- evaluate(reg, grid, method = "loop", precision = 0.01)
+
+  expect_gt(result[[2]], 0)
+  expect_equal(result[[2]], expected_tail, tolerance = 1e-6)
+})
+
 # --- Issue 2: summate reaches every engine ---------------------------------
 
 test_that("summate = FALSE is honoured by all evaluation methods", {
