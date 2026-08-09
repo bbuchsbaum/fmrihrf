@@ -9,14 +9,14 @@
 
 ## Convolution engine consolidation
 
-The package carried four convolution engines. Benchmarking them against
-numerical integration of the same designs showed no configuration in which the
-alternatives beat `conv` on either axis, so there is now one engine.
+The package carried four evaluation engines. `conv` provided the best
+speed/accuracy tradeoff in development benchmarks, so there is now one compiled
+convolution engine.
 
-* `method = "conv"` remains the default and is the only convolution engine.
-  It was 3-10x faster than `fft` and 10-100x faster than `loop` across every
-  case measured (single run to 1000 volumes x 500 events, 1 to 5 basis
-  functions, `precision` from 0.33 down to 0.01), at equal accuracy.
+* `method = "conv"` remains the default and is the only compiled convolution
+  engine. It avoids FFT zero-padding overhead and is substantially faster than
+  `loop` on large designs; exact speedups depend on design size, basis count,
+  and `precision`.
 
 * `method = "fft"` and `method = "Rconv"` are deprecated. They now evaluate via
   `conv` and warn. The FFT engine never repaid its zero-padding, because the
@@ -26,15 +26,16 @@ alternatives beat `conv` on either axis, so there is now one engine.
   grid was irregular or durations varied. Both implementations have been
   removed.
 
-* `method = "loop"` is retained. It is roughly twice as accurate as `conv`
-  because event onsets are never quantised, and it remains the automatic
-  fallback for regressors built from a list of per-event HRFs.
+* `method = "loop"` is retained as the reference implementation. It can be
+  more accurate at a given `precision` because event onsets are evaluated
+  directly, and it remains the automatic fallback for regressors built from a
+  list of per-event HRFs.
 
 * Event onsets and block edges are no longer snapped to the internal grid.
-  Each is placed at its exact sub-bin position, which at the default
-  `precision = 0.33` cut the error of an off-grid onset from ~12% of peak to
-  ~0.3%. Blocks are projected onto the linear hat basis, preserving trapezoid
-  accuracy while keeping the exact edge placement.
+  Each is placed at its exact sub-bin position, substantially reducing
+  off-grid error at the default `precision = 0.33`. Blocks are projected onto
+  the linear hat basis, preserving trapezoid accuracy while keeping the exact
+  edge placement.
 
 * `method = "loop"` no longer truncates blocked events at `hrf_span`. It now
   extends to `hrf_span + duration`, removing a residual error that did not
@@ -67,8 +68,9 @@ Addresses the defects reported in issue #45.
   amplitude jump. Durations smaller than `precision` are now integrated as
   blocks.
 
-* All four evaluation methods (`conv`, `fft`, `Rconv`, `loop`) now agree to
-  within quadrature error on block regressors.
+* The accepted evaluation methods (`conv`, `fft`, `Rconv`, `loop`) now
+  agree to within quadrature error on block regressors; the deprecated names
+  `fft` and `Rconv` route to `conv`.
 
 * `hrf_sine()` and `hrf_fourier()` no longer error on a scalar `t`. `vapply()`
   dropped the result to a plain vector when `length(t) == 1`, so the support
@@ -111,10 +113,6 @@ Addresses the defects reported in issue #45.
 
 * Consolidated derivative method Rd aliases into parent help pages, reducing documentation redundancy.
 * Added explicit `importFrom(utils, tail)` to avoid R CMD check NOTEs.
-
-## Bug Fixes
-
-* Guarded `is.symbol()` before `as.character()` in internal eco atlas extraction to prevent errors on non-symbol inputs.
 
 # fmrihrf 0.2.1
 

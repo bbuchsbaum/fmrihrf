@@ -186,8 +186,6 @@ eval_loop <- function(p, ...) {
   precision <- p$precision
   summate <- p$summate
 
-  grid_step <- stats::median(diff(grid), na.rm=TRUE)
-
   # Pre-calculate nearest grid indices for onsets (more robust than RANN for this)
   # Find the index of the grid point *just before or at* each onset
   nidx <- findInterval(valid_ons, grid)
@@ -200,12 +198,15 @@ eval_loop <- function(p, ...) {
     # the bare span truncated the tail of every block, leaving a residual error
     # that did not shrink with `precision`.
     event_span <- hrf_span + max(valid_durs[i], 0)
-    dspan <- event_span / grid_step # Approx span in grid units
 
     start_grid_idx <- nidx[i]
-    end_grid_idx <- min(start_grid_idx + ceiling(dspan) + 5, length(grid))
+    # Select the final grid point inside the event's support directly. Unlike
+    # estimating an index count from median(diff(grid)), this also works for a
+    # one-point grid and for irregular or duplicated sampling grids.
+    end_grid_idx <- findInterval(valid_ons[i] + event_span, grid)
     if (start_grid_idx > length(grid)) next
-    grid.idx <- start_grid_idx:end_grid_idx
+    if (end_grid_idx < start_grid_idx) next
+    grid.idx <- seq.int(start_grid_idx, end_grid_idx)
 
     relOns <- grid[grid.idx] - valid_ons[i]
     valid_rel_idx <- which(relOns >= 0 & relOns <= event_span)
