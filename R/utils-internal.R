@@ -21,6 +21,19 @@ recycle_or_error <- function(x, n, name) {
   if (is.null(a)) b else a
 }
 
+# Zero a response outside the causal support t >= 0.
+#
+# Several shape functions (gaussian, mexican hat, inverse logit, LWU) are
+# defined by formulas that are non-zero at negative lag. The regressor path
+# masks negative lags itself, but decorators such as block_hrf() and lag_hrf()
+# sample h(t - offset) directly and would otherwise mix in pre-onset values.
+#' @keywords internal
+#' @noRd
+.causal <- function(t, values) {
+  values[!is.na(t) & t < 0] <- 0
+  values
+}
+
 #' @importFrom utils tail
 #' @keywords internal
 #' @noRd

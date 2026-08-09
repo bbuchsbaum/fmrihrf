@@ -5,6 +5,11 @@
 src/*.o
 src/*.so
 src/*.dll
+src/*.dylib
+
+# Build output
+*.tar.gz
+*.Rcheck/
 docs
 CLAUDE.md
 /doc/

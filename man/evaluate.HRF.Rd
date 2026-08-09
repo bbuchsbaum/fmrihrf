@@ -22,11 +22,20 @@
 
 \item{amplitude}{The scaling value for the event (default: 1).}
 
-\item{duration}{The duration of the event (seconds). If > 0, the HRF is evaluated over this duration (default: 0).}
+\item{duration}{The duration of the event (seconds). A duration of 0 is an
+impulse of unit mass and returns the HRF itself; a duration > 0 is a
+unit-height boxcar and returns its integral against the HRF (default: 0).}
 
-\item{precision}{The temporal resolution for evaluating responses when duration > 0 (default: 0.2).}
+\item{precision}{The quadrature step used to integrate over the block when
+duration > 0 (default: 0.2). It controls numerical accuracy only: the
+result converges as `precision` decreases and does not otherwise depend on
+it.}
 
-\item{summate}{Logical; whether the HRF response should accumulate over the duration (default: TRUE). If FALSE, the convolution is averaged so the temporal profile is preserved but peak amplitude does not grow with duration.}
+\item{summate}{Logical; whether the HRF response should accumulate over the duration (default: TRUE),
+giving the integral over a unit-height block, so peak amplitude grows with duration. If FALSE, the
+result is divided by the block duration, giving the duration-averaged (unit-mass) response: the
+temporal profile is preserved, peak amplitude does not grow with duration, and the value approaches
+the impulse response as duration approaches 0.}
 
 \item{normalize}{Logical; scale output so that the peak absolute value is 1 (default: FALSE). Applied *after* amplitude scaling and duration processing.}
 
