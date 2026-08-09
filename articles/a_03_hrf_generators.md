@@ -15,6 +15,7 @@ through the internal `HRF_REGISTRY` and are also returned by
 with type “generator”.
 
 ``` r
+
 list_available_hrfs(details = TRUE) %>%
   dplyr::filter(type == "generator")
 #>       name      type nbasis_default is_alias                description
@@ -34,6 +35,7 @@ generator function with your desired parameters. For example, to create
 a B-spline basis with 8 functions spanning 32 seconds:
 
 ``` r
+
 # Create a B-spline basis using gen_hrf
 bs8 <- gen_hrf(hrf_bspline, N = 8, span = 32)
 print(bs8)
@@ -46,6 +48,7 @@ The returned value is a standard `HRF` object, so you can evaluate it or
 use it in model formulas like any other HRF.
 
 ``` r
+
 times <- seq(0, 32, by = 0.5)
 mat <- bs8(times)
 head(mat)
@@ -64,6 +67,7 @@ Here is a quick look at an FIR basis generated with 10 bins over a 20
 second window:
 
 ``` r
+
 # Use the pre-defined FIR basis or create one with gen_hrf
 fir10 <- HRF_FIR  # Pre-defined FIR with 12 basis functions
 resp <- fir10(times)

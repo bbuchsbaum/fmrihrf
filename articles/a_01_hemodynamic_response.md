@@ -21,6 +21,7 @@ Let’s look at two common examples: the SPM canonical HRF (`HRF_SPMG1`)
 and a Gaussian HRF (`HRF_GAUSSIAN`).
 
 ``` r
+
 # SPM canonical HRF (based on difference of two gamma functions)
 print(HRF_SPMG1)
 #> -- HRF: SPMG1 --------------------------------------------- 
@@ -42,6 +43,7 @@ specific time points. The
 function provides a convenient way to compare multiple HRFs:
 
 ``` r
+
 time_points <- seq(0, 25, by = 0.1)
 
 # Compare HRFs using plot_hrfs() - normalize = TRUE scales to peak at 1.0
@@ -67,6 +69,7 @@ arguments. We can use `gen_hrf` to create Gaussian HRFs with different
 peak times (`mean`) and widths (`sd`).
 
 ``` r
+
 # Create Gaussian HRFs with different parameters using gen_hrf
 # Note: hrf_gaussian is the underlying function, not the HRF object HRF_GAUSSIAN
 hrf_gauss_7_3 <- gen_hrf(hrf_gaussian, mean = 7, sd = 3, name = "Gaussian (Mean=7, SD=3)")
@@ -91,6 +94,7 @@ The `precision` argument controls the sampling resolution used for this
 convolution.
 
 ``` r
+
 # Create blocked HRFs using the SPM canonical HRF with different durations
 hrf_spm_w1 <- block_hrf(HRF_SPMG1, width = 1)
 hrf_spm_w2 <- block_hrf(HRF_SPMG1, width = 2)
@@ -107,6 +111,7 @@ summation, see next section). Setting `normalize=TRUE` in `block_hrf`
 approximately 1, regardless of duration.
 
 ``` r
+
 # Create normalized blocked HRFs
 hrf_spm_w1_norm <- block_hrf(HRF_SPMG1, width = 1, normalize = TRUE)
 hrf_spm_w2_norm <- block_hrf(HRF_SPMG1, width = 2, normalize = TRUE)
@@ -124,6 +129,7 @@ is identical to the summated version but the peak amplitude does not
 grow with block duration.
 
 ``` r
+
 # Create non-summating blocked HRFs
 hrf_spm_w2_nosum <- block_hrf(HRF_SPMG1, width = 2, summate = FALSE)
 hrf_spm_w4_nosum <- block_hrf(HRF_SPMG1, width = 4, summate = FALSE)
@@ -135,6 +141,7 @@ hrf_spm_w8_nosum <- block_hrf(HRF_SPMG1, width = 8, summate = FALSE)
 We can combine `summate=FALSE` and `normalize=TRUE`:
 
 ``` r
+
 # Create normalized, non-summating blocked HRFs
 hrf_spm_w2_nosum_norm <- block_hrf(HRF_SPMG1, width = 2, summate = FALSE, normalize = TRUE)
 hrf_spm_w4_nosum_norm <- block_hrf(HRF_SPMG1, width = 4, summate = FALSE, normalize = TRUE)
@@ -152,6 +159,7 @@ relative to the event onset. The `lag_hrf` function (or
 advances it.
 
 ``` r
+
 # Create lagged versions of the Gaussian HRF
 hrf_gauss_lag_neg2 <- lag_hrf(HRF_GAUSSIAN, lag = -2)
 hrf_gauss_lag_0 <- HRF_GAUSSIAN # Original (lag=0)
@@ -166,6 +174,7 @@ We can combine `lag_hrf` and `block_hrf` using the pipe operator (`%>%`)
 from `dplyr` (or `magrittr`).
 
 ``` r
+
 # Create HRFs that are both lagged and blocked
 hrf_lb_1 <- HRF_GAUSSIAN %>% lag_hrf(1) %>% block_hrf(width = 1, normalize = TRUE)
 hrf_lb_3 <- HRF_GAUSSIAN %>% lag_hrf(3) %>% block_hrf(width = 3, normalize = TRUE)
@@ -177,6 +186,7 @@ hrf_lb_5 <- HRF_GAUSSIAN %>% lag_hrf(5) %>% block_hrf(width = 5, normalize = TRU
 Alternatively, `gen_hrf` can apply lag and width directly:
 
 ``` r
+
 # Using gen_hrf directly
 hrf_lb_gen_3 <- gen_hrf(hrf_gaussian, lag = 3, width = 3, normalize = TRUE)
 resp_lb_gen_3 <- hrf_lb_gen_3(time_points)
@@ -202,6 +212,7 @@ plus its temporal derivative (`HRF_SPMG2`), and additionally its
 dispersion derivative (`HRF_SPMG3`).
 
 ``` r
+
 # SPM + Temporal Derivative (2 basis functions)
 print(HRF_SPMG2)
 #> -- HRF: SPMG2 --------------------------------------------- 
@@ -226,6 +237,7 @@ use it within `gen_hrf` to create an HRF object. Key parameters are `N`
 (number of basis functions) and `degree`.
 
 ``` r
+
 # B-spline basis with N=5 basis functions, degree=3 (cubic)
 hrf_bs_5_3 <- gen_hrf(hrf_bspline, N = 5, degree = 3, name = "B-spline (N=5, deg=3)")
 print(hrf_bs_5_3)
@@ -251,6 +263,7 @@ The `hrf_sine` function creates a basis set using sine waves of
 different frequencies.
 
 ``` r
+
 hrf_sin_5 <- gen_hrf(hrf_sine, N = 5, name = "Sine Basis (N=5)")
 print(hrf_sin_5)
 #> -- HRF: Sine Basis (N=5) ---------------------------------- 
@@ -278,6 +291,7 @@ The `hrf_gamma` function uses the gamma probability density function.
 \`\`\`\`
 
 ``` r
+
 hrf_gam <- gen_hrf(hrf_gamma, shape = 6, rate = 1, name = "Gamma (shape=6, rate=1)")
 print(hrf_gam)
 #> -- HRF: Gamma (shape=6, rate=1) --------------------------- 
@@ -293,6 +307,7 @@ The `hrf_mexhat` function uses the Mexican hat wavelet (second
 derivative of a Gaussian).
 
 ``` r
+
 hrf_mh <- gen_hrf(hrf_mexhat, mean = 6, sd = 1.5, name = "Mexican Hat (mean=6, sd=1.5)")
 print(hrf_mh)
 #> -- HRF: Mexican Hat (mean=6, sd=1.5) ---------------------- 
@@ -309,6 +324,7 @@ inverse logit (sigmoid) functions, allowing control over rise and fall
 times.
 
 ``` r
+
 hrf_il <- gen_hrf(hrf_inv_logit, mu1 = 5, s1 = 1, mu2 = 15, s2 = 1.5, name = "Inv. Logit Diff.")
 print(hrf_il)
 #> -- HRF: Inv. Logit Diff. ---------------------------------- 
@@ -337,6 +353,7 @@ there is no built-in hemodynamic delay—the HRF starts at time 0 (event
 onset) and extends for the specified `width`.
 
 ``` r
+
 # Create a boxcar of width 5 seconds (from 0 to 5 seconds)
 hrf_box <- hrf_boxcar(width = 5)
 print(hrf_box)
@@ -352,6 +369,7 @@ capturing signal in a specific post-stimulus window—use
 [`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md):
 
 ``` r
+
 # Boxcar from 4-8 seconds post-stimulus (capturing the expected BOLD peak)
 # Use lag_hrf() to delay a 4-second boxcar by 4 seconds
 hrf_delayed <- hrf_boxcar(width = 4) %>% lag_hrf(lag = 4)
@@ -367,6 +385,7 @@ regression coefficient β directly estimates the mean signal within the
 time window**.
 
 ``` r
+
 # Normalized boxcar - integral = 1
 # A 4-second boxcar lagged by 4 seconds (captures 4-8s window)
 hrf_norm <- hrf_boxcar(width = 4, normalize = TRUE) %>% lag_hrf(lag = 4)
@@ -403,6 +422,7 @@ smoothly interpolated function (`method = "linear"`).
 #### Using `width` for Evenly Spaced Weights
 
 ``` r
+
 # 6 weights evenly spaced over 10 seconds (at 0, 2, 4, 6, 8, 10)
 hrf_wt_width <- hrf_weighted(
   weights = c(0.1, 0.3, 1.0, 1.0, 0.3, 0.1),
@@ -416,6 +436,7 @@ hrf_wt_width <- hrf_weighted(
 #### Using Explicit `times` for Custom Spacing
 
 ``` r
+
 # Weighted step function with explicit time points
 hrf_wt <- hrf_weighted(
   weights = c(0.1, 0.3, 1.0, 1.0, 0.3, 0.1),
@@ -429,6 +450,7 @@ hrf_wt <- hrf_weighted(
 #### Smooth Weights (Linear Interpolation)
 
 ``` r
+
 # Smooth weights using linear interpolation
 hrf_smooth <- hrf_weighted(
   weights = c(0, 0.3, 1.0, 1.0, 0.3, 0),
@@ -445,6 +467,7 @@ The `hrf_weighted` function supports sub-second time intervals, which is
 useful for fine-grained temporal weighting:
 
 ``` r
+
 # Sub-second intervals: create a Gaussian-shaped weight function
 times_fine <- seq(4, 10, by = 0.25)
 weights_gaussian <- dnorm(times_fine, mean = 7, sd = 1)
@@ -461,6 +484,7 @@ integrate (linear) to 1. The regression coefficient then estimates a
 **weighted mean** of the signal:
 
 ``` r
+
 # Normalized weights - creates weighted average interpretation
 hrf_wt_norm <- hrf_weighted(
   weights = c(1, 2, 2, 1),  # Will be normalized
@@ -487,6 +511,7 @@ A common analysis compares BOLD signal in early vs. late portions of a
 trial. Here’s how to set up HRFs for this:
 
 ``` r
+
 # Early window: 2-6 seconds (4-second boxcar lagged by 2 seconds)
 hrf_early <- hrf_boxcar(width = 4, normalize = TRUE) %>% lag_hrf(lag = 2)
 
@@ -506,6 +531,7 @@ These HRFs integrate seamlessly with the
 function:
 
 ``` r
+
 # Create a regressor with boxcar HRF (4-second window starting 4s after onset)
 reg_boxcar <- regressor(
   onsets = c(0, 20, 40),
@@ -527,6 +553,7 @@ For example, we can create a basis set from a series of lagged Gaussian
 HRFs:
 
 ``` r
+
 # Create a list of lagged Gaussian HRFs
 lag_times <- seq(0, 10, by = 2)
 list_of_hrfs <- lapply(lag_times, function(lag) {
@@ -553,6 +580,7 @@ from deconvolution), you can turn it into an HRF function using
 points.
 
 ``` r
+
 # Simulate an average measured response profile
 sim_times <- 0:24
 set.seed(42) # For reproducibility
@@ -581,6 +609,7 @@ You can create an empirical *basis set* by applying dimensionality
 reduction (like PCA) to a collection of observed or simulated HRFs.
 
 ``` r
+
 # 1. Simulate a matrix of diverse HRFs
 set.seed(123) # for reproducibility
 n_sim <- 50
@@ -595,6 +624,7 @@ sim_mat <- replicate(n_sim, {
 ![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png)
 
 ``` r
+
 # 2. Perform PCA on the transpose (each column = one HRF, each row = one time point)
 pca_res <- prcomp(t(sim_mat), center = TRUE, scale. = FALSE)
 n_components <- 3

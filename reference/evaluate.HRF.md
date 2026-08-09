@@ -36,19 +36,26 @@ evaluate(
 
 - duration:
 
-  The duration of the event (seconds). If \> 0, the HRF is evaluated
-  over this duration (default: 0).
+  The duration of the event (seconds). A duration of 0 is an impulse of
+  unit mass and returns the HRF itself; a duration \> 0 is a unit-height
+  boxcar and returns its integral against the HRF (default: 0).
 
 - precision:
 
-  The temporal resolution for evaluating responses when duration \> 0
-  (default: 0.2).
+  The quadrature step used to integrate over the block when duration \>
+  0 (default: 0.2). It controls numerical accuracy only: the result
+  converges as \`precision\` decreases and does not otherwise depend on
+  it.
 
 - summate:
 
   Logical; whether the HRF response should accumulate over the duration
-  (default: TRUE). If FALSE, the convolution is averaged so the temporal
-  profile is preserved but peak amplitude does not grow with duration.
+  (default: TRUE), giving the integral over a unit-height block, so peak
+  amplitude grows with duration. If FALSE, the result is divided by the
+  block duration, giving the duration-averaged (unit-mass) response: the
+  temporal profile is preserved, peak amplitude does not grow with
+  duration, and the value approaches the impulse response as duration
+  approaches 0.
 
 - normalize:
 

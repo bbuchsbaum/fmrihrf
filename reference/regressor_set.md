@@ -22,7 +22,7 @@ evaluate(
   x,
   grid,
   precision = 0.33,
-  method = c("conv", "fft", "Rconv", "loop"),
+  method = c("conv", "loop", "fft", "Rconv"),
   sparse = FALSE,
   ...
 )

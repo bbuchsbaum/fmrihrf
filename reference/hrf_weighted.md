@@ -88,6 +88,7 @@ does **not** modify the weighted HRF's structure—it controls how long
 the neural input is sustained (which then gets convolved with this HRF).
 For trial-varying weighted HRFs, use a list of HRFs:
 
+
     hrf_early <- hrf_weighted(width = 6, weights = c(1, 1, 0, 0), normalize = TRUE)
     hrf_late <- hrf_weighted(width = 6, weights = c(0, 0, 1, 1), normalize = TRUE)
     reg <- regressor(onsets = c(0, 20), hrf = list(hrf_early, hrf_late))

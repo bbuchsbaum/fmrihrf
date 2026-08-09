@@ -12,6 +12,7 @@ convolution backend.
 ## Installation
 
 ``` r
+
 # From CRAN
 install.packages("fmrihrf")
 
@@ -22,6 +23,7 @@ remotes::install_github("bbuchsbaum/fmrihrf")
 ## Quick start
 
 ``` r
+
 library(fmrihrf)
 
 # Evaluate the SPM canonical HRF over 0-30 seconds
@@ -42,6 +44,7 @@ plot(reg)
 set to capture response variability.
 
 ``` r
+
 HRF_SPMG1                                    # SPM canonical (double gamma)
 HRF_SPMG3                                    # canonical + temporal & dispersion derivatives
 hrf_bspline(t, N = 6)                        # B-spline basis
@@ -51,6 +54,7 @@ hrf_fourier(t, N = 5)                        # Fourier basis
 **Decorators** — Modify any HRF through functional composition.
 
 ``` r
+
 lag_hrf(HRF_SPMG1, lag = 2)                  # shift peak by 2 s
 block_hrf(HRF_SPMG1, width = 15)             # sustained/blocked response
 normalise_hrf(HRF_SPMG1)                     # unit peak-normalised
@@ -59,6 +63,7 @@ normalise_hrf(HRF_SPMG1)                     # unit peak-normalised
 **Custom HRFs** — Wrap any `f(t)` into the HRF system.
 
 ``` r
+
 my_hrf <- as_hrf(function(t) exp(-t / 5), name = "exponential", span = 20)
 evaluate(my_hrf, seq(0, 20, by = 1))
 ```
@@ -68,6 +73,7 @@ design-matrix columns, with support for variable durations, amplitudes,
 and multi-basis expansion.
 
 ``` r
+
 sf <- sampling_frame(blocklens = c(200, 200), TR = 2)
 reg <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1,
                  duration = c(0, 5, 0), amplitude = c(1, 1.5, 1),
@@ -103,12 +109,14 @@ Vignettes cover the main workflows:
 Install the package:
 
 ``` r
+
 install.packages("fmrihrf")
 ```
 
 Install the command wrapper:
 
 ``` r
+
 fmrihrf::install_cli("~/.local/bin", overwrite = TRUE)
 ```
 

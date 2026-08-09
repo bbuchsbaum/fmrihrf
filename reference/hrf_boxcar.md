@@ -52,6 +52,7 @@ does **not** modify the boxcar width—it controls how long the neural
 input is sustained (which then gets convolved with this HRF). For
 trial-varying boxcar widths, use a list of HRFs:
 
+
     widths <- c(4, 6, 8)
     hrfs <- lapply(widths, function(w) hrf_boxcar(width = w, normalize = TRUE))
     reg <- regressor(onsets = c(0, 20, 40), hrf = hrfs)

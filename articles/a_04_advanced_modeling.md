@@ -33,6 +33,7 @@ Let’s create a library of gamma HRFs with different shape and rate
 parameters:
 
 ``` r
+
 # Define parameter grid for gamma HRFs
 gamma_params <- expand.grid(
   shape = c(4, 6, 8),
@@ -95,6 +96,7 @@ Here’s how to create a library of the SPM canonical HRF with different
 temporal lags:
 
 ``` r
+
 # Parameter grid for temporal lags
 lag_params <- data.frame(lag = seq(-2, 4, by = 1))
 print(lag_params)
@@ -147,6 +149,7 @@ interpreting estimated HRFs from fMRI analyses.
 ### How Reconstruction Works
 
 ``` r
+
 # Use a small basis for clear visualization
 basis_set <- gen_hrf(hrf_bspline, N = 5, degree = 3, span = 30)
 eval_times <- seq(0, 30, by = 0.1)
@@ -177,6 +180,7 @@ ggplot(basis_long, aes(x = Time, y = Value, color = Basis)) +
 ![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png)
 
 ``` r
+
 
 # Now demonstrate reconstruction with different coefficient patterns
 coefficient_sets <- list(
@@ -219,6 +223,7 @@ ggplot(reconstruction_df, aes(x = Time, y = HRF, color = Pattern)) +
 ### Interactive Visualization: Building an HRF Step by Step
 
 ``` r
+
 # Let's build up a canonical HRF step by step
 canonical_coefs <- c(0.0, 0.3, 1.0, 0.4, -0.1)
 
@@ -265,6 +270,7 @@ ggplot(cumulative_df, aes(x = Time, y = Value, color = Type)) +
 
 ``` r
 
+
 # Show coefficient importance
 coef_importance <- data.frame(
   Basis = paste0("B", 1:5),
@@ -296,6 +302,7 @@ where each condition shares the same HRF but has different event
 timings.
 
 ``` r
+
 # Simulate a 3-condition experiment
 set.seed(123)
 n_events_per_condition <- 8
@@ -357,6 +364,7 @@ ggplot(design_long, aes(x = Time, y = Response, color = Condition)) +
 
 ``` r
 
+
 # Add event markers
 onset_df <- data.frame(
   Time = all_onsets,
@@ -387,6 +395,7 @@ provides a higher-level interface that handles block-relative timing and
 creates design matrices directly.
 
 ``` r
+
 # Create a sampling frame for 2 blocks of 120 seconds each
 sframe <- sampling_frame(
   blocklens = c(120, 120),  # Two 4-minute blocks (120 scans each at TR = 2s)
@@ -454,6 +463,7 @@ ggplot(design_plot_long, aes(x = Time, y = Response, color = Condition)) +
 ![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png)
 
 ``` r
+
 
 # Show global vs block-relative timing
 timing_df <- data.frame(

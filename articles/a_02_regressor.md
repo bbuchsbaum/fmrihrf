@@ -24,6 +24,7 @@ canonical HRF (`HRF_SPMG1`). The events are brief, so we model them with
 a duration of 0 seconds (instantaneous).
 
 ``` r
+
 # Define event onsets
 onsets <- seq(0, 10 * 12, by = 12)
 
@@ -52,6 +53,7 @@ we use the
 function.
 
 ``` r
+
 # Define a time grid corresponding to scan times (e.g., TR=2s)
 TR <- 2
 scan_times <- seq(0, 140, by = TR)
@@ -70,6 +72,7 @@ Sometimes events have different durations. The `duration` argument in
 can take a vector matching the length of `onsets`.
 
 ``` r
+
 # Example onsets and durations
 onsets_var_dur <- seq(0, 5 * 12, length.out = 6)
 durations_var <- 1:length(onsets_var_dur) # Durations increase from 1s to 6s
@@ -93,6 +96,7 @@ preserves the same temporal profile but the peak amplitude does not grow
 with duration.
 
 ``` r
+
 # Create regressor with varying durations, summate=FALSE
 reg_var_dur_nosum <- regressor(onsets_var_dur, HRF_SPMG1,
                                duration = durations_var, summate = FALSE)
@@ -115,6 +119,7 @@ regressor* where the height of the HRF for each event is scaled by the
 corresponding amplitude value.
 
 ``` r
+
 # Example onsets and amplitudes (e.g., representing task difficulty)
 onsets_amp <- seq(0, 10 * 12, length.out = 11)
 amplitudes_raw <- 1:length(onsets_amp)
@@ -139,6 +144,7 @@ You can provide both `duration` and `amplitude` vectors to model events
 that vary in both aspects.
 
 ``` r
+
 set.seed(123)
 onsets_comb <- seq(0, 10 * 12, length.out = 11)
 amps_comb <- scale(1:length(onsets_comb), center = TRUE, scale = FALSE)
@@ -164,6 +170,7 @@ multiple timecourses, one for each basis function.
 will return a matrix.
 
 ``` r
+
 # Use a B-spline basis set
 onsets_basis <- seq(0, 10 * 12, length.out = 11)
 hrf_basis <- HRF_BSPLINE # Uses N=5 basis functions by default
@@ -192,6 +199,7 @@ You can temporally shift all onsets within a regressor using the
 method.
 
 ``` r
+
 # Original regressor
 reg_orig <- regressor(onsets = c(10, 30, 50), hrf = HRF_SPMG1)
 
