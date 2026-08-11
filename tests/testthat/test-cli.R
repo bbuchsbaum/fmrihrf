@@ -80,7 +80,9 @@ test_that("install_cli copies the wrapper and refuses accidental overwrite", {
   dest_dir <- tempfile()
   installed <- install_cli(dest_dir)
   expect_true(file.exists(installed[["fmrihrf"]]))
-  expect_true(file.access(installed[["fmrihrf"]], mode = 1) == 0)
+  if (.Platform$OS.type != "windows") {
+    expect_equal(unname(file.access(installed[["fmrihrf"]], mode = 1)), 0L)
+  }
   expect_error(install_cli(dest_dir), "Refusing to overwrite")
 })
 
@@ -90,10 +92,12 @@ test_that("exec wrapper has a valid help path", {
     wrapper <- file.path(getwd(), "exec", "fmrihrf")
   }
   skip_if_not(file.exists(wrapper))
-  lib_env <- paste0("R_LIBS=", paste(.libPaths(), collapse = .Platform$path.sep))
-  result <- system2(file.path(R.home("bin"), "Rscript"),
-                    c(wrapper, "--help"), stdout = TRUE, stderr = TRUE,
-                    env = lib_env)
+  rscript <- file.path(
+    R.home("bin"),
+    if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"
+  )
+  result <- system2(rscript,
+                    c(shQuote(wrapper), "--help"), stdout = TRUE, stderr = TRUE)
   status <- attr(result, "status")
   if (is.null(status)) {
     status <- 0L
