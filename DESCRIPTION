@@ -42,4 +42,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
 BugReports: https://github.com/bbuchsbaum/fmrihrf/issues
-Config/Needs/website: https://github.com/bbuchsbaum/albersdown
+Config/Needs/website: https://github.com/bbuchsbaum/albersdown, albersdown
