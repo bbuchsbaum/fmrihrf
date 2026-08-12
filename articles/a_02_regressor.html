@@ -64,7 +64,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-08-11</h4>
+            <h4 data-toc-skip class="date">2026-08-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_02_regressor.Rmd" class="external-link"><code>vignettes/a_02_regressor.Rmd</code></a></small>
       <div class="d-none name"><code>a_02_regressor.Rmd</code></div>
@@ -72,7 +72,7 @@ Buchsbaum</h4>
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-interaction","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-interaction");});</script><div class="section level2">
 <h2 id="introduction-what-is-a-regressor">Introduction: What is a Regressor?<a class="anchor" aria-label="anchor" href="#introduction-what-is-a-regressor"></a>
 </h2>
 <p>In fMRI analysis, a <strong>regressor</strong> (or predictor)
@@ -102,9 +102,6 @@ model them with a duration of 0 seconds (instantaneous).</p>
 <span><span class="co"># Uses HRF_SPMG1 by default if no hrf is specified</span></span>
 <span><span class="co"># Duration is 0 by default</span></span>
 <span><span class="va">reg1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="va">onsets</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Print the regressor object to see its properties (uses new print.Reg method)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Access components using helper functions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/onsets.html">onsets</a></span><span class="op">(</span><span class="va">reg1</span><span class="op">)</span><span class="op">)</span></span>
@@ -142,7 +139,6 @@ length of <code>onsets</code>.</p>
 <span></span>
 <span><span class="co"># Create regressor with varying durations</span></span>
 <span><span class="va">reg_var_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_var_dur</span>, <span class="va">HRF_SPMG1</span>, duration <span class="op">=</span> <span class="va">durations_var</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_var_dur</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot the regressor</span></span>
 <span><span class="va">scan_times_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_var_dur</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
@@ -186,7 +182,6 @@ is scaled by the corresponding amplitude value.</p>
 <span></span>
 <span><span class="co"># Create the parametric regressor</span></span>
 <span><span class="va">reg_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_amp</span>, <span class="va">HRF_SPMG1</span>, amplitude <span class="op">=</span> <span class="va">amplitudes_scaled</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_amp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot the parametric regressor</span></span>
 <span><span class="va">scan_times_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_amp</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
@@ -206,7 +201,6 @@ vectors to model events that vary in both aspects.</p>
 <span></span>
 <span><span class="va">reg_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_comb</span>, <span class="va">HRF_SPMG1</span>, </span>
 <span>                      amplitude <span class="op">=</span> <span class="va">amps_comb</span>, duration <span class="op">=</span> <span class="va">durs_comb</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_comb</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot the combined regressor</span></span>
 <span><span class="va">scan_times_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_comb</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
@@ -227,7 +221,6 @@ matrix.</p>
 <span><span class="va">hrf_basis</span> <span class="op">&lt;-</span> <span class="va">HRF_BSPLINE</span> <span class="co"># Uses N=5 basis functions by default</span></span>
 <span></span>
 <span><span class="va">reg_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span><span class="va">onsets_basis</span>, <span class="va">hrf_basis</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">reg_basis</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/nbasis.html">nbasis</a></span><span class="op">(</span><span class="va">reg_basis</span><span class="op">)</span> <span class="co"># Should be 5</span></span>
 <span><span class="co">#&gt; [1] 5</span></span>
 <span></span>

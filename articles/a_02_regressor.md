@@ -33,9 +33,6 @@ onsets <- seq(0, 10 * 12, by = 12)
 # Duration is 0 by default
 reg1 <- regressor(onsets = onsets, hrf = HRF_SPMG1)
 
-# Print the regressor object to see its properties (uses new print.Reg method)
-print(reg1)
-
 # Access components using helper functions
 head(onsets(reg1))
 #> [1]  0 12 24 36 48 60
@@ -79,7 +76,6 @@ durations_var <- 1:length(onsets_var_dur) # Durations increase from 1s to 6s
 
 # Create regressor with varying durations
 reg_var_dur <- regressor(onsets_var_dur, HRF_SPMG1, duration = durations_var)
-print(reg_var_dur)
 
 # Plot the regressor
 scan_times_dur <- seq(0, max(onsets_var_dur) + 30, by = TR)
@@ -129,7 +125,6 @@ amplitudes_scaled <- scale(amplitudes_raw, center = TRUE, scale = FALSE)
 
 # Create the parametric regressor
 reg_amp <- regressor(onsets_amp, HRF_SPMG1, amplitude = amplitudes_scaled)
-print(reg_amp)
 
 # Plot the parametric regressor
 scan_times_amp <- seq(0, max(onsets_amp) + 30, by = TR)
@@ -152,7 +147,6 @@ durs_comb <- sample(1:5, length(onsets_comb), replace = TRUE)
 
 reg_comb <- regressor(onsets_comb, HRF_SPMG1, 
                       amplitude = amps_comb, duration = durs_comb)
-print(reg_comb)
 
 # Plot the combined regressor
 scan_times_comb <- seq(0, max(onsets_comb) + 30, by = TR)
@@ -176,7 +170,6 @@ onsets_basis <- seq(0, 10 * 12, length.out = 11)
 hrf_basis <- HRF_BSPLINE # Uses N=5 basis functions by default
 
 reg_basis <- regressor(onsets_basis, hrf_basis)
-print(reg_basis)
 nbasis(reg_basis) # Should be 5
 #> [1] 5
 
