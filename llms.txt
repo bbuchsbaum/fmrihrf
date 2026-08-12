@@ -342,7 +342,10 @@ activated on site pages.
   : Generate Neural Input Function from Event Timing
 
 - [`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md)
-  : Normalise an HRF Object
+  : Normalise Each Basis of an HRF to Unit Peak
+
+- [`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
+  : Normalize an HRF Object with a Fixed Scale
 
 - [`onsets()`](https://bbuchsbaum.github.io/fmrihrf/reference/onsets.md)
   : Get event onsets from an object

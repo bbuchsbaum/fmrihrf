@@ -4,6 +4,18 @@
 
 ### Improvements
 
+- Added fixed-scale HRF normalization with
+  [`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
+  and the `hrf_norm` argument to
+  [`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md)
+  and
+  [`getHRF()`](https://bbuchsbaum.github.io/fmrihrf/reference/getHRF.md).
+  Modes include Nilearn/SPM reference-grid scaling, unit peak, unit
+  integral, and independent per-basis unit peaks. The existing
+  [`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md)
+  and `normalize = TRUE` interfaces retain their per-basis unit-peak
+  behavior.
+
 - Factored the duplicated single-basis / multi-basis branching in
   [`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md),
   [`evaluate.HRF()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.HRF.md),

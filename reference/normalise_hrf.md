@@ -1,7 +1,8 @@
-# Normalise an HRF Object
+# Normalise Each Basis of an HRF to Unit Peak
 
-Creates a new HRF object whose output is scaled such that the maximum
-absolute value of the response is 1.
+Back-compatible spelling and behavior for independently peak-normalizing
+every basis column. New code can use \`normalize_hrf(hrf,
+"unit_peak_per_basis")\` explicitly.
 
 ## Usage
 
@@ -13,33 +14,24 @@ normalise_hrf(hrf)
 
 - hrf:
 
-  The HRF object (of class \`HRF\`) to normalise.
+  An object of class \`HRF\`.
 
 ## Value
 
-A new HRF object representing the normalised function.
-
-## Details
-
-For multi-basis HRFs, each basis function (column) is normalised
-independently.
+A unit-peak \`HRF\` object.
 
 ## See also
 
 Other HRF_decorator_functions:
 [`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md),
-[`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md)
+[`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md),
+[`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
 
 ## Examples
 
 ``` r
-# Create a gaussian HRF with a peak value != 1
-gauss_unnorm <- as_hrf(function(t) 5 * dnorm(t, 6, 2), name="unnorm_gauss")
-# Normalise it
+gauss_unnorm <- as_hrf(function(t) 5 * dnorm(t, 6, 2), name = "unnorm_gauss")
 gauss_norm <- normalise_hrf(gauss_unnorm)
-t_vals <- seq(0, 20, by = 0.1)
-max(gauss_unnorm(t_vals)) # Peak is > 1
-#> [1] 0.9973557
-max(gauss_norm(t_vals))   # Peak is 1
+max(gauss_norm(seq(0, 20, by = 0.1)))
 #> [1] 1
 ```

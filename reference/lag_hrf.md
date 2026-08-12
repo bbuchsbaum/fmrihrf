@@ -28,7 +28,8 @@ A new HRF object representing the lagged function.
 
 Other HRF_decorator_functions:
 [`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md),
-[`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md)
+[`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md),
+[`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
 
 ## Examples
 

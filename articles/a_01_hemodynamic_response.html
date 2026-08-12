@@ -125,6 +125,25 @@ indicates the approximate time window over which the HRF is
 non-zero.</p>
 </div>
 <div class="section level2">
+<h2 id="choosing-a-fixed-hrf-scale">Choosing a Fixed HRF Scale<a class="anchor" aria-label="anchor" href="#choosing-a-fixed-hrf-scale"></a>
+</h2>
+<p>HRF scaling changes the units of fitted coefficients, so use an
+explicit convention when comparing designs across software.
+<code>hrf_norm = "spm"</code> matches the Nilearn/SPM reference-grid
+convention; <code>"unit_peak"</code> sets the canonical peak to one, and
+<code>"unit_integral"</code> sets its continuous integral to one.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spm_scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, hrf_norm <span class="op">=</span> <span class="st">"spm"</span><span class="op">)</span></span>
+<span><span class="va">spm_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">32</span>, length.out <span class="op">=</span> <span class="fl">1600</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">spm_scaled</span><span class="op">(</span><span class="va">spm_grid</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+<p>Use <code><a href="../reference/normalize_hrf.html">normalize_hrf()</a></code> to scale an existing HRF object. For
+SPM derivative bases, the modes above apply one canonical-derived factor
+to every column and therefore preserve their relative scale. The legacy
+<code><a href="../reference/normalise_hrf.html">normalise_hrf()</a></code> function instead gives every basis column
+its own unit peak.</p>
+</div>
+<div class="section level2">
 <h2 id="modifying-hrf-parameters-with-gen_hrf">Modifying HRF Parameters with <code>gen_hrf</code><a class="anchor" aria-label="anchor" href="#modifying-hrf-parameters-with-gen_hrf"></a>
 </h2>
 <p>The <code>gen_hrf</code> function is a flexible way to create new HRF
@@ -133,7 +152,7 @@ functions, often by modifying the parameters of existing ones.</p>
 <code>mean</code> and <code>sd</code> arguments. We can use
 <code>gen_hrf</code> to create Gaussian HRFs with different peak times
 (<code>mean</code>) and widths (<code>sd</code>).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create Gaussian HRFs with different parameters using gen_hrf</span></span>
 <span><span class="co"># Note: hrf_gaussian is the underlying function, not the HRF object HRF_GAUSSIAN</span></span>
 <span><span class="va">hrf_gauss_7_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gaussian</span>, mean <span class="op">=</span> <span class="fl">7</span>, sd <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"Gaussian (Mean=7, SD=3)"</span><span class="op">)</span></span>
@@ -154,7 +173,7 @@ to model the response to a sustained event of a specific
 with a boxcar function of the specified width.</p>
 <p>The <code>precision</code> argument controls the sampling resolution
 used for this convolution.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create blocked HRFs using the SPM canonical HRF with different durations</span></span>
 <span><span class="va">hrf_spm_w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
@@ -167,7 +186,7 @@ used for this convolution.</p>
 summation, see next section). Setting <code>normalize=TRUE</code> in
 <code>block_hrf</code> (or <code>gen_hrf</code>) rescales the response
 so the peak amplitude is approximately 1, regardless of duration.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create normalized blocked HRFs</span></span>
 <span><span class="va">hrf_spm_w1_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">1</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w2_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -183,7 +202,7 @@ whether the response accumulates over the duration
 (<code>summate=FALSE</code>). When <code>summate=FALSE</code>, the
 temporal profile is identical to the summated version but the peak
 amplitude does not grow with block duration.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create non-summating blocked HRFs</span></span>
 <span><span class="va">hrf_spm_w2_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -191,7 +210,7 @@ amplitude does not grow with block duration.</p>
 <p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.png" class="r-plt" alt="" width="672"></p>
 <p>We can combine <code>summate=FALSE</code> and
 <code>normalize=TRUE</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create normalized, non-summating blocked HRFs</span></span>
 <span><span class="va">hrf_spm_w2_nosum_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, summate <span class="op">=</span> <span class="cn">FALSE</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4_nosum_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span>, summate <span class="op">=</span> <span class="cn">FALSE</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -207,7 +226,7 @@ relative to the event onset. The <code>lag_hrf</code> function (or
 <code>gen_hrf_lagged</code>) shifts an existing HRF in time by a
 specified <code>lag</code> (in seconds). A positive lag delays the
 response, while a negative lag advances it.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create lagged versions of the Gaussian HRF</span></span>
 <span><span class="va">hrf_gauss_lag_neg2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="va">HRF_GAUSSIAN</span>, lag <span class="op">=</span> <span class="op">-</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">hrf_gauss_lag_0</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="co"># Original (lag=0)</span></span>
@@ -220,7 +239,7 @@ response, while a negative lag advances it.</p>
 <p>We can combine <code>lag_hrf</code> and <code>block_hrf</code> using
 the pipe operator (<code>%&gt;%</code>) from <code>dplyr</code> (or
 <code>magrittr</code>).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create HRFs that are both lagged and blocked</span></span>
 <span><span class="va">hrf_lb_1</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_lb_3</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">3</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -228,7 +247,7 @@ the pipe operator (<code>%&gt;%</code>) from <code>dplyr</code> (or
 <p><img src="a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.png" class="r-plt" alt="" width="672"></p>
 <p>Alternatively, <code>gen_hrf</code> can apply lag and width
 directly:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using gen_hrf directly</span></span>
 <span><span class="va">hrf_lb_gen_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gaussian</span>, lag <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">3</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">resp_lb_gen_3</span> <span class="op">&lt;-</span> <span class="fu">hrf_lb_gen_3</span><span class="op">(</span><span class="va">time_points</span><span class="op">)</span></span>
@@ -252,7 +271,7 @@ where each column corresponds to a basis function.</p>
 <p><code>fmrihrf</code> provides pre-defined HRF objects for the SPM
 canonical HRF plus its temporal derivative (<code>HRF_SPMG2</code>), and
 additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># SPM + Temporal Derivative (2 basis functions)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">HRF_SPMG2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: SPMG2 --------------------------------------------- </span></span>
@@ -274,7 +293,7 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 We typically use it within <code>gen_hrf</code> to create an HRF object.
 Key parameters are <code>N</code> (number of basis functions) and
 <code>degree</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># B-spline basis with N=5 basis functions, degree=3 (cubic)</span></span>
 <span><span class="va">hrf_bs_5_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_bspline</span>, N <span class="op">=</span> <span class="fl">5</span>, degree <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"B-spline (N=5, deg=3)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_bs_5_3</span><span class="op">)</span></span>
@@ -296,7 +315,7 @@ Key parameters are <code>N</code> (number of basis functions) and
 </h3>
 <p>The <code>hrf_sine</code> function creates a basis set using sine
 waves of different frequencies.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hrf_sin_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_sine</span>, N <span class="op">=</span> <span class="fl">5</span>, name <span class="op">=</span> <span class="st">"Sine Basis (N=5)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_sin_5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: Sine Basis (N=5) ---------------------------------- </span></span>
@@ -337,7 +356,7 @@ Daguerre polynomials provide an orthogonal basis set on [0, ∞) suitable for mo
 <p>The <code>hrf_gamma</code> function uses the gamma probability
 density function.</p>
 <p>````</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hrf_gam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gamma</span>, shape <span class="op">=</span> <span class="fl">6</span>, rate <span class="op">=</span> <span class="fl">1</span>, name <span class="op">=</span> <span class="st">"Gamma (shape=6, rate=1)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_gam</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: Gamma (shape=6, rate=1) --------------------------- </span></span>
@@ -350,7 +369,7 @@ density function.</p>
 </h3>
 <p>The <code>hrf_mexhat</code> function uses the Mexican hat wavelet
 (second derivative of a Gaussian).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hrf_mh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_mexhat</span>, mean <span class="op">=</span> <span class="fl">6</span>, sd <span class="op">=</span> <span class="fl">1.5</span>, name <span class="op">=</span> <span class="st">"Mexican Hat (mean=6, sd=1.5)"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_mh</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: Mexican Hat (mean=6, sd=1.5) ---------------------- </span></span>
@@ -364,7 +383,7 @@ density function.</p>
 <p>The <code>hrf_inv_logit</code> function creates an HRF shape by
 subtracting two inverse logit (sigmoid) functions, allowing control over
 rise and fall times.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hrf_il</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_inv_logit</span>, mu1 <span class="op">=</span> <span class="fl">5</span>, s1 <span class="op">=</span> <span class="fl">1</span>, mu2 <span class="op">=</span> <span class="fl">15</span>, s2 <span class="op">=</span> <span class="fl">1.5</span>, name <span class="op">=</span> <span class="st">"Inv. Logit Diff."</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_il</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: Inv. Logit Diff. ---------------------------------- </span></span>
@@ -392,7 +411,7 @@ that is constant within a time window and zero outside. Unlike
 traditional HRFs, there is no built-in hemodynamic delay—the HRF starts
 at time 0 (event onset) and extends for the specified
 <code>width</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a boxcar of width 5 seconds (from 0 to 5 seconds)</span></span>
 <span><span class="va">hrf_box</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_box</span><span class="op">)</span></span>
@@ -403,7 +422,7 @@ at time 0 (event onset) and extends for the specified
 <p>To create a boxcar that starts at a later time point—useful for
 capturing signal in a specific post-stimulus window—use
 <code><a href="../reference/lag_hrf.html">lag_hrf()</a></code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Boxcar from 4-8 seconds post-stimulus (capturing the expected BOLD peak)</span></span>
 <span><span class="co"># Use lag_hrf() to delay a 4-second boxcar by 4 seconds</span></span>
 <span><span class="va">hrf_delayed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
@@ -416,7 +435,7 @@ capturing signal in a specific post-stimulus window—use
 integral equals 1. This has an important interpretation: <strong>when
 used in a GLM, the regression coefficient β directly estimates the mean
 signal within the time window</strong>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalized boxcar - integral = 1</span></span>
 <span><span class="co"># A 4-second boxcar lagged by 4 seconds (captures 4-8s window)</span></span>
 <span><span class="va">hrf_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
@@ -452,7 +471,7 @@ weight</p>
 <div class="section level4">
 <h4 id="using-width-for-evenly-spaced-weights">Using <code>width</code> for Evenly Spaced Weights<a class="anchor" aria-label="anchor" href="#using-width-for-evenly-spaced-weights"></a>
 </h4>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 6 weights evenly spaced over 10 seconds (at 0, 2, 4, 6, 8, 10)</span></span>
 <span><span class="va">hrf_wt_width</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_weighted.html">hrf_weighted</a></span><span class="op">(</span></span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span><span class="op">)</span>,</span>
@@ -464,7 +483,7 @@ weight</p>
 <div class="section level4">
 <h4 id="using-explicit-times-for-custom-spacing">Using Explicit <code>times</code> for Custom Spacing<a class="anchor" aria-label="anchor" href="#using-explicit-times-for-custom-spacing"></a>
 </h4>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weighted step function with explicit time points</span></span>
 <span><span class="va">hrf_wt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_weighted.html">hrf_weighted</a></span><span class="op">(</span></span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span><span class="op">)</span>,</span>
@@ -476,7 +495,7 @@ weight</p>
 <div class="section level4">
 <h4 id="smooth-weights-linear-interpolation">Smooth Weights (Linear Interpolation)<a class="anchor" aria-label="anchor" href="#smooth-weights-linear-interpolation"></a>
 </h4>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Smooth weights using linear interpolation</span></span>
 <span><span class="va">hrf_smooth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_weighted.html">hrf_weighted</a></span><span class="op">(</span></span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.3</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">0.3</span>, <span class="fl">0</span><span class="op">)</span>,</span>
@@ -490,7 +509,7 @@ weight</p>
 </h4>
 <p>The <code>hrf_weighted</code> function supports sub-second time
 intervals, which is useful for fine-grained temporal weighting:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Sub-second intervals: create a Gaussian-shaped weight function</span></span>
 <span><span class="va">times_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">10</span>, by <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
 <span><span class="va">weights_gaussian</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">times_fine</span>, mean <span class="op">=</span> <span class="fl">7</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -505,7 +524,7 @@ intervals, which is useful for fine-grained temporal weighting:</p>
 <p>When <code>normalize = TRUE</code>, the weights are scaled to sum
 (constant) or integrate (linear) to 1. The regression coefficient then
 estimates a <strong>weighted mean</strong> of the signal:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalized weights - creates weighted average interpretation</span></span>
 <span><span class="va">hrf_wt_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_weighted.html">hrf_weighted</a></span><span class="op">(</span></span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,  <span class="co"># Will be normalized</span></span>
@@ -530,7 +549,7 @@ estimates a <strong>weighted mean</strong> of the signal:</p>
 </h3>
 <p>A common analysis compares BOLD signal in early vs. late portions of
 a trial. Here’s how to set up HRFs for this:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Early window: 2-6 seconds (4-second boxcar lagged by 2 seconds)</span></span>
 <span><span class="va">hrf_early</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -545,7 +564,7 @@ compare the mean BOLD signal in each window.</p>
 </h3>
 <p>These HRFs integrate seamlessly with the <code><a href="../reference/regressor.html">regressor()</a></code>
 function:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a regressor with boxcar HRF (4-second window starting 4s after onset)</span></span>
 <span><span class="va">reg_boxcar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span></span>
 <span>  onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span><span class="op">)</span>,</span>
@@ -565,7 +584,7 @@ function:</p>
 (a basis set).</p>
 <p>For example, we can create a basis set from a series of lagged
 Gaussian HRFs:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a list of lagged Gaussian HRFs</span></span>
 <span><span class="va">lag_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">list_of_hrfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">lag_times</span>, <span class="kw">function</span><span class="op">(</span><span class="va">lag</span><span class="op">)</span> <span class="op">{</span></span>
@@ -591,7 +610,7 @@ Gaussian HRFs:</p>
 (e.g., from deconvolution), you can turn it into an HRF function using
 <code>gen_empirical_hrf</code>. It uses linear interpolation between the
 provided points.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate an average measured response profile</span></span>
 <span><span class="va">sim_times</span> <span class="op">&lt;-</span> <span class="fl">0</span><span class="op">:</span><span class="fl">24</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span> <span class="co"># For reproducibility</span></span>
@@ -618,7 +637,7 @@ provided points.</p>
 <p>You can create an empirical <em>basis set</em> by applying
 dimensionality reduction (like PCA) to a collection of observed or
 simulated HRFs.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Simulate a matrix of diverse HRFs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> <span class="co"># for reproducibility</span></span>
 <span><span class="va">n_sim</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
@@ -629,7 +648,7 @@ simulated HRFs.</p>
 <span>  <span class="fu">hrf_func</span><span class="op">(</span><span class="va">sim_times</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2. Perform PCA on the transpose (each column = one HRF, each row = one time point)</span></span>
 <span><span class="va">pca_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">sim_mat</span><span class="op">)</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">n_components</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>

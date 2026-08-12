@@ -60,6 +60,7 @@ and custom basis sets with specified parameters.</p>
 <span>  width <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  summate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  hrf_norm <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -101,6 +102,12 @@ and custom basis sets with specified parameters.</p>
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
 <dd><p>Whether to normalize the HRF (default: FALSE)</p></dd>
+
+
+<dt id="arg-hrf-norm">hrf_norm<a class="anchor" aria-label="anchor" href="#arg-hrf-norm"></a></dt>
+<dd><p>Fixed-scale normalization mode passed to [normalize_hrf()].
+The default `"none"` leaves the HRF unchanged. `normalize = TRUE` is the
+legacy per-basis unit-peak shortcut; do not supply both.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

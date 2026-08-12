@@ -59,6 +59,30 @@ plot_hrfs(HRF_SPMG1, HRF_GAUSSIAN,
 Note that the `span` attribute (e.g., 24 seconds) indicates the
 approximate time window over which the HRF is non-zero.
 
+## Choosing a Fixed HRF Scale
+
+HRF scaling changes the units of fitted coefficients, so use an explicit
+convention when comparing designs across software. `hrf_norm = "spm"`
+matches the Nilearn/SPM reference-grid convention; `"unit_peak"` sets
+the canonical peak to one, and `"unit_integral"` sets its continuous
+integral to one.
+
+``` r
+
+spm_scaled <- gen_hrf(HRF_SPMG1, hrf_norm = "spm")
+spm_grid <- seq(0, 32, length.out = 1600)
+sum(spm_scaled(spm_grid))
+#> [1] 1
+```
+
+Use
+[`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
+to scale an existing HRF object. For SPM derivative bases, the modes
+above apply one canonical-derived factor to every column and therefore
+preserve their relative scale. The legacy
+[`normalise_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalise_hrf.md)
+function instead gives every basis column its own unit peak.
+
 ## Modifying HRF Parameters with `gen_hrf`
 
 The `gen_hrf` function is a flexible way to create new HRF functions,

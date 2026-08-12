@@ -59,6 +59,7 @@ blocking, and normalization decorators based on arguments.</p>
 <span>  normalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  hrf_norm <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -103,6 +104,12 @@ scaled by total block weight so amplitude does not grow with block width.</p></d
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
 <dd><p>Optional span for the *final* HRF object. If NULL (default), the span is determined by the base HRF and decorators.</p></dd>
+
+
+<dt id="arg-hrf-norm">hrf_norm<a class="anchor" aria-label="anchor" href="#arg-hrf-norm"></a></dt>
+<dd><p>Fixed-scale normalization mode passed to [normalize_hrf()].
+The default `"none"` preserves the raw HRF. `normalize = TRUE` remains a
+back-compatible shortcut for `"unit_peak_per_basis"`; do not supply both.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
