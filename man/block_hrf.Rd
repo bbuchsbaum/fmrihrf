@@ -45,6 +45,7 @@ legend("topright", legend = c("Original", "Blocked (width=5)"), col = c("blue", 
 \seealso{
 Other HRF_decorator_functions: 
 \code{\link{lag_hrf}()},
-\code{\link{normalise_hrf}()}
+\code{\link{normalise_hrf}()},
+\code{\link{normalize_hrf}()}
 }
 \concept{HRF_decorator_functions}

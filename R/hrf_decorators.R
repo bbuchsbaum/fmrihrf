@@ -131,67 +131,139 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
 }
 
 
-#' Normalise an HRF Object
+#' Normalize an HRF Object with a Fixed Scale
 #'
-#' Creates a new HRF object whose output is scaled such that the maximum absolute
-#' value of the response is 1.
+#' Creates an HRF whose evaluations are divided by constants computed once on
+#' a fixed reference grid. The resulting scale therefore does not depend on the
+#' time points supplied in later calls.
 #'
-#' @param hrf The HRF object (of class `HRF`) to normalise.
+#' @param hrf An object of class `HRF`.
+#' @param mode Normalization convention: `"spm"` divides by the sum of the
+#'   canonical basis on the 1,600-point 0--32 second Nilearn reference grid;
+#'   `"unit_peak"` divides every basis by the canonical basis peak;
+#'   `"unit_integral"` divides every basis by the canonical basis trapezoidal
+#'   integral; `"unit_peak_per_basis"` scales each basis independently; and
+#'   `"none"` returns `hrf` unchanged.
 #'
-#' @return A new HRF object representing the normalised function.
-#' @details For multi-basis HRFs, each basis function (column) is normalised independently.
+#' @return An `HRF` object with fixed normalization.
+#' @details For multi-basis HRFs, `"spm"`, `"unit_peak"`, and
+#'   `"unit_integral"` use one scalar computed from the first (canonical)
+#'   column and apply it uniformly. This preserves the relative scale of
+#'   derivative bases. Only `"unit_peak_per_basis"` rescales columns
+#'   independently.
 #'
 #' @family HRF_decorator_functions
 #' @export
 #' @examples
-#' # Create a gaussian HRF with a peak value != 1
-#' gauss_unnorm <- as_hrf(function(t) 5 * dnorm(t, 6, 2), name="unnorm_gauss")
-#' # Normalise it
-#' gauss_norm <- normalise_hrf(gauss_unnorm)
-#' t_vals <- seq(0, 20, by = 0.1)
-#' max(gauss_unnorm(t_vals)) # Peak is > 1
-#' max(gauss_norm(t_vals))   # Peak is 1
-normalise_hrf <- function(hrf) {
-  assertthat::assert_that(inherits(hrf, "HRF"), msg = "Input 'hrf' must be an HRF object.")
+#' spm_scaled <- normalize_hrf(HRF_SPMG1, "spm")
+#' reference_grid <- seq(0, 32, length.out = 1600)
+#' sum(spm_scaled(reference_grid))
+#'
+#' peak_scaled <- normalize_hrf(HRF_SPMG2, "unit_peak")
+#' max(abs(peak_scaled(seq(0, 24, by = 0.01))[, 1]))
+normalize_hrf <- function(
+    hrf,
+    mode) {
+  assertthat::assert_that(
+    inherits(hrf, "HRF"),
+    msg = "Input 'hrf' must be an HRF object."
+  )
+  mode <- match.arg(mode, c(
+    "spm", "unit_peak", "unit_integral", "unit_peak_per_basis", "none"
+  ))
+  if (identical(mode, "none")) {
+    return(hrf)
+  }
 
-  # Original attributes
   orig_name <- attr(hrf, "name")
   orig_span <- attr(hrf, "span")
   orig_nbasis <- nbasis(hrf)
   orig_params <- attr(hrf, "params")
-
-  # Compute normalization constants once on a fixed support grid so scaling is
-  # invariant to the specific evaluation points requested later.
-  ref_n <- max(1001L, min(20001L, as.integer(ceiling(orig_span / 0.01)) + 1L))
-  ref_grid <- seq(0, orig_span, length.out = ref_n)
-  ref_vals <- hrf(ref_grid)
-
-  peak_val <- if (orig_nbasis == 1) {
-    .get_peaks(as.numeric(ref_vals))
-  } else if (is.matrix(ref_vals)) {
-    .get_peaks(ref_vals)
+  param_names <- names(orig_params)
+  decorator_params <- if (is.null(param_names)) {
+    list()
   } else {
-    1
+    orig_params[startsWith(param_names, ".")]
   }
 
-  # Create the normalised function
-  normalised_func <- function(t) {
-    res <- hrf(t)
-    if (orig_nbasis == 1) {
-      res <- res / peak_val
-    } else if (is.matrix(res)) {
-      res <- sweep(res, 2, peak_val, "/")
+  if (identical(mode, "spm")) {
+    ref_grid <- seq(0, 32, length.out = 1600L)
+  } else {
+    ref_n <- max(as.integer(round(orig_span * 50)) + 1L, 2L)
+    ref_grid <- seq(0, orig_span, length.out = ref_n)
+  }
+  ref_vals <- hrf(ref_grid)
+  canonical <- if (is.matrix(ref_vals)) ref_vals[, 1L] else as.numeric(ref_vals)
+
+  factor <- switch(
+    mode,
+    spm = sum(canonical),
+    unit_peak = max(abs(canonical)),
+    unit_integral = sum(diff(ref_grid) *
+      (utils::head(canonical, -1L) + utils::tail(canonical, -1L)) / 2),
+    unit_peak_per_basis = if (is.matrix(ref_vals)) {
+      apply(abs(ref_vals), 2L, max)
+    } else {
+      max(abs(canonical))
     }
-    # If it's not numeric or matrix (e.g., NULL or error result), return as is
-    return(res)
+  )
+
+  if (identical(mode, "unit_peak_per_basis")) {
+    factor[factor == 0] <- 1
+    if (any(!is.finite(factor))) {
+      stop("Per-basis normalization factors must be finite.", call. = FALSE)
+    }
+  } else if (!is.finite(factor) || abs(factor) < .Machine$double.xmin) {
+    stop(
+      sprintf("Normalization factor for '%s' (mode = '%s') is not usable.",
+              orig_name, mode),
+      call. = FALSE
+    )
   }
 
-  # Create new HRF object using as_hrf
+  normalized_func <- function(t) {
+    values <- hrf(t)
+    if (length(factor) == 1L) {
+      values / factor
+    } else if (is.matrix(values)) {
+      sweep(values, 2L, factor, "/")
+    } else {
+      values / factor
+    }
+  }
+
   as_hrf(
-    f = normalised_func,
-    name = paste0(orig_name, "_norm"),
+    f = normalized_func,
+    name = paste0(orig_name, "[norm=", mode, "]"),
     nbasis = orig_nbasis,
     span = orig_span,
-    params = c(orig_params, list(.normalised = TRUE)) # Add flag for bookkeeping
+    params = c(decorator_params, list(
+      .normalization = mode,
+      .normalization_factor = factor
+    ))
   )
-} 
+}
+
+
+#' Normalise Each Basis of an HRF to Unit Peak
+#'
+#' Back-compatible spelling and behavior for independently peak-normalizing
+#' every basis column. New code can use
+#' `normalize_hrf(hrf, "unit_peak_per_basis")` explicitly.
+#'
+#' @param hrf An object of class `HRF`.
+#' @return A unit-peak `HRF` object.
+#' @family HRF_decorator_functions
+#' @export
+#' @examples
+#' gauss_unnorm <- as_hrf(function(t) 5 * dnorm(t, 6, 2), name = "unnorm_gauss")
+#' gauss_norm <- normalise_hrf(gauss_unnorm)
+#' max(gauss_norm(seq(0, 20, by = 0.1)))
+normalise_hrf <- function(hrf) {
+  out <- normalize_hrf(hrf, "unit_peak_per_basis")
+  attr(out, "name") <- paste0(attr(hrf, "name"), "_norm")
+  params <- attr(out, "params")
+  params$.normalised <- TRUE
+  attr(out, "params") <- params
+  out
+}

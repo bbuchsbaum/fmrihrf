@@ -14,6 +14,7 @@ gen_hrf(
   normalize = FALSE,
   name = NULL,
   span = NULL,
+  hrf_norm = "none",
   ...
 )
 }
@@ -37,6 +38,10 @@ scaled by total block weight so amplitude does not grow with block width.}
 \item{name}{Optional name for the *final* HRF object. If NULL (default), a name is generated based on the base HRF and applied decorators.}
 
 \item{span}{Optional span for the *final* HRF object. If NULL (default), the span is determined by the base HRF and decorators.}
+
+\item{hrf_norm}{Fixed-scale normalization mode passed to [normalize_hrf()].
+The default `"none"` preserves the raw HRF. `normalize = TRUE` remains a
+back-compatible shortcut for `"unit_peak_per_basis"`; do not supply both.}
 
 \item{...}{Extra arguments passed to the *base* HRF function if `hrf` is a function.}
 }

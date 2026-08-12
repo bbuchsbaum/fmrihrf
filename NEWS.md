@@ -2,6 +2,12 @@
 
 ## Improvements
 
+* Added fixed-scale HRF normalization with `normalize_hrf()` and the
+  `hrf_norm` argument to `gen_hrf()` and `getHRF()`. Modes include Nilearn/SPM
+  reference-grid scaling, unit peak, unit integral, and independent per-basis
+  unit peaks. The existing `normalise_hrf()` and `normalize = TRUE` interfaces
+  retain their per-basis unit-peak behavior.
+
 * Factored the duplicated single-basis / multi-basis branching in
   `block_hrf()`, `evaluate.HRF()`, and `normalise_hrf()` into three internal
   helpers (`.weighted_combine`, `.normalise_result`, `.get_peaks`). No

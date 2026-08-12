@@ -147,6 +147,9 @@ bind_basis <- function(...) {
 #'   block responses are integrated; if `FALSE`, the integrated response is
 #'   scaled by total block weight so amplitude does not grow with block width.
 #' @param normalize If TRUE, applies `normalise_hrf` at the end. Default is FALSE.
+#' @param hrf_norm Fixed-scale normalization mode passed to [normalize_hrf()].
+#'   The default `"none"` preserves the raw HRF. `normalize = TRUE` remains a
+#'   back-compatible shortcut for `"unit_peak_per_basis"`; do not supply both.
 #' @param name Optional name for the *final* HRF object. If NULL (default), a name is generated based on the base HRF and applied decorators.
 #' @param span Optional span for the *final* HRF object. If NULL (default), the span is determined by the base HRF and decorators.
 #' @param ... Extra arguments passed to the *base* HRF function if `hrf` is a function.
@@ -163,7 +166,16 @@ bind_basis <- function(...) {
 #'
 #' @export
 gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
-                    summate=TRUE, normalize=FALSE, name=NULL, span=NULL, ...) {
+                    summate=TRUE, normalize=FALSE, name=NULL, span=NULL,
+                    hrf_norm="none", ...) {
+
+  hrf_norm <- match.arg(hrf_norm, c(
+    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
+  ))
+  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
+    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
+         call. = FALSE)
+  }
 
   # 1. Ensure we start with an HRF object
   if (is.function(hrf) && !inherits(hrf, "HRF")) {
@@ -213,6 +225,8 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   # Apply normalization decorator last if needed
   if (normalize) {
     decorated_hrf <- normalise_hrf(decorated_hrf)
+  } else if (!identical(hrf_norm, "none")) {
+    decorated_hrf <- normalize_hrf(decorated_hrf, hrf_norm)
   }
 
   # Override name and span if provided by user
@@ -1012,6 +1026,9 @@ HRF_REGISTRY <- list(
 #' @param width Block width for block designs (default: 0)
 #' @param summate Whether to sum responses in block designs (default: TRUE)
 #' @param normalize Whether to normalize the HRF (default: FALSE)
+#' @param hrf_norm Fixed-scale normalization mode passed to [normalize_hrf()].
+#'   The default `"none"` leaves the HRF unchanged. `normalize = TRUE` is the
+#'   legacy per-basis unit-peak shortcut; do not supply both.
 #' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre)
 #' @return An HRF object
 #' @details
@@ -1034,7 +1051,15 @@ HRF_REGISTRY <- list(
 getHRF <- function(name = "spmg1", # Default to spmg1
                    nbasis=5, span=24,
                    lag=0, width=0,
-                   summate=TRUE, normalize=FALSE, ...) {
+                   summate=TRUE, normalize=FALSE, hrf_norm="none", ...) {
+
+  hrf_norm <- match.arg(hrf_norm, c(
+    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
+  ))
+  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
+    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
+         call. = FALSE)
+  }
 
   key   <- match.arg(tolower(name), names(HRF_REGISTRY))
   entry <- HRF_REGISTRY[[key]]
@@ -1059,6 +1084,8 @@ getHRF <- function(name = "spmg1", # Default to spmg1
   }
   if (normalize) {
       base <- normalise_hrf(base)
+  } else if (!identical(hrf_norm, "none")) {
+      base <- normalize_hrf(base, hrf_norm)
   }
 
   attr(base, "name") <- key # Set name attribute to the matched registry key
