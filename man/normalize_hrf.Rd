@@ -40,7 +40,7 @@ peak_scaled <- normalize_hrf(HRF_SPMG2, "unit_peak")
 max(abs(peak_scaled(seq(0, 24, by = 0.01))[, 1]))
 }
 \seealso{
-Other HRF_decorator_functions:
+Other HRF_decorator_functions: 
 \code{\link{block_hrf}()},
 \code{\link{lag_hrf}()},
 \code{\link{normalise_hrf}()}
