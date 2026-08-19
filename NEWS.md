@@ -2,6 +2,11 @@
 
 ## Improvements
 
+* Added `feature_regressor()` for continuously sampled features (for example
+  RMS energy). Each sample is a zero-order-hold bin of width dt, with
+  optional pre-convolution centering and scaling. This is the continuous
+  analogue of an amplitude-modulated event train, not a list of trials.
+
 * Added fixed-scale HRF normalization with `normalize_hrf()` and the
   `hrf_norm` argument to `gen_hrf()` and `getHRF()`. Modes include Nilearn/SPM
   reference-grid scaling, unit peak, unit integral, and independent per-basis
