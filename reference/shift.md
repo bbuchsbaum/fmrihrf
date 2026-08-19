@@ -21,6 +21,9 @@ include:
 ``` r
 shift(x, ...)
 
+# S3 method for class 'FeatureReg'
+shift(x, shift_amount, ...)
+
 # S3 method for class 'Reg'
 shift(x, shift_amount, ...)
 ```

@@ -11,7 +11,8 @@ Reg(
   duration = 0,
   amplitude = 1,
   span = 40,
-  summate = TRUE
+  summate = TRUE,
+  drop_zero_amplitude = TRUE
 )
 ```
 
@@ -26,4 +27,7 @@ event amplitudes/scaling factors. \* \`span\`: Numeric scalar indicating
 the HRF span (seconds). \* \`summate\`: Logical indicating if
 overlapping HRF responses should summate. \* \`filtered_all\`: Logical
 attribute set to \`TRUE\` when all events were removed due to zero or
-\`NA\` amplitudes.
+\`NA\` amplitudes. \* \`drop_zero_amplitude\`: If \`TRUE\` (default),
+events with amplitude 0 are removed. \`feature_regressor()\` sets this
+to \`FALSE\` so a sampled feature grid is preserved, including silent
+bins.

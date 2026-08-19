@@ -240,6 +240,9 @@ activated on site pages.
 - [`evaluate()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.md)
   : Evaluate a regressor object over a time grid
 
+- [`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md)
+  : Construct a Feature Regressor from a Sampled Time Series
+
 - [`fmrihrf_cli()`](https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf_cli.md)
   : Command line entrypoint for fmrihrf
 
@@ -352,6 +355,9 @@ activated on site pages.
 
 - [`penalty_matrix()`](https://bbuchsbaum.github.io/fmrihrf/reference/penalty_matrix.md)
   : Generate penalty matrix for regularization
+
+- [`plot(`*`<FeatureReg>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/plot.FeatureReg.md)
+  : Plot a Feature Regressor
 
 - [`plot(`*`<HRF>`*`)`](https://bbuchsbaum.github.io/fmrihrf/reference/plot.HRF.md)
   : Plot an HRF Object

@@ -64,7 +64,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-08-12</h4>
+            <h4 data-toc-skip class="date">2026-08-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_02_regressor.Rmd" class="external-link"><code>vignettes/a_02_regressor.Rmd</code></a></small>
       <div class="d-none name"><code>a_02_regressor.Rmd</code></div>
@@ -189,11 +189,39 @@ is scaled by the corresponding amplitude value.</p>
 <p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
+<h2 id="continuous-features">Continuous Features<a class="anchor" aria-label="anchor" href="#continuous-features"></a>
+</h2>
+<p>A sampled feature such as RMS energy is a time series, not a list of
+trials. <code><a href="../reference/feature_regressor.html">feature_regressor()</a></code> encodes each sample as a
+zero-order-hold bin of width <code>dt</code> and convolves that signal
+with the HRF. By default the series is demeaned before convolution so
+the mean does not create run-edge transients; native units are left
+unchanged.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
+<span><span class="va">feat_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, by <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span>
+<span><span class="co"># Simulated acoustic envelope</span></span>
+<span><span class="va">rms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">feat_times</span> <span class="op">/</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">0.5</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">feat_times</span> <span class="op">/</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/feature_regressor.html">feature_regressor</a></span><span class="op">(</span><span class="va">rms</span>, dt <span class="op">=</span> <span class="va">dt</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span>
+<span><span class="va">scan_times_feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">feat_times</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">feat</span>, grid <span class="op">=</span> <span class="va">scan_times_feat</span>, precision <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a_02_regressor_files/figure-html/feature_regressor-1.png" class="r-plt" alt="" width="672"></p>
+<p>Using <code>regressor(times, amplitude = rms, duration = 0)</code>
+instead would treat each sample as a unit-mass impulse and scale the
+predicted BOLD by about <code>1/dt</code>. Pass
+<code>duration = dt</code> (and skip centering) if you need the same ZOH
+encoding from <code><a href="../reference/regressor.html">regressor()</a></code>.</p>
+<p>If the feature is only meaningful inside stimulus blocks, pass a
+<code>mask</code> for the on-period and keep a separate boxcar for
+“stimulus on” rather than demeaning the whole concatenated series.</p>
+</div>
+<div class="section level2">
 <h2 id="combining-duration-and-amplitude-modulation">Combining Duration and Amplitude Modulation<a class="anchor" aria-label="anchor" href="#combining-duration-and-amplitude-modulation"></a>
 </h2>
 <p>You can provide both <code>duration</code> and <code>amplitude</code>
 vectors to model events that vary in both aspects.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">onsets_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span> <span class="op">*</span> <span class="fl">12</span>, length.out <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">amps_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">onsets_comb</span><span class="op">)</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -215,7 +243,7 @@ vectors to model events that vary in both aspects.</p>
 <code>regressor</code> object will represent multiple timecourses, one
 for each basis function. <code><a href="../reference/evaluate.html">evaluate()</a></code> will return a
 matrix.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use a B-spline basis set</span></span>
 <span><span class="va">onsets_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span> <span class="op">*</span> <span class="fl">12</span>, length.out <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">hrf_basis</span> <span class="op">&lt;-</span> <span class="va">HRF_BSPLINE</span> <span class="co"># Uses N=5 basis functions by default</span></span>
@@ -239,7 +267,7 @@ matrix.</p>
 </h2>
 <p>You can temporally shift all onsets within a regressor using the
 <code><a href="../reference/shift.html">shift()</a></code> method.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Original regressor</span></span>
 <span><span class="va">reg_orig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">50</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span>
 <span></span>

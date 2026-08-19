@@ -52,7 +52,8 @@
 <span>  duration <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  amplitude <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  span <span class="op">=</span> <span class="fl">40</span>,</span>
-<span>  summate <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  summate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  drop_zero_amplitude <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -67,7 +68,10 @@
   * `span`: Numeric scalar indicating the HRF span (seconds).
   * `summate`: Logical indicating if overlapping HRF responses should summate.
   * `filtered_all`: Logical attribute set to `TRUE` when all events were
-    removed due to zero or `NA` amplitudes.</p>
+    removed due to zero or `NA` amplitudes.
+  * `drop_zero_amplitude`: If `TRUE` (default), events with amplitude 0 are
+    removed. `feature_regressor()` sets this to `FALSE` so a sampled feature
+    grid is preserved, including silent bins.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

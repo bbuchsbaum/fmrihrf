@@ -4,6 +4,13 @@
 
 ### Improvements
 
+- Added
+  [`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md)
+  for continuously sampled features (for example RMS energy). Each
+  sample is a zero-order-hold bin of width dt, with optional
+  pre-convolution centering and scaling. This is the continuous analogue
+  of an amplitude-modulated event train, not a list of trials.
+
 - Added fixed-scale HRF normalization with
   [`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
   and the `hrf_norm` argument to

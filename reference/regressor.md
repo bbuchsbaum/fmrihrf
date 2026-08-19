@@ -13,7 +13,8 @@ regressor(
   duration = 0,
   amplitude = 1,
   span = 40,
-  summate = TRUE
+  summate = TRUE,
+  drop_zero_amplitude = TRUE
 )
 ```
 

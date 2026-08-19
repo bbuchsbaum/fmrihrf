@@ -133,6 +133,40 @@ plot(reg_amp, grid = scan_times_amp)
 
 ![](a_02_regressor_files/figure-html/parametric_modulation-1.png)
 
+## Continuous Features
+
+A sampled feature such as RMS energy is a time series, not a list of
+trials.
+[`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md)
+encodes each sample as a zero-order-hold bin of width `dt` and convolves
+that signal with the HRF. By default the series is demeaned before
+convolution so the mean does not create run-edge transients; native
+units are left unchanged.
+
+``` r
+
+dt <- 0.1
+feat_times <- seq(0, 20, by = dt)
+# Simulated acoustic envelope
+rms <- abs(sin(2 * pi * feat_times / 8)) * (0.5 + 0.5 * sin(2 * pi * feat_times / 20))
+
+feat <- feature_regressor(rms, dt = dt, hrf = HRF_SPMG1)
+scan_times_feat <- seq(0, max(feat_times) + 30, by = TR)
+plot(feat, grid = scan_times_feat, precision = dt)
+```
+
+![](a_02_regressor_files/figure-html/feature_regressor-1.png)
+
+Using `regressor(times, amplitude = rms, duration = 0)` instead would
+treat each sample as a unit-mass impulse and scale the predicted BOLD by
+about `1/dt`. Pass `duration = dt` (and skip centering) if you need the
+same ZOH encoding from
+[`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md).
+
+If the feature is only meaningful inside stimulus blocks, pass a `mask`
+for the on-period and keep a separate boxcar for “stimulus on” rather
+than demeaning the whole concatenated series.
+
 ## Combining Duration and Amplitude Modulation
 
 You can provide both `duration` and `amplitude` vectors to model events

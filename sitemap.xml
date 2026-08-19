@@ -26,6 +26,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/empirical_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.HRF.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf-package.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/fmrihrf_cli.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.html</loc></url>
@@ -67,6 +68,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/onsets.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/penalty_matrix.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot.FeatureReg.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot.HRF.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot.Reg.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.html</loc></url>
