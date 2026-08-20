@@ -149,9 +149,16 @@ plot(reg_amp, grid = scan_times_amp)
 
 A sampled feature such as RMS energy is a time series, not a list of trials.
 `feature_regressor()` encodes each sample as a zero-order-hold bin of width
-`dt` and convolves that signal with the HRF. By default the series is demeaned
-before convolution so the mean does not create run-edge transients; native
-units are left unchanged.
+`dt` and convolves that signal with the HRF. That is the same linear model as
+amplitude modulation on this sampling grid: the predicted BOLD is \(Hx\).
+
+By default the series is demeaned before convolution (`center = TRUE`) and left
+in native units. For a whole-run series that is \(H(x-\mu 1)=Hx-\mu H1\).
+In the interior of the run, overlapping HRFs make \(H1\) nearly constant, so
+with a GLM intercept the centered and raw columns test the same effect. They
+differ by the HRF-length ramp of \(H1\) at the run boundaries; centering
+removes that onset/offset transient. `scale = "sd"` z-scores the feature, not
+the final filtered design column.
 
 ```{r feature_regressor}
 dt <- 0.1
@@ -169,9 +176,11 @@ each sample as a unit-mass impulse and scale the predicted BOLD by about
 `1/dt`. Pass `duration = dt` (and skip centering) if you need the same ZOH
 encoding from `regressor()`.
 
-If the feature is only meaningful inside stimulus blocks, pass a `mask` for
-the on-period and keep a separate boxcar for "stimulus on" rather than
-demeaning the whole concatenated series.
+If you want louder-versus-quieter *conditional on sound*, pass a `mask` for
+the on-period (silence stays 0 after centering) and a separate boxcar for
+sound presence. That is not an affine transform of the all-sample RMS series.
+Do not drop silent samples before centering: that silently turns the all-TR
+model into the sparse one.
 
 ## Combining Duration and Amplitude Modulation
 

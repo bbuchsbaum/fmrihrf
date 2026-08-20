@@ -136,6 +136,74 @@ test_that("centering is linear and happens before convolution", {
                tolerance = 1e-6)
 })
 
+test_that("all-TR z-scoring is Hx/sd - (mean/sd) H1", {
+  dt <- 0.2
+  set.seed(2)
+  s <- abs(rnorm(80, mean = 2, sd = 0.4))
+  mu <- mean(s)
+  sdv <- stats::sd(s)
+  grid <- seq(0, 20, by = 0.5)
+
+  y_z <- evaluate(
+    feature_regressor(s, dt = dt, hrf = HRF_SPMG1, center = TRUE, scale = "sd"),
+    grid, precision = dt
+  )
+  y_raw <- evaluate(
+    feature_regressor(s, dt = dt, hrf = HRF_SPMG1, center = FALSE, scale = "none"),
+    grid, precision = dt
+  )
+  y_ones <- evaluate(
+    feature_regressor(rep(1, length(s)), dt = dt, hrf = HRF_SPMG1,
+                      center = FALSE, scale = "none"),
+    grid, precision = dt
+  )
+  expect_equal(y_z, y_raw / sdv - (mu / sdv) * y_ones, tolerance = 1e-6)
+})
+
+test_that("interior all-TR centered and raw columns are nearly collinear", {
+  dt <- 0.2
+  set.seed(3)
+  s <- abs(rnorm(500, mean = 2, sd = 0.5))
+  grid <- seq(0, 100, by = 1)
+  y_raw <- evaluate(
+    feature_regressor(s, dt = dt, hrf = HRF_SPMG1, center = FALSE, scale = "none"),
+    grid, precision = dt
+  )
+  y_cen <- evaluate(
+    feature_regressor(s, dt = dt, hrf = HRF_SPMG1, center = TRUE, scale = "none"),
+    grid, precision = dt
+  )
+  interior <- grid > 30 & grid < 80
+  expect_gt(stats::cor(y_raw[interior], y_cen[interior]), 0.999)
+})
+
+test_that("mask centering is not an affine transform of the all-sample series", {
+  dt <- 0.2
+  set.seed(4)
+  values <- c(rep(0, 40), runif(40, 1, 3), rep(0, 40))
+  mask <- values > 0
+  grid <- seq(0, 30, by = 0.5)
+
+  y_raw <- evaluate(
+    feature_regressor(values, dt = dt, hrf = HRF_SPMG1,
+                      center = FALSE, scale = "none"),
+    grid, precision = dt
+  )
+  y_mask <- evaluate(
+    feature_regressor(values, dt = dt, hrf = HRF_SPMG1,
+                      center = TRUE, scale = "none", mask = mask),
+    grid, precision = dt
+  )
+  y_ones <- evaluate(
+    feature_regressor(rep(1, length(values)), dt = dt, hrf = HRF_SPMG1,
+                      center = FALSE, scale = "none"),
+    grid, precision = dt
+  )
+  mu <- mean(values)
+  all_tr_centered <- y_raw - mu * y_ones
+  expect_gt(max(abs(y_mask - all_tr_centered)), 0.05 * max(abs(all_tr_centered)))
+})
+
 test_that("scale = 'sd' unit-variances the (centered) feature", {
   values <- c(1, 2, 3, 4, 5)
   feat <- feature_regressor(values, dt = 0.2, center = TRUE, scale = "sd")
