@@ -66,6 +66,17 @@ test_that("values must be finite", {
   expect_error(feature_regressor(c(1, Inf), dt = 0.1), "values")
 })
 
+test_that("matrix and array values are rejected instead of flattened", {
+  expect_error(
+    feature_regressor(matrix(1:6, nrow = 3), dt = 0.1),
+    "matrix and array inputs"
+  )
+  expect_error(
+    feature_regressor(array(1:8, dim = c(2, 2, 2)), dt = 0.1),
+    "matrix and array inputs"
+  )
+})
+
 test_that("per-event HRF lists are rejected", {
   expect_error(
     feature_regressor(1:3, hrf = list(HRF_SPMG1, HRF_SPMG1, HRF_SPMG1), dt = 0.1),

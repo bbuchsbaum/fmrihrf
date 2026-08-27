@@ -57,6 +57,10 @@ convolution engine.
 
 ## Bug Fixes
 
+* Fixed issue #50: `feature_regressor()` now rejects matrix and array inputs
+  instead of silently flattening them into one long feature. Pass one feature
+  column at a time.
+
 Addresses the defects reported in issue #45.
 
 * **Breaking:** epoch (`duration > 0`) regressors are no longer scaled by

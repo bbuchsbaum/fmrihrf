@@ -35,7 +35,8 @@
 #' `regressor(times, amplitude = values, duration = 0)`, the predicted BOLD
 #' is smaller by about \eqn{\Delta t}.
 #'
-#' @param values Numeric vector of feature samples.
+#' @param values Numeric vector of feature samples. Matrix and array inputs are
+#'   rejected; construct one feature regressor per column instead.
 #' @param hrf The hemodynamic response function to convolve with the feature.
 #'   Same types as [regressor()], except a list of per-event HRFs is not
 #'   allowed. Defaults to `HRF_SPMG1`.
@@ -92,6 +93,10 @@ feature_regressor <- function(values,
 
   scale <- match.arg(scale)
 
+  if (!is.null(dim(values))) {
+    stop("`values` must be a numeric vector; matrix and array inputs are not ",
+         "supported. Pass one feature column at a time.", call. = FALSE)
+  }
   if (!is.numeric(values) || length(values) == 0L) {
     stop("`values` must be a non-empty numeric vector.", call. = FALSE)
   }

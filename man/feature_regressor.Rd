@@ -17,7 +17,8 @@ feature_regressor(
 )
 }
 \arguments{
-\item{values}{Numeric vector of feature samples.}
+\item{values}{Numeric vector of feature samples. Matrix and array inputs are
+rejected; construct one feature regressor per column instead.}
 
 \item{hrf}{The hemodynamic response function to convolve with the feature.
 Same types as [regressor()], except a list of per-event HRFs is not
