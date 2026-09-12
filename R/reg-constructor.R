@@ -177,6 +177,9 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
 #'   with the duration of sustained events (via weighted integration). If `FALSE`,
 #'   weighted integration is normalized by total block weight so amplitude does
 #'   not grow with duration.
+#' @param drop_zero_amplitude Logical scalar; if `TRUE` (default), events with
+#'   amplitude 0 are removed before convolution. Set to `FALSE` to keep a full
+#'   event grid (including silent bins), as `feature_regressor()` does.
 #'
 #' @details
 #' This function serves as the main public interface for creating regressor objects.
@@ -184,7 +187,8 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
 #' efficient storage. The resulting object can be evaluated at specific time points
 #' using the `evaluate()` function.
 #'
-#' Events with an amplitude of 0 are automatically filtered out.
+#' By default (`drop_zero_amplitude = TRUE`), events with an amplitude of 0 are
+#' filtered out.
 #'
 #' ## Trial-Varying HRFs
 #'
