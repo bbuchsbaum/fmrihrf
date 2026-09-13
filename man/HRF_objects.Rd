@@ -139,3 +139,12 @@ Other hrf:
 \code{\link{penalty_matrix}()}
 }
 \concept{hrf}
+
+\details{
+SPMG bases are raw continuous kernels. SPMG2 adds the analytic time derivative;
+SPMG3 also adds the response-dispersion difference
+\code{(h(d) - h(d + 0.01))/0.01}, holding response mean and mass fixed.
+Columns are not implicitly orthogonalized or independently rescaled.
+Use \code{normalize_hrf()} or the existing normalization flags to select scaling.
+These conventions do not reproduce every sampled SPM/Nilearn design detail.
+}

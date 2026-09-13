@@ -706,6 +706,12 @@ list_available_hrfs <- function(details = FALSE) {
 #' matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basis functions")
 #' 
 #' @name HRF_objects
+#' @details SPMG bases are raw continuous kernels. SPMG2 adds the analytic
+#' time derivative; SPMG3 also adds the response-dispersion difference
+#' `(h(d) - h(d + 0.01))/0.01`, holding the response mean and mass fixed.
+#' Columns are not implicitly orthogonalized or independently rescaled.
+#' Use [normalize_hrf()] or the existing normalization flags to select scaling.
+#' These conventions do not reproduce every sampled SPM/Nilearn design detail.
 #' @aliases HRF_SPMG1 HRF_SPMG2 HRF_SPMG3 HRF_GAMMA HRF_GAUSSIAN HRF_BSPLINE HRF_FIR
 #' @family hrf
 #' @seealso 
@@ -728,13 +734,15 @@ HRF_GAUSSIAN <- as_hrf(hrf_gaussian, name="gaussian", params=list(mean=6, sd=2))
 
 #' @rdname HRF_objects
 #' @export
-HRF_SPMG1 <- as_hrf(hrf_spmg1, name="SPMG1", params=list(P1=5, P2=15, A1=0.0833))
+HRF_SPMG1 <- as_hrf(hrf_spmg1, name="SPMG1", params=list(P1=5, P2=15, A1=1/120))
 
 #' @rdname HRF_objects
 #' @export
+# Raw informed bases: no implicit orthogonalization or equal-norm scaling.
+# Existing normalization decorators continue to control scaling.
 HRF_SPMG2 <- bind_basis(
-  as_hrf(hrf_spmg1, name="SPMG1_canonical", params=list(P1=5, P2=15, A1=0.0833)),
-  as_hrf(hrf_spmg1_deriv, name="SPMG1_temporal_deriv", params=list(P1=5, P2=15, A1=0.0833))
+  as_hrf(hrf_spmg1, name="SPMG1_canonical", params=list(P1=5, P2=15, A1=1/120)),
+  as_hrf(hrf_spmg1_deriv, name="SPMG1_temporal_deriv", params=list(P1=5, P2=15, A1=1/120))
 )
 attr(HRF_SPMG2, "name") <- "SPMG2"
 class(HRF_SPMG2) <- c("SPMG2_HRF", class(HRF_SPMG2))
@@ -742,9 +750,9 @@ class(HRF_SPMG2) <- c("SPMG2_HRF", class(HRF_SPMG2))
 #' @rdname HRF_objects
 #' @export
 HRF_SPMG3 <- bind_basis(
-  as_hrf(hrf_spmg1, name="SPMG1_canonical", params=list(P1=5, P2=15, A1=0.0833)),
-  as_hrf(hrf_spmg1_deriv, name="SPMG1_temporal_deriv", params=list(P1=5, P2=15, A1=0.0833)),
-  as_hrf(hrf_spmg1_second_deriv, name="SPMG1_dispersion_deriv", params=list(P1=5, P2=15, A1=0.0833))
+  as_hrf(hrf_spmg1, name="SPMG1_canonical", params=list(P1=5, P2=15, A1=1/120)),
+  as_hrf(hrf_spmg1_deriv, name="SPMG1_temporal_deriv", params=list(P1=5, P2=15, A1=1/120)),
+  as_hrf(hrf_spmg1_dispersion_deriv, name="SPMG1_dispersion_deriv", params=list(P1=5, P2=15, A1=1/120))
 )
 attr(HRF_SPMG3, "name") <- "SPMG3"
 class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
