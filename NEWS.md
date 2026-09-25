@@ -57,6 +57,9 @@ convolution engine.
 
 ## Bug Fixes
 
+* Preserved parameter metadata in closed HRF constructors and decorators without
+  incorrectly warning that the captured parameters would be ignored.
+
 * Fixed loop-based block regressors integrating the kernel beyond its declared
   span, where the convolution engine already truncated it. The restored SPMG
   undershoot exposed this existing tail discrepancy. Support is now applied

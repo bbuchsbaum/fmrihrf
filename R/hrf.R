@@ -82,6 +82,16 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 }
 
 
+# Internal constructors already capture their parameters in a closure. Preserve
+# those values as metadata without trying to pass them to a function(t).
+.as_closed_hrf <- function(f, name, nbasis, span, params) {
+  obj <- as_hrf(f, name = name, nbasis = nbasis, span = span)
+  attr(obj, "params") <- params
+  attr(obj, "param_names") <- names(params)
+  obj
+}
+
+
 #' Bind HRFs into a Basis Set
 #'
 #' Combines multiple HRF objects into a single multi-basis HRF object.
@@ -706,6 +716,7 @@ list_available_hrfs <- function(details = FALSE) {
 #' matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basis functions")
 #' 
 #' @name HRF_objects
+#' @md
 #' @details SPMG bases are raw continuous kernels. SPMG2 adds the analytic
 #' time derivative; SPMG3 also adds the response-dispersion difference
 #' `(h(d) - h(d + 0.01))/0.01`, holding the response mean and mass fixed.
@@ -847,7 +858,7 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Tent HRF with 6 basis functions")
 #' @export
 hrf_tent_generator <- function(nbasis=5, span=24) {
-  obj <- as_hrf(
+  obj <- .as_closed_hrf(
     f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1),
     name="tent", nbasis=as.integer(nbasis), span=span,
     params=list(N=nbasis, degree=1, span=span)
@@ -878,7 +889,7 @@ hrf_tent_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Fourier HRF with 8 basis functions")
 #' @export
 hrf_fourier_generator <- function(nbasis=5, span=24) {
-  obj <- as_hrf(
+  obj <- .as_closed_hrf(
     f = function(t) hrf_fourier(t, span=span, nbasis=nbasis),
     name="fourier", nbasis=as.integer(nbasis), span=span,
     params=list(nbasis=nbasis, span=span)
@@ -910,7 +921,7 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Daguerre HRF with 5 basis functions")
 #' @export
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
-  obj <- as_hrf(
+  obj <- .as_closed_hrf(
     f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale, span=24),
     name="daguerre", nbasis=as.integer(nbasis), span=24,
     params=list(n_basis=nbasis, scale=scale)

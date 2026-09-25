@@ -6,28 +6,29 @@
 #' of convolving the feature with an HRF, not a train of unit-mass impulses.
 #'
 #' Amplitude modulation on this sampling grid is the same linear model as
-#' convolving the sampled series: if \(x\) is the (possibly centered) feature
-#' and \(H\) is the convolution operator, the regressor is \(Hx\). Zeros are
+#' convolving the sampled series: if \eqn{x} is the (possibly centered) feature
+#' and \eqn{H} is the convolution operator, the regressor is \eqn{Hx}. Zeros are
 #' kept, so an all-TR / all-sample series stays an all-sample series. No
 #' unmodulated companion regressor is added.
 #'
 #' Centering and scaling are applied to the feature **before** convolution.
 #' For a whole-run series (`mask = NULL`),
 #' \deqn{H(x-\mu\mathbf{1}) = Hx - \mu H\mathbf{1}.}
-#' Away from the run edges, \(H\mathbf{1}\) is nearly constant (overlapping
+#' Away from the run edges, \eqn{H\mathbf{1}} is nearly constant (overlapping
 #' HRFs sum to a plateau), so with a GLM intercept the centered and raw
 #' columns are affinely equivalent. They differ by the HRF-length ramp of
-#' \(H\mathbf{1}\) at the start and end of the run. Default `center = TRUE`
+#' \eqn{H\mathbf{1}} at the start and end of the run. Default `center = TRUE`
 #' removes that boundary term; `center = FALSE` keeps it. `scale = "sd"`
 #' only changes the feature's units (still pre-convolution). It is not
 #' standardization of the final BOLD-space column after filtering.
 #'
-#' Use `mask` when the feature is a within-sound intensity modulator. Center
-#' and scale then use only the on-samples, and silence stays 0:
-#' \deqn{H[m(x-\mu_{\mathrm{on}})] = Hx - \mu_{\mathrm{on}} Hm.}
+#' Use `mask` when the feature should be centered only during an on-period
+#' (stimulus present, task on, and so on). Center and scale then use only the
+#' on-samples, and off-mask samples stay 0:
+#' \deqn{H[m(x-\mu_{\mathrm{on}})] = H(mx) - \mu_{\mathrm{on}} Hm.}
 #' That is **not** an affine transform of the all-sample series. Pair it with
-#' a separate sound-presence / boxcar regressor if you want sound-vs-silence
-#' and louder-vs-quieter as two questions.
+#' a separate boxcar for the on-period if you want presence and intensity as
+#' two questions.
 #'
 #' Each sample is a zero-order-hold bin of width \eqn{\Delta t}, not a
 #' unit-mass impulse. Evaluate with `precision` less than or equal to the
@@ -35,6 +36,7 @@
 #' `regressor(times, amplitude = values, duration = 0)`, the predicted BOLD
 #' is smaller by about \eqn{\Delta t}.
 #'
+#' @md
 #' @param values Numeric vector of feature samples. Matrix and array inputs are
 #'   rejected; construct one feature regressor per column instead.
 #' @param hrf The hemodynamic response function to convolve with the feature.
@@ -49,14 +51,14 @@
 #'   Defaults to 0.
 #' @param center Logical; if `TRUE` (default), subtract the mean of the
 #'   (masked) samples before convolution. For an all-sample series this
-#'   removes \(\mu H\mathbf{1}\), including the HRF-length run-boundary ramp.
+#'   removes \eqn{\mu H\mathbf{1}}, including the HRF-length run-boundary ramp.
 #' @param scale Character; `"none"` (default) leaves native units, `"sd"`
 #'   divides by the standard deviation of the (masked) samples after centering.
 #'   This z-scores the feature, not the convolved design column.
 #' @param mask Optional logical vector the same length as `values`. Center and
 #'   scale statistics are computed on `mask == TRUE` samples only; off-mask
-#'   samples are set to 0 (within-sound intensity modulator). This is not
-#'   equivalent to global all-sample centering.
+#'   samples are set to 0. This is not equivalent to global all-sample
+#'   centering.
 #' @param span Temporal window in seconds for the HRF, passed to [regressor()].
 #'   If `NULL`, the HRF's own span is used.
 #'

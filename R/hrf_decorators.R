@@ -33,7 +33,7 @@ lag_hrf <- function(hrf, lag) {
   }
 
   # Create new HRF object using as_hrf
-  as_hrf(
+  .as_closed_hrf(
     f = lagged_func,
     name = paste0(orig_name, "_lag(", lag, ")"),
     nbasis = orig_nbasis,
@@ -121,7 +121,7 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
   )
   
   # Create new HRF object using as_hrf
-  as_hrf(
+  .as_closed_hrf(
     f = blocked_func,
     name = paste0(orig_name, "_block(w=", width, ")"),
     nbasis = orig_nbasis,

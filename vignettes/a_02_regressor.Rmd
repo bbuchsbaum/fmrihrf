@@ -31,6 +31,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7, 
   fig.height = 5,
+  dpi = 90,
   message = FALSE,
   warning = FALSE
 )
@@ -176,11 +177,11 @@ each sample as a unit-mass impulse and scale the predicted BOLD by about
 `1/dt`. Pass `duration = dt` (and skip centering) if you need the same ZOH
 encoding from `regressor()`.
 
-If you want louder-versus-quieter *conditional on sound*, pass a `mask` for
-the on-period (silence stays 0 after centering) and a separate boxcar for
-sound presence. That is not an affine transform of the all-sample RMS series.
-Do not drop silent samples before centering: that silently turns the all-TR
-model into the sparse one.
+If you want intensity *conditional on an on-period*, pass a `mask` for those
+samples (off-period stays 0 after centering) and a separate boxcar for
+presence. That is not an affine transform of the all-sample series.
+Do not drop off-period samples before centering: that silently turns the
+all-sample model into the sparse one.
 
 ## Combining Duration and Amplitude Modulation
 

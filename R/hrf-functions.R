@@ -649,7 +649,7 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
     ifelse(t >= 0 & t < width, amplitude, 0)
   }
 
-  as_hrf(f,
+  .as_closed_hrf(f,
          name = sprintf("boxcar[%.2g]", width),
          nbasis = 1L,
          span = width,
@@ -820,7 +820,7 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
     sprintf("weighted[%d pts, %s]", length(times), method)
   }
 
-  as_hrf(f,
+  .as_closed_hrf(f,
          name = hrf_name,
          nbasis = 1L,
          span = max(times),
