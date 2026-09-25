@@ -116,7 +116,8 @@ test_that("gen_hrf_set combines HRFs correctly", {
   hrf1 <- gen_hrf(HRF_SPMG1, lag = 0)
   hrf2 <- gen_hrf(HRF_SPMG1, lag = 2)
   hrf3 <- gen_hrf(HRF_SPMG1, lag = 4)
-  hrf_set <- gen_hrf_set(hrf1, hrf2, hrf3, name = "test_set")
+  expect_warning(hrf_set <- gen_hrf_set(hrf1, hrf2, hrf3, name = "test_set"),
+                 "deprecated")
   
   # Test structure
   expect_true(inherits(hrf_set, "HRF"))
@@ -159,7 +160,8 @@ test_that("gen_empirical_hrf creates valid HRF", {
   # Create simple empirical HRF
   t <- seq(0, 20, by = 0.5)
   y <- dnorm(t, mean = 6, sd = 2)
-  hrf <- gen_empirical_hrf(t, y, name = "test_empirical")
+  expect_warning(hrf <- gen_empirical_hrf(t, y, name = "test_empirical"),
+                 "deprecated")
   
   # Test structure
   expect_true(inherits(hrf, "HRF"))
