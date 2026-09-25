@@ -42,7 +42,6 @@ a unified interface to create HRFs
 ``` r
 # Create Fourier basis with 8 functions
 custom_fourier <- hrf_fourier_generator(nbasis = 8)
-#> Warning: Parameters nbasis, span are not arguments to function fourier and will be ignored
 t <- seq(0, 24, by = 0.1)
 response <- evaluate(custom_fourier, t)
 matplot(t, response, type = "l", main = "Fourier HRF with 8 basis functions")

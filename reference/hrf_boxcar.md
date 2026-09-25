@@ -82,24 +82,19 @@ Other hrf_functions:
 ``` r
 # Simple boxcar of 5 seconds width
 hrf1 <- hrf_boxcar(width = 5)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[5] and will be ignored
 t <- seq(-1, 10, by = 0.1)
 plot(t, evaluate(hrf1, t), type = "s", main = "Simple Boxcar HRF")
 
 
 # Normalized boxcar - coefficient will estimate mean signal in window
 hrf2 <- hrf_boxcar(width = 5, normalize = TRUE)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[5] and will be ignored
 # integral is now 1, so beta estimates mean(Y[0:5])
 
 # Use in a regressor with trial-varying widths
 hrf_short <- hrf_boxcar(width = 4, normalize = TRUE)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[4] and will be ignored
 hrf_long <- hrf_boxcar(width = 8, normalize = TRUE)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[8] and will be ignored
 reg <- regressor(onsets = c(0, 20), hrf = list(hrf_short, hrf_long))
 
 # For delayed windows, use lag_hrf decorator
 hrf_delayed <- lag_hrf(hrf_boxcar(width = 5), lag = 10)  # Window from 10-15s
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[5] and will be ignored
 ```

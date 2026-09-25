@@ -64,7 +64,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-08-19</h4>
+            <h4 data-toc-skip class="date">2026-09-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_01_hemodynamic_response.Rmd" class="external-link"><code>vignettes/a_01_hemodynamic_response.Rmd</code></a></small>
       <div class="d-none name"><code>a_01_hemodynamic_response.Rmd</code></div>
@@ -99,7 +99,7 @@ number of basis functions (<code>nbasis</code>), and effective duration
 <span><span class="co">#&gt; -- HRF: SPMG1 --------------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span>
-<span><span class="co">#&gt;    Parameters: P1 = 5, P2 = 15, A1 = 0.0833</span></span>
+<span><span class="co">#&gt;    Parameters: P1 = 5, P2 = 15, A1 = 0.008333</span></span>
 <span></span>
 <span><span class="co"># Gaussian HRF</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">HRF_GAUSSIAN</span><span class="op">)</span></span>
@@ -119,7 +119,7 @@ convenient way to compare multiple HRFs:</p>
 <span>          normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>          title <span class="op">=</span> <span class="st">"Comparison of SPM Canonical and Gaussian HRFs"</span>,</span>
 <span>          subtitle <span class="op">=</span> <span class="st">"HRFs normalized to peak at 1.0 for shape comparison"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png" class="r-plt" alt="" width="630"></p>
 <p>Note that the <code>span</code> attribute (e.g., 24 seconds)
 indicates the approximate time window over which the HRF is
 non-zero.</p>
@@ -158,7 +158,7 @@ functions, often by modifying the parameters of existing ones.</p>
 <span><span class="va">hrf_gauss_7_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gaussian</span>, mean <span class="op">=</span> <span class="fl">7</span>, sd <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"Gaussian (Mean=7, SD=3)"</span><span class="op">)</span></span>
 <span><span class="va">hrf_gauss_5_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gaussian</span>, mean <span class="op">=</span> <span class="fl">5</span>, sd <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"Gaussian (Mean=5, SD=2)"</span><span class="op">)</span></span>
 <span><span class="va">hrf_gauss_4_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_hrf.html">gen_hrf</a></span><span class="op">(</span><span class="va">hrf_gaussian</span>, mean <span class="op">=</span> <span class="fl">4</span>, sd <span class="op">=</span> <span class="fl">1</span>, name <span class="op">=</span> <span class="st">"Gaussian (Mean=4, SD=1)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.png" class="r-plt" alt="" width="630"></p>
 <p><code>gen_hrf</code> can also directly incorporate lags and durations
 (see later sections).</p>
 </div>
@@ -178,7 +178,7 @@ used for this convolution.</p>
 <span><span class="va">hrf_spm_w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.png" class="r-plt" alt="" width="630"></p>
 <div class="section level3">
 <h3 id="normalization">Normalization<a class="anchor" aria-label="anchor" href="#normalization"></a>
 </h3>
@@ -191,7 +191,7 @@ so the peak amplitude is approximately 1, regardless of duration.</p>
 <span><span class="va">hrf_spm_w1_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">1</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w2_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="modeling-saturation-with-summate">Modeling Saturation with <code>summate</code><a class="anchor" aria-label="anchor" href="#modeling-saturation-with-summate"></a>
@@ -207,7 +207,7 @@ amplitude does not grow with block duration.</p>
 <span><span class="va">hrf_spm_w2_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w8_nosum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">8</span>, summate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.png" class="r-plt" alt="" width="630"></p>
 <p>We can combine <code>summate=FALSE</code> and
 <code>normalize=TRUE</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -215,7 +215,7 @@ amplitude does not grow with block duration.</p>
 <span><span class="va">hrf_spm_w2_nosum_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">2</span>, summate <span class="op">=</span> <span class="cn">FALSE</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w4_nosum_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">4</span>, summate <span class="op">=</span> <span class="cn">FALSE</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_spm_w8_nosum_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, width <span class="op">=</span> <span class="fl">8</span>, summate <span class="op">=</span> <span class="cn">FALSE</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 </div>
 <div class="section level2">
@@ -231,7 +231,7 @@ response, while a negative lag advances it.</p>
 <span><span class="va">hrf_gauss_lag_neg2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="va">HRF_GAUSSIAN</span>, lag <span class="op">=</span> <span class="op">-</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">hrf_gauss_lag_0</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="co"># Original (lag=0)</span></span>
 <span><span class="va">hrf_gauss_lag_pos3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="va">HRF_GAUSSIAN</span>, lag <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="combining-lag-and-duration">Combining Lag and Duration<a class="anchor" aria-label="anchor" href="#combining-lag-and-duration"></a>
@@ -244,7 +244,7 @@ the pipe operator (<code>%&gt;%</code>) from <code>dplyr</code> (or
 <span><span class="va">hrf_lb_1</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_lb_3</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">3</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">hrf_lb_5</span> <span class="op">&lt;-</span> <span class="va">HRF_GAUSSIAN</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">5</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.png" class="r-plt" alt="" width="630"></p>
 <p>Alternatively, <code>gen_hrf</code> can apply lag and width
 directly:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -283,8 +283,8 @@ additionally its dispersion derivative (<code>HRF_SPMG3</code>).</p>
 <span><span class="co">#&gt; -- HRF: SPMG3 --------------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 3 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.png" class="r-plt" alt="" width="672"></p>
-<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="b-spline-basis-set">B-Spline Basis Set<a class="anchor" aria-label="anchor" href="#b-spline-basis-set"></a>
@@ -307,8 +307,8 @@ Key parameters are <code>N</code> (number of basis functions) and
 <span><span class="co">#&gt; -- HRF: Tent Set (N=10) ----------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 10 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.png" class="r-plt" alt="" width="672"></p>
-<p><img src="a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="sine-basis-set">Sine Basis Set<a class="anchor" aria-label="anchor" href="#sine-basis-set"></a>
@@ -321,7 +321,7 @@ waves of different frequencies.</p>
 <span><span class="co">#&gt; -- HRF: Sine Basis (N=5) ---------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 5 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="half-cosine-basis-set-flobs-like">Half-Cosine Basis Set (FLOBS-like)<a class="anchor" aria-label="anchor" href="#half-cosine-basis-set-flobs-like"></a>
@@ -330,7 +330,7 @@ waves of different frequencies.</p>
 described by Woolrich et al. (2004), often used in FSL’s FLOBS (FMRIB’s
 Linear Optimal Basis Sets). It uses four half-cosine functions to model
 initial dip, rise, fall/undershoot, and recovery.</p>
-<p><img src="a_01_hemodynamic_response_files/figure-html/half_cosine-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/half_cosine-1.png" class="r-plt" alt="" width="630"></p>
 <!-- ### Daguerre Polynomial Basis Set
 
 Daguerre polynomials provide an orthogonal basis set on [0, ∞) suitable for modeling decaying responses. This functionality is not yet implemented in the package.
@@ -362,7 +362,7 @@ density function.</p>
 <span><span class="co">#&gt; -- HRF: Gamma (shape=6, rate=1) --------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/gamma_hrf_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/gamma_hrf_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="mexican-hat-wavelet-hrf">Mexican Hat Wavelet HRF<a class="anchor" aria-label="anchor" href="#mexican-hat-wavelet-hrf"></a>
@@ -375,7 +375,7 @@ density function.</p>
 <span><span class="co">#&gt; -- HRF: Mexican Hat (mean=6, sd=1.5) ---------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/mexhat_hrf_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/mexhat_hrf_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="inverse-logit-difference-hrf">Inverse Logit Difference HRF<a class="anchor" aria-label="anchor" href="#inverse-logit-difference-hrf"></a>
@@ -389,7 +389,7 @@ rise and fall times.</p>
 <span><span class="co">#&gt; -- HRF: Inv. Logit Diff. ---------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/inv_logit_hrf_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/inv_logit_hrf_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 </div>
 <div class="section level2">
@@ -417,8 +417,9 @@ at time 0 (event onset) and extends for the specified
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrf_box</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- HRF: boxcar[5] ----------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
-<span><span class="co">#&gt;    Span: 5 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_basic_plot-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="co">#&gt;    Span: 5 s</span></span>
+<span><span class="co">#&gt;    Parameters: width = 5, amplitude = 1, normalize = FALSE</span></span></code></pre></div>
+<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_basic_plot-1.png" class="r-plt" alt="" width="630"></p>
 <p>To create a boxcar that starts at a later time point—useful for
 capturing signal in a specific post-stimulus window—use
 <code><a href="../reference/lag_hrf.html">lag_hrf()</a></code>:</p>
@@ -426,7 +427,7 @@ capturing signal in a specific post-stimulus window—use
 <code class="sourceCode R"><span><span class="co"># Boxcar from 4-8 seconds post-stimulus (capturing the expected BOLD peak)</span></span>
 <span><span class="co"># Use lag_hrf() to delay a 4-second boxcar by 4 seconds</span></span>
 <span><span class="va">hrf_delayed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="normalized-boxcar-estimating-mean-signal">Normalized Boxcar: Estimating Mean Signal<a class="anchor" aria-label="anchor" href="#normalized-boxcar-estimating-mean-signal"></a>
@@ -478,7 +479,7 @@ weight</p>
 <span>  width <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"constant"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_width_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_width_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level4">
 <h4 id="using-explicit-times-for-custom-spacing">Using Explicit <code>times</code> for Custom Spacing<a class="anchor" aria-label="anchor" href="#using-explicit-times-for-custom-spacing"></a>
@@ -490,7 +491,7 @@ weight</p>
 <span>  times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">12</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"constant"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_times_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_times_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level4">
 <h4 id="smooth-weights-linear-interpolation">Smooth Weights (Linear Interpolation)<a class="anchor" aria-label="anchor" href="#smooth-weights-linear-interpolation"></a>
@@ -502,7 +503,7 @@ weight</p>
 <span>  times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">12</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"linear"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level4">
 <h4 id="sub-second-precision">Sub-second Precision<a class="anchor" aria-label="anchor" href="#sub-second-precision"></a>
@@ -515,7 +516,7 @@ intervals, which is useful for fine-grained temporal weighting:</p>
 <span><span class="va">weights_gaussian</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">times_fine</span>, mean <span class="op">=</span> <span class="fl">7</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">hrf_gauss_wt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_weighted.html">hrf_weighted</a></span><span class="op">(</span><span class="va">weights_gaussian</span>, times <span class="op">=</span> <span class="va">times_fine</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_subsecond_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/weighted_subsecond_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 </div>
 <div class="section level3">
@@ -555,7 +556,7 @@ a trial. Here’s how to set up HRFs for this:</p>
 <span></span>
 <span><span class="co"># Late window: 8-12 seconds (4-second boxcar lagged by 8 seconds)</span></span>
 <span><span class="va">hrf_late</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span>lag <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.png" class="r-plt" alt="" width="630"></p>
 <p>Using these HRFs in separate regressors allows you to estimate and
 compare the mean BOLD signal in each window.</p>
 </div>
@@ -573,7 +574,7 @@ function:</p>
 <span></span>
 <span><span class="co"># Compare with traditional SPM HRF</span></span>
 <span><span class="va">reg_spm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/regressor.html">regressor</a></span><span class="op">(</span>onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span><span class="op">)</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 </div>
 <div class="section level2">
@@ -597,7 +598,7 @@ Gaussian HRFs:</p>
 <span><span class="co">#&gt; -- HRF: hrf_set ------------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 6 </span></span>
 <span><span class="co">#&gt;    Span: 34 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="creating-empirical-hrfs">Creating Empirical HRFs<a class="anchor" aria-label="anchor" href="#creating-empirical-hrfs"></a>
@@ -629,7 +630,7 @@ provided points.</p>
 <span><span class="co">#&gt; -- HRF: empirical_hrf ------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 1 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level3">
 <h3 id="empirical-basis-set-via-pca">Empirical Basis Set via PCA<a class="anchor" aria-label="anchor" href="#empirical-basis-set-via-pca"></a>
@@ -647,7 +648,7 @@ simulated HRFs.</p>
 <span>              <span class="fu"><a href="../reference/block_hrf.html">block_hrf</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu">hrf_func</span><span class="op">(</span><span class="va">sim_times</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png" class="r-plt" alt="" width="630"></p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2. Perform PCA on the transpose (each column = one HRF, each row = one time point)</span></span>
 <span><span class="va">pca_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">sim_mat</span><span class="op">)</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -657,7 +658,7 @@ simulated HRFs.</p>
 <span><span class="va">variance_explained</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pca_res</span><span class="op">)</span><span class="op">$</span><span class="va">importance</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_components</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variance explained by top"</span>, <span class="va">n_components</span>, <span class="st">"components:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">variance_explained</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variance explained by top 3 components: 67.5% 29.6% 2.7%</span></span>
+<span><span class="co">#&gt; Variance explained by top 3 components: 66.3% 30.9% 2.6%</span></span>
 <span></span>
 <span><span class="co"># Extract the top principal components</span></span>
 <span><span class="va">pc_vectors</span> <span class="op">&lt;-</span> <span class="va">pca_res</span><span class="op">$</span><span class="va">rotation</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_components</span><span class="op">]</span></span>
@@ -679,7 +680,7 @@ simulated HRFs.</p>
 <span><span class="co">#&gt; -- HRF: hrf_set ------------------------------------------- </span></span>
 <span><span class="co">#&gt;    Basis functions: 3 </span></span>
 <span><span class="co">#&gt;    Span: 24 s</span></span></code></pre></div>
-<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.png" class="r-plt" alt="" width="630"></p>
 <p>This empirical basis set can then be used in regression models just
 like any other pre-defined or custom basis set.</p>
 </div>

@@ -6,7 +6,7 @@ parameterization.
 ## Usage
 
 ``` r
-hrf_spmg1(t, P1 = 5, P2 = 15, A1 = 0.0833)
+hrf_spmg1(t, P1 = 5, P2 = 15, A1 = 1/120)
 ```
 
 ## Arguments
@@ -26,7 +26,7 @@ hrf_spmg1(t, P1 = 5, P2 = 15, A1 = 0.0833)
 - A1:
 
   Amplitude scaling factor for the positive gamma function component;
-  normally fixed at .0833
+  normally fixed at 1/120
 
 ## Value
 

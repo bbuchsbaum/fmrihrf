@@ -64,7 +64,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-08-19</h4>
+            <h4 data-toc-skip class="date">2026-09-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_02_regressor.Rmd" class="external-link"><code>vignettes/a_02_regressor.Rmd</code></a></small>
       <div class="d-none name"><code>a_02_regressor.Rmd</code></div>
@@ -124,7 +124,7 @@ times), we use the <code><a href="../reference/evaluate.html">evaluate()</a></co
 <span><span class="co"># Plot the regressor using the plot() method</span></span>
 <span><span class="co"># This automatically evaluates and plots with onset markers</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg1</span>, grid <span class="op">=</span> <span class="va">scan_times</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="varying-event-durations">Varying Event Durations<a class="anchor" aria-label="anchor" href="#varying-event-durations"></a>
@@ -143,7 +143,7 @@ length of <code>onsets</code>.</p>
 <span><span class="co"># Plot the regressor</span></span>
 <span><span class="va">scan_times_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_var_dur</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_var_dur</span>, grid <span class="op">=</span> <span class="va">scan_times_dur</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/varying_duration-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/varying_duration-1.png" class="r-plt" alt="" width="630"></p>
 <div class="section level3">
 <h3 id="duration-and-summation">Duration and Summation<a class="anchor" aria-label="anchor" href="#duration-and-summation"></a>
 </h3>
@@ -162,7 +162,7 @@ peak amplitude does not grow with duration.</p>
 <span>                grid <span class="op">=</span> <span class="va">scan_times_dur</span>,</span>
 <span>                title <span class="op">=</span> <span class="st">"Effect of Summation on Response"</span>,</span>
 <span>                subtitle <span class="op">=</span> <span class="st">"Same events with varying durations"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/duration_no_summate-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/duration_no_summate-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 </div>
 <div class="section level2">
@@ -186,7 +186,7 @@ is scaled by the corresponding amplitude value.</p>
 <span><span class="co"># Plot the parametric regressor</span></span>
 <span><span class="va">scan_times_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_amp</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_amp</span>, grid <span class="op">=</span> <span class="va">scan_times_amp</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="continuous-features">Continuous Features<a class="anchor" aria-label="anchor" href="#continuous-features"></a>
@@ -194,9 +194,21 @@ is scaled by the corresponding amplitude value.</p>
 <p>A sampled feature such as RMS energy is a time series, not a list of
 trials. <code><a href="../reference/feature_regressor.html">feature_regressor()</a></code> encodes each sample as a
 zero-order-hold bin of width <code>dt</code> and convolves that signal
-with the HRF. By default the series is demeaned before convolution so
-the mean does not create run-edge transients; native units are left
-unchanged.</p>
+with the HRF. That is the same linear model as amplitude modulation on
+this sampling grid: the predicted BOLD is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">Hx</annotation></semantics></math>.</p>
+<p>By default the series is demeaned before convolution
+(<code>center = TRUE</code>) and left in native units. For a whole-run
+series that is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>μ</mi><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>H</mi><mi>x</mi><mo>−</mo><mi>μ</mi><mi>H</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">H(x-\mu 1)=Hx-\mu H1</annotation></semantics></math>.
+In the interior of the run, overlapping HRFs make
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">H1</annotation></semantics></math>
+nearly constant, so with a GLM intercept the centered and raw columns
+test the same effect. They differ by the HRF-length ramp of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">H1</annotation></semantics></math>
+at the run boundaries; centering removes that onset/offset transient.
+<code>scale = "sd"</code> z-scores the feature, not the final filtered
+design column.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
 <span><span class="va">feat_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, by <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span>
@@ -206,15 +218,17 @@ unchanged.</p>
 <span><span class="va">feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/feature_regressor.html">feature_regressor</a></span><span class="op">(</span><span class="va">rms</span>, dt <span class="op">=</span> <span class="va">dt</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span>
 <span><span class="va">scan_times_feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">feat_times</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">feat</span>, grid <span class="op">=</span> <span class="va">scan_times_feat</span>, precision <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/feature_regressor-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/feature_regressor-1.png" class="r-plt" alt="" width="630"></p>
 <p>Using <code>regressor(times, amplitude = rms, duration = 0)</code>
 instead would treat each sample as a unit-mass impulse and scale the
 predicted BOLD by about <code>1/dt</code>. Pass
 <code>duration = dt</code> (and skip centering) if you need the same ZOH
 encoding from <code><a href="../reference/regressor.html">regressor()</a></code>.</p>
-<p>If the feature is only meaningful inside stimulus blocks, pass a
-<code>mask</code> for the on-period and keep a separate boxcar for
-“stimulus on” rather than demeaning the whole concatenated series.</p>
+<p>If you want intensity <em>conditional on an on-period</em>, pass a
+<code>mask</code> for those samples (off-period stays 0 after centering)
+and a separate boxcar for presence. That is not an affine transform of
+the all-sample series. Do not drop off-period samples before centering:
+that silently turns the all-sample model into the sparse one.</p>
 </div>
 <div class="section level2">
 <h2 id="combining-duration-and-amplitude-modulation">Combining Duration and Amplitude Modulation<a class="anchor" aria-label="anchor" href="#combining-duration-and-amplitude-modulation"></a>
@@ -233,7 +247,7 @@ vectors to model events that vary in both aspects.</p>
 <span><span class="co"># Plot the combined regressor</span></span>
 <span><span class="va">scan_times_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_comb</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_comb</span>, grid <span class="op">=</span> <span class="va">scan_times_comb</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/duration_amplitude-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/duration_amplitude-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="regressors-with-hrf-basis-sets">Regressors with HRF Basis Sets<a class="anchor" aria-label="anchor" href="#regressors-with-hrf-basis-sets"></a>
@@ -260,7 +274,7 @@ matrix.</p>
 <span></span>
 <span><span class="co"># Plot using the plot() method - automatically handles multi-basis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_basis</span>, grid <span class="op">=</span> <span class="va">scan_times_basis</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/basis_set_regressor-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/basis_set_regressor-1.png" class="r-plt" alt="" width="630"></p>
 </div>
 <div class="section level2">
 <h2 id="shifting-regressors">Shifting Regressors<a class="anchor" aria-label="anchor" href="#shifting-regressors"></a>
@@ -286,7 +300,7 @@ matrix.</p>
 <span>                grid <span class="op">=</span> <span class="va">scan_times_shift</span>,</span>
 <span>                show_onsets <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Show onsets for both</span></span>
 <span>                title <span class="op">=</span> <span class="st">"Shifting a Regressor"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/shift_regressor-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="a_02_regressor_files/figure-html/shift_regressor-1.png" class="r-plt" alt="" width="630"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

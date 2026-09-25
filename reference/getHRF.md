@@ -97,9 +97,7 @@ fir20 <- getHRF("fir", nbasis = 20, span = 30)
 
 # Create B-spline basis with lag
 bs_lag <- getHRF("bspline", nbasis = 8, lag = 2)
-#> Warning: Parameters nbasis, degree, span are not arguments to function bspline_lag(2) and will be ignored
 
 # Create blocked Gaussian HRF
 block_gauss <- getHRF("gaussian", width = 5)
-#> Warning: Parameters mean, sd are not arguments to function gaussian_block(w=5) and will be ignored
 ```

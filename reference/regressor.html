@@ -106,6 +106,12 @@ with the duration of sustained events (via weighted integration). If `FALSE`,
 weighted integration is normalized by total block weight so amplitude does
 not grow with duration.</p></dd>
 
+
+<dt id="arg-drop-zero-amplitude">drop_zero_amplitude<a class="anchor" aria-label="anchor" href="#arg-drop-zero-amplitude"></a></dt>
+<dd><p>Logical scalar; if `TRUE` (default), remove
+zero-amplitude events. Set to `FALSE` to retain all supplied onsets,
+including zero-valued samples in a continuous feature series.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -121,7 +127,7 @@ not grow with duration.</p></dd>
 Internally, it utilizes the `Reg()` constructor which performs validation and
 efficient storage. The resulting object can be evaluated at specific time points
 using the `evaluate()` function.</p>
-<p>Events with an amplitude of 0 are automatically filtered out.</p>
+<p>Events with an amplitude of 0 are filtered out when `drop_zero_amplitude = TRUE`.</p>
 <p>## Trial-Varying HRFs</p>
 <p>When `hrf` is a list of HRF objects, each event can have its own HRF. This is
 useful for trial-wise analyses where different events may have different
@@ -152,9 +158,7 @@ to the number of onsets.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Trial-varying HRFs: different boxcar windows for each event</span></span></span>
 <span class="r-in"><span><span class="va">hrf1</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters width, amplitude, normalize are not arguments to function boxcar[4] and will be ignored</span>
 <span class="r-in"><span><span class="va">hrf2</span> <span class="op">&lt;-</span> <span class="fu"><a href="hrf_boxcar.html">hrf_boxcar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">6</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Parameters width, amplitude, normalize are not arguments to function boxcar[6] and will be ignored</span>
 <span class="r-in"><span><span class="va">reg_varying</span> <span class="op">&lt;-</span> <span class="fu">regressor</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  onsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  hrf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">hrf1</span>, <span class="va">hrf2</span><span class="op">)</span></span></span>

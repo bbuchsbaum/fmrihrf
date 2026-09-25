@@ -32,7 +32,7 @@ print(HRF_SPMG1)
 #> -- HRF: SPMG1 --------------------------------------------- 
 #>    Basis functions: 1 
 #>    Span: 24 s
-#>    Parameters: P1 = 5, P2 = 15, A1 = 0.0833 
+#>    Parameters: P1 = 5, P2 = 15, A1 = 0.008333 
 
 # Print multi-basis HRF
 print(HRF_SPMG3)

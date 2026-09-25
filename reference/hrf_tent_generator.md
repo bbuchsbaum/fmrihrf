@@ -38,7 +38,6 @@ for a smoother alternative
 ``` r
 # Create a tent basis with 6 functions over a 20 second window
 custom_tent <- hrf_tent_generator(nbasis = 6, span = 20)
-#> Warning: Parameters N, degree, span are not arguments to function tent and will be ignored
 t <- seq(0, 20, by = 0.1)
 response <- evaluate(custom_tent, t)
 matplot(t, response, type = "l", main = "Tent HRF with 6 basis functions")

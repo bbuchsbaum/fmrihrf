@@ -71,6 +71,12 @@ regressor(
   integration). If \`FALSE\`, weighted integration is normalized by
   total block weight so amplitude does not grow with duration.
 
+- drop_zero_amplitude:
+
+  Logical scalar; if \`TRUE\` (default), remove zero-amplitude events.
+  Set to \`FALSE\` to retain all supplied onsets, including zero-valued
+  samples in a continuous feature series.
+
 ## Value
 
 An S3 object of class \`Reg\` and \`list\` containing processed event
@@ -86,7 +92,8 @@ objects. Internally, it utilizes the \`Reg()\` constructor which
 performs validation and efficient storage. The resulting object can be
 evaluated at specific time points using the \`evaluate()\` function.
 
-Events with an amplitude of 0 are automatically filtered out.
+Events with an amplitude of 0 are filtered out when
+\`drop_zero_amplitude = TRUE\`.
 
 \## Trial-Varying HRFs
 
@@ -119,9 +126,7 @@ response <- evaluate(reg, times)
 
 # Trial-varying HRFs: different boxcar windows for each event
 hrf1 <- hrf_boxcar(width = 4, normalize = TRUE)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[4] and will be ignored
 hrf2 <- hrf_boxcar(width = 6, normalize = TRUE)
-#> Warning: Parameters width, amplitude, normalize are not arguments to function boxcar[6] and will be ignored
 reg_varying <- regressor(
   onsets = c(10, 30),
   hrf = list(hrf1, hrf2)

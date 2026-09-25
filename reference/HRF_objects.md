@@ -35,6 +35,16 @@ When called as functions, return numeric vectors or matrices of HRF
 values. When used as objects, they are HRF objects with class
 `c("HRF", "function")`.
 
+## Details
+
+SPMG bases are raw continuous kernels. SPMG2 adds the analytic time
+derivative; SPMG3 also adds the response-dispersion difference
+`(h(d) - h(d + 0.01))/0.01`, holding the response mean and mass fixed.
+Columns are not implicitly orthogonalized or independently rescaled. Use
+[`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
+or the existing normalization flags to select scaling. These conventions
+do not reproduce every sampled SPM/Nilearn design detail.
+
 ## Canonical HRFs
 
 - `HRF_SPMG1`:

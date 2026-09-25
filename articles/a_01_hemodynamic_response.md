@@ -27,7 +27,7 @@ print(HRF_SPMG1)
 #> -- HRF: SPMG1 --------------------------------------------- 
 #>    Basis functions: 1 
 #>    Span: 24 s
-#>    Parameters: P1 = 5, P2 = 15, A1 = 0.0833
+#>    Parameters: P1 = 5, P2 = 15, A1 = 0.008333
 
 # Gaussian HRF
 print(HRF_GAUSSIAN)
@@ -384,6 +384,7 @@ print(hrf_box)
 #> -- HRF: boxcar[5] ----------------------------------------- 
 #>    Basis functions: 1 
 #>    Span: 5 s
+#>    Parameters: width = 5, amplitude = 1, normalize = FALSE
 ```
 
 ![](a_01_hemodynamic_response_files/figure-html/boxcar_basic_plot-1.png)
@@ -657,7 +658,7 @@ n_components <- 3
 variance_explained <- summary(pca_res)$importance[2, 1:n_components]
 cat("Variance explained by top", n_components, "components:",
     paste0(round(variance_explained * 100, 1), "%"), "\n")
-#> Variance explained by top 3 components: 67.5% 29.6% 2.7%
+#> Variance explained by top 3 components: 66.3% 30.9% 2.6%
 
 # Extract the top principal components
 pc_vectors <- pca_res$rotation[, 1:n_components]

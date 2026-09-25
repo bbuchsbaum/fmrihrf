@@ -81,22 +81,31 @@ for creating custom HRFs.</p>
 When used as objects, they are HRF objects with class <code>c("HRF", "function")</code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>SPMG bases are raw continuous kernels. SPMG2 adds the analytic
+time derivative; SPMG3 also adds the response-dispersion difference
+<code>(h(d) - h(d + 0.01))/0.01</code>, holding the response mean and mass fixed.
+Columns are not implicitly orthogonalized or independently rescaled.
+Use <code><a href="normalize_hrf.html">normalize_hrf()</a></code> or the existing normalization flags to select scaling.
+These conventions do not reproduce every sampled SPM/Nilearn design detail.</p>
+    </div>
+    <div class="section level2">
     <h2 id="canonical-hrfs">Canonical HRFs<a class="anchor" aria-label="anchor" href="#canonical-hrfs"></a></h2>
 
 
 <dl><dt><code>HRF_SPMG1</code></dt>
 <dd><p>SPM canonical HRF (single basis function)</p></dd>
 
-  <dt><code>HRF_SPMG2</code></dt>
+<dt><code>HRF_SPMG2</code></dt>
 <dd><p>SPM canonical HRF with temporal derivative (2 basis functions)</p></dd>
 
-  <dt><code>HRF_SPMG3</code></dt>
+<dt><code>HRF_SPMG3</code></dt>
 <dd><p>SPM canonical HRF with temporal and dispersion derivatives (3 basis functions)</p></dd>
 
-  <dt><code>HRF_GAMMA</code></dt>
+<dt><code>HRF_GAMMA</code></dt>
 <dd><p>Gamma function-based HRF</p></dd>
 
-  <dt><code>HRF_GAUSSIAN</code></dt>
+<dt><code>HRF_GAUSSIAN</code></dt>
 <dd><p>Gaussian function-based HRF</p></dd>
 
 
@@ -108,7 +117,7 @@ When used as objects, they are HRF objects with class <code>c("HRF", "function")
 <dl><dt><code>HRF_BSPLINE</code></dt>
 <dd><p>B-spline basis HRF (5 basis functions)</p></dd>
 
-  <dt><code>HRF_FIR</code></dt>
+<dt><code>HRF_FIR</code></dt>
 <dd><p>Finite Impulse Response (FIR) basis HRF (12 basis functions)</p></dd>
 
 

@@ -73,77 +73,94 @@ of convolving the feature with an HRF, not a train of unit-mass impulses.</p>
 
 
 <dl><dt id="arg-values">values<a class="anchor" aria-label="anchor" href="#arg-values"></a></dt>
-<dd><p>Numeric vector of feature samples.</p></dd>
+<dd><p>Numeric vector of feature samples. Matrix and array inputs are
+rejected; construct one feature regressor per column instead.</p></dd>
 
 
 <dt id="arg-hrf">hrf<a class="anchor" aria-label="anchor" href="#arg-hrf"></a></dt>
 <dd><p>The hemodynamic response function to convolve with the feature.
-Same types as [regressor()], except a list of per-event HRFs is not
-allowed. Defaults to `HRF_SPMG1`.</p></dd>
+Same types as <code><a href="regressor.html">regressor()</a></code>, except a list of per-event HRFs is not
+allowed. Defaults to <code>HRF_SPMG1</code>.</p></dd>
 
 
 <dt id="arg-times">times<a class="anchor" aria-label="anchor" href="#arg-times"></a></dt>
 <dd><p>Numeric vector of sample times in seconds, same length as
-`values`. Mutually exclusive with `dt`. Times must be strictly increasing
+<code>values</code>. Mutually exclusive with <code>dt</code>. Times must be strictly increasing
 and non-negative. The last bin width is the last inter-sample gap.</p></dd>
 
 
 <dt id="arg-dt">dt<a class="anchor" aria-label="anchor" href="#arg-dt"></a></dt>
 <dd><p>Positive sampling interval in seconds. Mutually exclusive with
-`times`. Sample times are `start + seq(0, by = dt, length.out = length(values))`.</p></dd>
+<code>times</code>. Sample times are <code>start + seq(0, by = dt, length.out = length(values))</code>.</p></dd>
 
 
 <dt id="arg-start">start<a class="anchor" aria-label="anchor" href="#arg-start"></a></dt>
-<dd><p>Start time in seconds used only when `dt` is supplied.
+<dd><p>Start time in seconds used only when <code>dt</code> is supplied.
 Defaults to 0.</p></dd>
 
 
 <dt id="arg-center">center<a class="anchor" aria-label="anchor" href="#arg-center"></a></dt>
-<dd><p>Logical; if `TRUE` (default), subtract the mean of the
-(masked) samples before convolution.</p></dd>
+<dd><p>Logical; if <code>TRUE</code> (default), subtract the mean of the
+(masked) samples before convolution. For an all-sample series this
+removes \(\mu H\mathbf{1}\), including the HRF-length run-boundary ramp.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>Character; `"none"` (default) leaves native units, `"sd"`
-divides by the standard deviation of the (masked) samples after centering.</p></dd>
+<dd><p>Character; <code>"none"</code> (default) leaves native units, <code>"sd"</code>
+divides by the standard deviation of the (masked) samples after centering.
+This z-scores the feature, not the convolved design column.</p></dd>
 
 
 <dt id="arg-mask">mask<a class="anchor" aria-label="anchor" href="#arg-mask"></a></dt>
-<dd><p>Optional logical vector the same length as `values`. Center and
-scale statistics are computed on `mask == TRUE` samples only; off-mask
-samples are set to 0 after that (block-centered modulator).</p></dd>
+<dd><p>Optional logical vector the same length as <code>values</code>. Center and
+scale statistics are computed on <code>mask == TRUE</code> samples only; off-mask
+samples are set to 0. This is not equivalent to global all-sample
+centering.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>Temporal window in seconds for the HRF, passed to [regressor()].
-If `NULL`, the HRF's own span is used.</p></dd>
+<dd><p>Temporal window in seconds for the HRF, passed to <code><a href="regressor.html">regressor()</a></code>.
+If <code>NULL</code>, the HRF's own span is used.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An S3 object of class `c("FeatureReg", "Reg", "list")`. Evaluation
-  uses the same convolution path as [regressor()].</p>
+    <p>An S3 object of class <code>c("FeatureReg", "Reg", "list")</code>. Evaluation
+uses the same convolution path as <code><a href="regressor.html">regressor()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Centering and scaling are applied to the feature **before** convolution.
-The default is to demean and leave the native units unchanged. This is the
-usual choice when the feature is defined for a whole run: the mean aliases
-into the intercept, and the edge transients of a non-zero mean are rarely
-of interest. If the feature is a within-block modulator, pass a `mask` for
-the on-period (and typically a separate boxcar for "stimulus on") rather
-than demeaning the concatenated series.</p>
-<p>This is **not** parametric modulation of discrete events. No unmodulated
-companion regressor is added. Zeros are valid samples and are retained.</p>
-<p>Evaluate with `precision` less than or equal to the feature sampling
-interval so that several samples are not collapsed into one convolution bin.
-Compared with `regressor(times, amplitude = values, duration = 0)`, the
-predicted BOLD is smaller by about \(\Delta t\) (the missing integral
-measure of a continuous signal).</p>
+    <p>Amplitude modulation on this sampling grid is the same linear model as
+convolving the sampled series: if \(x\) is the (possibly centered) feature
+and \(H\) is the convolution operator, the regressor is \(Hx\). Zeros are
+kept, so an all-TR / all-sample series stays an all-sample series. No
+unmodulated companion regressor is added.</p>
+<p>Centering and scaling are applied to the feature <strong>before</strong> convolution.
+For a whole-run series (<code>mask = NULL</code>),
+$$H(x-\mu\mathbf{1}) = Hx - \mu H\mathbf{1}.$$
+Away from the run edges, \(H\mathbf{1}\) is nearly constant (overlapping
+HRFs sum to a plateau), so with a GLM intercept the centered and raw
+columns are affinely equivalent. They differ by the HRF-length ramp of
+\(H\mathbf{1}\) at the start and end of the run. Default <code>center = TRUE</code>
+removes that boundary term; <code>center = FALSE</code> keeps it. <code>scale = "sd"</code>
+only changes the feature's units (still pre-convolution). It is not
+standardization of the final BOLD-space column after filtering.</p>
+<p>Use <code>mask</code> when the feature should be centered only during an on-period
+(stimulus present, task on, and so on). Center and scale then use only the
+on-samples, and off-mask samples stay 0:
+$$H[m(x-\mu_{\mathrm{on}})] = H(mx) - \mu_{\mathrm{on}} Hm.$$
+That is <strong>not</strong> an affine transform of the all-sample series. Pair it with
+a separate boxcar for the on-period if you want presence and intensity as
+two questions.</p>
+<p>Each sample is a zero-order-hold bin of width \(\Delta t\), not a
+unit-mass impulse. Evaluate with <code>precision</code> less than or equal to the
+feature sampling interval. Compared with
+<code>regressor(times, amplitude = values, duration = 0)</code>, the predicted BOLD
+is smaller by about \(\Delta t\).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>[regressor()], [evaluate()]</p></div>
+    <div class="dont-index"><p><code><a href="regressor.html">regressor()</a></code>, <code><a href="evaluate.html">evaluate()</a></code></p></div>
     </div>
 
     <div class="section level2">

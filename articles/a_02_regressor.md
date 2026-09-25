@@ -139,9 +139,17 @@ A sampled feature such as RMS energy is a time series, not a list of
 trials.
 [`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md)
 encodes each sample as a zero-order-hold bin of width `dt` and convolves
-that signal with the HRF. By default the series is demeaned before
-convolution so the mean does not create run-edge transients; native
-units are left unchanged.
+that signal with the HRF. That is the same linear model as amplitude
+modulation on this sampling grid: the predicted BOLD is $`Hx`$.
+
+By default the series is demeaned before convolution (`center = TRUE`)
+and left in native units. For a whole-run series that is
+$`H(x-\mu 1)=Hx-\mu H1`$. In the interior of the run, overlapping HRFs
+make $`H1`$ nearly constant, so with a GLM intercept the centered and
+raw columns test the same effect. They differ by the HRF-length ramp of
+$`H1`$ at the run boundaries; centering removes that onset/offset
+transient. `scale = "sd"` z-scores the feature, not the final filtered
+design column.
 
 ``` r
 
@@ -163,9 +171,11 @@ about `1/dt`. Pass `duration = dt` (and skip centering) if you need the
 same ZOH encoding from
 [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md).
 
-If the feature is only meaningful inside stimulus blocks, pass a `mask`
-for the on-period and keep a separate boxcar for “stimulus on” rather
-than demeaning the whole concatenated series.
+If you want intensity *conditional on an on-period*, pass a `mask` for
+those samples (off-period stays 0 after centering) and a separate boxcar
+for presence. That is not an affine transform of the all-sample series.
+Do not drop off-period samples before centering: that silently turns the
+all-sample model into the sparse one.
 
 ## Combining Duration and Amplitude Modulation
 

@@ -120,7 +120,6 @@ Other hrf_functions:
 ``` r
 # Simple: 6s window with 4 evenly-spaced weights (at 0, 2, 4, 6s)
 hrf1 <- hrf_weighted(width = 6, weights = c(0.2, 0.5, 0.8, 0.3))
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[4 pts, constant] and will be ignored
 t <- seq(-1, 10, by = 0.1)
 plot(t, evaluate(hrf1, t), type = "s", main = "Weighted HRF (width + weights)")
 
@@ -131,7 +130,6 @@ hrf2 <- hrf_weighted(
   weights = c(0.1, 0.5, 0.8, 0.5, 0.1),
   method = "linear"
 )
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[5 pts, linear] and will be ignored
 plot(t, evaluate(hrf2, t), type = "l", main = "Smooth Weighted HRF")
 
 
@@ -141,16 +139,12 @@ hrf3 <- hrf_weighted(
   weights = c(1, 2, 2, 1),
   normalize = TRUE
 )
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[4 pts, constant] and will be ignored
 
 # Trial-varying weighted HRFs
 hrf_early <- hrf_weighted(width = 6, weights = c(1, 1, 0, 0), normalize = TRUE)
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[4 pts, constant] and will be ignored
 hrf_late <- hrf_weighted(width = 6, weights = c(0, 0, 1, 1), normalize = TRUE)
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[4 pts, constant] and will be ignored
 reg <- regressor(onsets = c(0, 20), hrf = list(hrf_early, hrf_late))
 
 # For delayed windows, use lag_hrf
 hrf_delayed <- lag_hrf(hrf_weighted(width = 5, weights = c(1, 2, 1)), lag = 10)
-#> Warning: Parameters times, weights, width, method, normalize are not arguments to function weighted[3 pts, constant] and will be ignored
 ```

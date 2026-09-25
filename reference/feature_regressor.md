@@ -26,81 +26,101 @@ feature_regressor(
 
 - values:
 
-  Numeric vector of feature samples.
+  Numeric vector of feature samples. Matrix and array inputs are
+  rejected; construct one feature regressor per column instead.
 
 - hrf:
 
   The hemodynamic response function to convolve with the feature. Same
-  types as \[regressor()\], except a list of per-event HRFs is not
-  allowed. Defaults to \`HRF_SPMG1\`.
+  types as
+  [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md),
+  except a list of per-event HRFs is not allowed. Defaults to
+  `HRF_SPMG1`.
 
 - times:
 
-  Numeric vector of sample times in seconds, same length as \`values\`.
-  Mutually exclusive with \`dt\`. Times must be strictly increasing and
+  Numeric vector of sample times in seconds, same length as `values`.
+  Mutually exclusive with `dt`. Times must be strictly increasing and
   non-negative. The last bin width is the last inter-sample gap.
 
 - dt:
 
   Positive sampling interval in seconds. Mutually exclusive with
-  \`times\`. Sample times are \`start + seq(0, by = dt, length.out =
-  length(values))\`.
+  `times`. Sample times are
+  `start + seq(0, by = dt, length.out = length(values))`.
 
 - start:
 
-  Start time in seconds used only when \`dt\` is supplied. Defaults to
-  0.
+  Start time in seconds used only when `dt` is supplied. Defaults to 0.
 
 - center:
 
-  Logical; if \`TRUE\` (default), subtract the mean of the (masked)
-  samples before convolution.
+  Logical; if `TRUE` (default), subtract the mean of the (masked)
+  samples before convolution. For an all-sample series this removes
+  \\\mu H\mathbf{1}\\, including the HRF-length run-boundary ramp.
 
 - scale:
 
-  Character; \`"none"\` (default) leaves native units, \`"sd"\` divides
-  by the standard deviation of the (masked) samples after centering.
+  Character; `"none"` (default) leaves native units, `"sd"` divides by
+  the standard deviation of the (masked) samples after centering. This
+  z-scores the feature, not the convolved design column.
 
 - mask:
 
-  Optional logical vector the same length as \`values\`. Center and
-  scale statistics are computed on \`mask == TRUE\` samples only;
-  off-mask samples are set to 0 after that (block-centered modulator).
+  Optional logical vector the same length as `values`. Center and scale
+  statistics are computed on `mask == TRUE` samples only; off-mask
+  samples are set to 0. This is not equivalent to global all-sample
+  centering.
 
 - span:
 
-  Temporal window in seconds for the HRF, passed to \[regressor()\]. If
-  \`NULL\`, the HRF's own span is used.
+  Temporal window in seconds for the HRF, passed to
+  [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md).
+  If `NULL`, the HRF's own span is used.
 
 ## Value
 
-An S3 object of class \`c("FeatureReg", "Reg", "list")\`. Evaluation
-uses the same convolution path as \[regressor()\].
+An S3 object of class `c("FeatureReg", "Reg", "list")`. Evaluation uses
+the same convolution path as
+[`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md).
 
 ## Details
 
-Centering and scaling are applied to the feature \*\*before\*\*
-convolution. The default is to demean and leave the native units
-unchanged. This is the usual choice when the feature is defined for a
-whole run: the mean aliases into the intercept, and the edge transients
-of a non-zero mean are rarely of interest. If the feature is a
-within-block modulator, pass a \`mask\` for the on-period (and typically
-a separate boxcar for "stimulus on") rather than demeaning the
-concatenated series.
+Amplitude modulation on this sampling grid is the same linear model as
+convolving the sampled series: if \\x\\ is the (possibly centered)
+feature and \\H\\ is the convolution operator, the regressor is \\Hx\\.
+Zeros are kept, so an all-TR / all-sample series stays an all-sample
+series. No unmodulated companion regressor is added.
 
-This is \*\*not\*\* parametric modulation of discrete events. No
-unmodulated companion regressor is added. Zeros are valid samples and
-are retained.
+Centering and scaling are applied to the feature **before** convolution.
+For a whole-run series (`mask = NULL`), \$\$H(x-\mu\mathbf{1}) = Hx -
+\mu H\mathbf{1}.\$\$ Away from the run edges, \\H\mathbf{1}\\ is nearly
+constant (overlapping HRFs sum to a plateau), so with a GLM intercept
+the centered and raw columns are affinely equivalent. They differ by the
+HRF-length ramp of \\H\mathbf{1}\\ at the start and end of the run.
+Default `center = TRUE` removes that boundary term; `center = FALSE`
+keeps it. `scale = "sd"` only changes the feature's units (still
+pre-convolution). It is not standardization of the final BOLD-space
+column after filtering.
 
-Evaluate with \`precision\` less than or equal to the feature sampling
-interval so that several samples are not collapsed into one convolution
-bin. Compared with \`regressor(times, amplitude = values, duration =
-0)\`, the predicted BOLD is smaller by about \\\Delta t\\ (the missing
-integral measure of a continuous signal).
+Use `mask` when the feature should be centered only during an on-period
+(stimulus present, task on, and so on). Center and scale then use only
+the on-samples, and off-mask samples stay 0:
+\$\$H\[m(x-\mu\_{\mathrm{on}})\] = H(mx) - \mu\_{\mathrm{on}} Hm.\$\$
+That is **not** an affine transform of the all-sample series. Pair it
+with a separate boxcar for the on-period if you want presence and
+intensity as two questions.
+
+Each sample is a zero-order-hold bin of width \\\Delta t\\, not a
+unit-mass impulse. Evaluate with `precision` less than or equal to the
+feature sampling interval. Compared with
+`regressor(times, amplitude = values, duration = 0)`, the predicted BOLD
+is smaller by about \\\Delta t\\.
 
 ## See also
 
-\[regressor()\], \[evaluate()\]
+[`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md),
+[`evaluate()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.md)
 
 ## Examples
 

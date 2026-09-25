@@ -36,7 +36,6 @@ An object of class \`HRF\` representing the lagged basis.
 ``` r
 # Canonical SPM HRF delayed by 2 seconds
 h <- make_hrf("spmg1", lag = 2)
-#> Warning: Parameters P1, P2, A1 are not arguments to function spmg1_lag(2) and will be ignored
 h(0:5)
-#> [1] 0.00000000 0.00000000 0.00000000 0.03064436 0.36074973 1.00778477
+#> [1] 0.000000000 0.000000000 0.000000000 0.003065662 0.036089408 0.100818722
 ```

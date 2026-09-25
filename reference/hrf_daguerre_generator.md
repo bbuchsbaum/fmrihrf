@@ -44,7 +44,6 @@ a unified interface to create HRFs
 ``` r
 # Create Daguerre basis with 5 functions
 custom_dag <- hrf_daguerre_generator(nbasis = 5, scale = 3)
-#> Warning: Parameters n_basis, scale are not arguments to function daguerre and will be ignored
 t <- seq(0, 24, by = 0.1)
 response <- evaluate(custom_dag, t)
 matplot(t, response, type = "l", main = "Daguerre HRF with 5 basis functions")

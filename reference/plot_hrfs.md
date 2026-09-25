@@ -85,11 +85,8 @@ plot_hrfs(HRF_SPMG1, HRF_GAMMA, HRF_GAUSSIAN,
 
 # Compare blocked HRFs with different durations
 hrf_1s <- block_hrf(HRF_SPMG1, width = 1)
-#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_block(w=1) and will be ignored
 hrf_3s <- block_hrf(HRF_SPMG1, width = 3)
-#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_block(w=3) and will be ignored
 hrf_5s <- block_hrf(HRF_SPMG1, width = 5)
-#> Warning: Parameters P1, P2, A1 are not arguments to function SPMG1_block(w=5) and will be ignored
 plot_hrfs(hrf_1s, hrf_3s, hrf_5s,
           labels = c("1s duration", "3s duration", "5s duration"),
           title = "Effect of Event Duration on HRF")

@@ -41,7 +41,6 @@ A new \`HRF\` object with \`nbasis = 1\`.
 # Create a custom HRF from SPMG3 basis coefficients
 coeffs <- c(1, 0.2, -0.1)  # Main response + slight temporal shift - dispersion
 custom_hrf <- hrf_from_coefficients(HRF_SPMG3, coeffs)
-#> Warning: Parameters coefficients are not arguments to function SPMG3_from_coef and will be ignored
 
 # Evaluate the custom HRF
 t <- seq(0, 20, by = 0.1)
@@ -50,5 +49,4 @@ response <- evaluate(custom_hrf, t)
 # Create from FIR basis
 fir_coeffs <- c(0, 0.2, 0.5, 1, 0.8, 0.4, 0.1, 0, 0, 0, 0, 0)
 custom_fir <- hrf_from_coefficients(HRF_FIR, fir_coeffs)
-#> Warning: Parameters nbasis, span, bin_width, coefficients are not arguments to function fir_from_coef and will be ignored
 ```
