@@ -222,6 +222,23 @@ eval_loop <- function(p, ...) {
         # Select the appropriate HRF for this event
         current_hrf <- if (hrf_is_list) p$valid_hrfs[[i]] else p$hrf
 
+        # Match the finite kernel sampled by the convolution engine. Mask
+        # before block integration, not after: a block near the end of the
+        # span contains both supported and unsupported kernel lags.
+        raw_hrf <- current_hrf
+        current_hrf <- local({
+          kernel <- raw_hrf
+          cutoff <- hrf_span
+          bounded <- function(t) {
+            values <- kernel(t)
+            outside <- t < 0 | t > cutoff
+            if (is.matrix(values)) values[outside, ] <- 0 else values[outside] <- 0
+            values
+          }
+          attributes(bounded) <- attributes(kernel)
+          bounded
+        })
+
         # Call evaluate S3 generic, should dispatch to evaluate.HRF
         resp <- evaluate(current_hrf, relOns[valid_rel_idx], amplitude=valid_amp[i],
                          duration=valid_durs[i],

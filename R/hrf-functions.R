@@ -151,7 +151,7 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #' @param t A vector of time points.
 #' @param P1 The first exponent parameter (default: 5).
 #' @param P2 The second exponent parameter (default: 15).
-#' @param A1 Amplitude scaling factor for the positive gamma function component; normally fixed at .0833
+#' @param A1 Amplitude scaling factor for the positive gamma function component; normally fixed at 1/120
 #' @return A vector of HRF values at the given time points.
 #' @family hrf_functions
 #' @export
@@ -162,8 +162,8 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #' hrf_values <- hrf_spmg1(time_points)
 #' # Plot the HRF values
 #' plot(time_points, hrf_values, type='l', main='SPM Canonical Double Gamma HRF')
-hrf_spmg1 <- function(t, P1=5, P2=15,A1=.0833) {
- 	ifelse(t < 0, 0, exp(-t)*(A1*t^P1 - 1.274527e-13*t^P2))
+hrf_spmg1 <- function(t, P1=5, P2=15,A1=1/120) {
+  ifelse(t < 0, 0, exp(-t) * (A1 * t^P1 - t^P2 / (6 * factorial(15))))
 	
 }
 
@@ -171,8 +171,8 @@ hrf_spmg1 <- function(t, P1=5, P2=15,A1=.0833) {
 # Fast analytic first derivative for hrf_spmg1
 #' @keywords internal
 #' @noRd
-hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = .0833) {
-  C <- 1.274527e-13
+hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
+  C <- (1 / (6 * factorial(15)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
@@ -186,8 +186,8 @@ hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = .0833) {
 # Fast analytic second derivative for hrf_spmg1
 #' @keywords internal
 #' @noRd
-hrf_spmg1_second_deriv <- function(t, P1 = 5, P2 = 15, A1 = .0833) {
-  C <- 1.274527e-13
+hrf_spmg1_second_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
+  C <- (1 / (6 * factorial(15)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
@@ -200,6 +200,32 @@ hrf_spmg1_second_deriv <- function(t, P1 = 5, P2 = 15, A1 = .0833) {
     D2_prime <- C   * ((P2 - 1) * t_pos^(P2 - 2) * (P2 - t_pos) - t_pos^(P2 - 1))
     ret[pos] <- exp(-t_pos) * (D1_prime - D2_prime - (D1 - D2))
   }
+  ret
+}
+
+
+# SPM-sign dispersion difference of the positive gamma component. Its mean
+# (P1 + 1) and total mass (A1 * Gamma(P1 + 1)) remain fixed; the undershoot
+# cancels. Raw kernels are not normalized or orthogonalized here.
+#' @keywords internal
+#' @noRd
+hrf_spmg1_dispersion_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
+  mass <- A1 * gamma(P1 + 1)
+  mass * (dgamma(t, shape = P1 + 1, scale = 1) -
+            dgamma(t, shape = (P1 + 1) / 1.01, scale = 1.01)) / 0.01
+}
+
+# Time derivative of the dispersion column, not a third time derivative.
+hrf_spmg1_dispersion_time_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
+  ret <- numeric(length(t))
+  pos <- t > 0
+  x <- t[pos]
+  a <- P1 + 1
+  d <- 1.01
+  ret[pos] <- A1 * gamma(a) * (
+    dgamma(x, a) * ((a - 1) / x - 1) -
+      dgamma(x, a / d, scale = d) * ((a / d - 1) / x - 1 / d)
+  ) / 0.01
   ret
 }
 
@@ -623,7 +649,7 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
     ifelse(t >= 0 & t < width, amplitude, 0)
   }
 
-  as_hrf(f,
+  .as_closed_hrf(f,
          name = sprintf("boxcar[%.2g]", width),
          nbasis = 1L,
          span = width,
@@ -794,7 +820,7 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
     sprintf("weighted[%d pts, %s]", length(times), method)
   }
 
-  as_hrf(f,
+  .as_closed_hrf(f,
          name = hrf_name,
          nbasis = 1L,
          span = max(times),

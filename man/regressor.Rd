@@ -46,9 +46,9 @@ with the duration of sustained events (via weighted integration). If `FALSE`,
 weighted integration is normalized by total block weight so amplitude does
 not grow with duration.}
 
-\item{drop_zero_amplitude}{Logical scalar; if `TRUE` (default), events with
-amplitude 0 are removed before convolution. Set to `FALSE` to keep a full
-event grid (including silent bins), as `feature_regressor()` does.}
+\item{drop_zero_amplitude}{Logical scalar; if `TRUE` (default), remove
+zero-amplitude events. Set to `FALSE` to retain all supplied onsets,
+including zero-valued samples in a continuous feature series.}
 }
 \value{
 An S3 object of class `Reg` and `list`
@@ -68,8 +68,7 @@ Internally, it utilizes the `Reg()` constructor which performs validation and
 efficient storage. The resulting object can be evaluated at specific time points
 using the `evaluate()` function.
 
-By default (`drop_zero_amplitude = TRUE`), events with an amplitude of 0 are
-filtered out.
+Events with an amplitude of 0 are filtered out when `drop_zero_amplitude = TRUE`.
 
 ## Trial-Varying HRFs
 

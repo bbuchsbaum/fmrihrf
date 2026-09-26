@@ -57,6 +57,34 @@ convolution engine.
 
 ## Bug Fixes
 
+* Preserved parameter metadata in closed HRF constructors and decorators without
+  incorrectly warning that the captured parameters would be ignored.
+
+* Fixed loop-based block regressors integrating the kernel beyond its declared
+  span, where the convolution engine already truncated it. The restored SPMG
+  undershoot exposed this existing tail discrepancy. Support is now applied
+  before block integration on both paths.
+
+* **Breaking:** corrected the SPMG canonical positive coefficient from `0.0833`
+  to `1/120` and used the exact undershoot coefficient `1/(6*15!)`.
+  `HRF_SPMG1`, `HRF_SPMG2`, and `HRF_SPMG3` now have the SPM double-gamma
+  shape (about 8.9% undershoot relative to peak, previously 0.6%). This changes
+  both raw scale and shape; existing analyses should be refitted.
+
+* **Breaking:** the third column of `HRF_SPMG3` is now a genuine response
+  dispersion derivative, holding positive-component mean and mass fixed and
+  using SPM's `(h(d) - h(d + 0.01))/0.01` sign/step convention. Previously it
+  was a second time derivative. `deriv(HRF_SPMG3, ...)` follows the corrected
+  basis. Temporal derivatives remain analytic. These are raw, unorthogonalized
+  continuous kernels; exact sampled SPM/Nilearn design compatibility is not
+  implied. Existing `normalize`, `normalise_hrf()`, `normalize_hrf()`, and
+  `hrf_norm` scaling policies are unchanged. Coefficients and derivative-based
+  amplitude summaries must respect the selected scaling and basis geometry.
+
+* Fixed issue #50: `feature_regressor()` now rejects matrix and array inputs
+  instead of silently flattening them into one long feature. Pass one feature
+  column at a time.
+
 Addresses the defects reported in issue #45.
 
 * **Breaking:** epoch (`duration > 0`) regressors are no longer scaled by

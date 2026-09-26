@@ -31,6 +31,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7,
   fig.height = 5,
+  dpi = 90,
   message = FALSE,
   warning = FALSE
 )

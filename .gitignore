@@ -15,3 +15,6 @@ CLAUDE.md
 /doc/
 /Meta/
 .omc
+
+# macOS Finder metadata
+.DS_Store
