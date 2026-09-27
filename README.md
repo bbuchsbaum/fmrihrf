@@ -4,6 +4,8 @@
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/fmrihrf)](https://CRAN.R-project.org/package=fmrihrf)
 [![R-CMD-check](https://github.com/bbuchsbaum/fmrihrf/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bbuchsbaum/fmrihrf/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/bbuchsbaum/fmrihrf/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/bbuchsbaum/fmrihrf/actions/workflows/test-coverage.yaml)
+[![Codecov test coverage](https://codecov.io/gh/bbuchsbaum/fmrihrf/branch/main/graph/badge.svg)](https://app.codecov.io/gh/bbuchsbaum/fmrihrf?branch=main)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
