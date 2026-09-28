@@ -11,7 +11,8 @@ plot_hrfs(
   labels = NULL,
   title = NULL,
   subtitle = NULL,
-  use_ggplot = TRUE
+  use_ggplot = TRUE,
+  draw = TRUE
 )
 }
 \arguments{
@@ -36,6 +37,10 @@ no subtitle is shown.}
 
 \item{use_ggplot}{Logical; if TRUE and ggplot2 is available, use ggplot2
 for plotting. If FALSE, use base R graphics. Default is TRUE.}
+
+\item{draw}{Logical; draw the plot immediately (default TRUE). With
+`use_ggplot = TRUE`, set FALSE to customize or auto-print the returned
+data frame's `"plot"` attribute, for example in a themed vignette.}
 }
 \value{
 Invisibly returns a data frame in long format with columns 'time',
