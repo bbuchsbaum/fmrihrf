@@ -71,24 +71,33 @@ gamma_responses <- gamma_lib(time_points)
 
 # Convert to long format for plotting
 gamma_df <- as.data.frame(gamma_responses)
-names(gamma_df) <- paste0("Shape", gamma_params$shape, "_Rate", gamma_params$rate)
+names(gamma_df) <- with(gamma_params, paste(shape, rate, sep = " / "))
 gamma_df$Time <- time_points
 
 gamma_long <- pivot_longer(gamma_df, -Time, names_to = "Parameters", values_to = "Response")
+gamma_long <- gamma_long %>%
+  separate(Parameters, into = c("Shape", "Rate"), sep = " / ", remove = FALSE) %>%
+  mutate(Shape = factor(Shape, levels = c("4", "6", "8")),
+         Rate = factor(Rate, levels = c("0.8", "1", "1.2")))
 
 # Create a more informative plot
-ggplot(gamma_long, aes(x = Time, y = Response, color = Parameters)) +
-  geom_line(linewidth = 1) +
-  scale_color_viridis_d() +
-  labs(title = "Library of Gamma HRFs",
-       subtitle = "Systematic variation of shape and rate parameters",
-       x = "Time (seconds)",
-       y = "HRF Response") +
-  theme_minimal() +
-  theme(legend.position = "right")
+ggplot(gamma_long, aes(x = Time, y = Response, color = Rate, linetype = Rate)) +
+  geom_line(linewidth = 0.8) +
+  facet_wrap(~Shape, ncol = 1, labeller = label_both) +
+  albersdown::scale_color_albers() +
+  labs(title = "Gamma HRF library", x = "Time (s)",
+       y = "Response", color = "Rate", linetype = "Rate") +
+  theme(legend.position = "bottom")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/gamma_library-1.png)
+![Nine gamma HRFs grouped into panels by shape (4, 6, 8), with rate
+(0.8, 1, 1.2) distinguished by color and line type. All panels share the
+same
+axes.](a_04_advanced_modeling_files/figure-html/gamma_library-1.png)![](a_04_advanced_modeling_files/figure-html/gamma_library-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/gamma_library-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/gamma_library-dark-1.phone.png)
 
 ### Example 2: Library of Lagged SPM HRFs
 
@@ -134,11 +143,14 @@ ggplot(spm_lag_long, aes(x = Time, y = Response, color = Lag)) +
   labs(title = "Library of Lagged SPM Canonical HRFs",
        subtitle = "Temporal lags from -2 to +4 seconds",
        x = "Time (seconds)",
-       y = "HRF Response") +
-  theme_minimal()
+       y = "HRF Response")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png)
+![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png)![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/spm_lag_library-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/spm_lag_library-dark-1.phone.png)
 
 ## Reconstruction Matrices: From Coefficients to HRF Shapes
 
@@ -150,8 +162,9 @@ interpreting estimated HRFs from fMRI analyses.
 
 ``` r
 
-# Use a small basis for clear visualization
-basis_set <- gen_hrf(hrf_bspline, N = 5, degree = 3, span = 30)
+# Five cubic B-splines with explicit 24-second support.
+# Evaluate through 30 seconds to show that the basis is zero beyond its support.
+basis_set <- hrf_bspline_generator(nbasis = 5, span = 24)
 eval_times <- seq(0, 30, by = 0.1)
 
 # The reconstruction matrix: each column is a basis function evaluated at time points
@@ -173,11 +186,14 @@ ggplot(basis_long, aes(x = Time, y = Value, color = Basis)) +
   labs(title = "B-spline Basis Functions",
        subtitle = "Each basis function covers a different time window",
        x = "Time (seconds)",
-       y = "Basis Function Value") +
-  theme_minimal()
+       y = "Basis Function Value")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png)
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-1.phone.png)
 
 ``` r
 
@@ -214,13 +230,21 @@ ggplot(reconstruction_df, aes(x = Time, y = HRF, color = Pattern)) +
        subtitle = "Varying coefficients produces diverse HRF patterns",
        x = "Time (seconds)",
        y = "HRF Response") +
-  theme_minimal() +
   theme(legend.position = "bottom")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.png)
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.phone.png)
 
-### Interactive Visualization: Building an HRF Step by Step
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-2.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-2.phone.png)
+
+### Building an HRF Step by Step
+
+The solid line is the cumulative response; the dashed line is the
+contribution added at each step. All panels use the same axes. The basis
+has 24-second support and is zero afterward, through the end of the
+30-second evaluation grid.
 
 ``` r
 
@@ -247,29 +271,35 @@ for (i in 1:5) {
     Value = c(cumulative_hrf, individual_contribution),
     Type = rep(c("Cumulative", "Individual"), each = length(eval_times)),
     Step = i,
-    Basis = paste0("Adding B", i, " (coef=", round(canonical_coefs[i], 2), ")")
+    Basis = paste0(i, ". Add B", i, "  (weight ", round(canonical_coefs[i], 2), ")")
   )
   cumulative_df <- rbind(cumulative_df, df)
 }
 
 # Create faceted plot showing the build-up
-ggplot(cumulative_df, aes(x = Time, y = Value, color = Type)) +
-  geom_line(linewidth = 1.2) +
-  facet_wrap(~Basis, ncol = 5) +
-  scale_color_manual(values = c("Cumulative" = "black", "Individual" = "red")) +
-  labs(title = "Building an HRF: Sequential Addition of Weighted Basis Functions",
-       subtitle = "Red: individual contribution, Black: cumulative sum",
-       x = "Time (seconds)",
-       y = "Value") +
-  theme_minimal() +
+ggplot(cumulative_df, aes(x = Time, y = Value, color = Type, linetype = Type)) +
+  geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
+  geom_line(linewidth = 0.9) +
+  facet_wrap(~Basis, ncol = 1) +
+  albersdown::scale_color_albers() +
+  scale_linetype_manual(values = c("Cumulative" = "solid", "Individual" = "dashed")) +
+  scale_y_continuous(breaks = c(0, 0.4, 0.8)) +
+  labs(title = "Building an HRF step by step",
+       x = "Time (s)", y = "Response", color = NULL, linetype = NULL) +
   theme(legend.position = "bottom",
-        strip.text = element_text(size = 9))
+        strip.text = element_text(size = 10))
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.png)
+![Five sequential reconstruction panels on common axes. Each shows the
+cumulative HRF and the weighted basis function added at that step,
+including the negative fifth
+contribution.](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-dark-1.phone.png)
 
 ``` r
-
 
 # Show coefficient importance
 coef_importance <- data.frame(
@@ -278,20 +308,24 @@ coef_importance <- data.frame(
   `Absolute Value` = abs(canonical_coefs)
 )
 
-ggplot(coef_importance, aes(x = Basis, y = Coefficient, fill = Coefficient > 0)) +
+coef_importance$Sign <- factor(sign(coef_importance$Coefficient),
+                              levels = c(-1, 0, 1), labels = c("Negative", "Zero", "Positive"))
+ggplot(coef_importance, aes(x = Basis, y = Coefficient, fill = Sign)) +
   geom_col() +
   geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5) +
-  scale_fill_manual(values = c("FALSE" = "#D55E00", "TRUE" = "#009E73"),
-                    labels = c("Negative", "Positive")) +
+  albersdown::scale_fill_albers() +
   labs(title = "Coefficient Values for Canonical HRF",
        subtitle = "B3 dominates the shape, B5 provides the undershoot",
        x = "Basis Function",
        y = "Coefficient Value",
-       fill = "Sign") +
-  theme_minimal()
+       fill = "Sign")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-2.png)
+![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-dark-1.phone.png)
 
 ## Regressor Sets: Multi-Condition Experimental Designs
 
@@ -356,11 +390,14 @@ ggplot(design_long, aes(x = Time, y = Response, color = Condition)) +
        subtitle = "Three experimental conditions with shared HRF",
        x = "Time (seconds)",
        y = "Predicted BOLD Response",
-       color = "Condition") +
-  theme_minimal()
+       color = "Condition")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.png)
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-1.phone.png)
 
 ``` r
 
@@ -381,11 +418,14 @@ ggplot(design_long, aes(x = Time, y = Response, color = Condition)) +
        subtitle = "Points show stimulus onset times",
        x = "Time (seconds)",
        y = "Predicted BOLD Response",
-       color = "Condition") +
-  theme_minimal()
+       color = "Condition")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.png)
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.png)![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-2.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-2.phone.png)
 
 ## Regressor Design: Complex Block Designs
 
@@ -456,11 +496,14 @@ ggplot(design_plot_long, aes(x = Time, y = Response, color = Condition)) +
        subtitle = "Two blocks with different event schedules (dashed line = block boundary)",
        x = "Time (seconds)",
        y = "Predicted BOLD Response",
-       color = "Condition") +
-  theme_minimal()
+       color = "Condition")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png)
+![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-dark-1.phone.png)
 
 ``` r
 

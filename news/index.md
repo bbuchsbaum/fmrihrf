@@ -4,6 +4,21 @@
 
 ### Improvements
 
+- Improved vignette plots for narrow screens: compact legends,
+  shared-axis panels for gamma libraries and reconstruction, and visible
+  light/dark series colors. Comparison helpers respect the active
+  ggplot2 theme and accept `draw = FALSE` for customization or vignette
+  auto-printing.
+
+- Fixed clipped peak annotations and respected onset transparency in
+  event and feature-regressor plots. Clarified the spline example’s
+  24-second support without changing its evaluated values.
+
+- Updated the website and vignettes to albersdown 2.1.0. Vignettes now
+  use its self-contained output format with light, dark, and phone-sized
+  figures, replacing the copied theme assets. Figure resolution is
+  limited to keep the source package compact.
+
 - Added
   [`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md)
   for continuously sampled features (for example RMS energy). Each

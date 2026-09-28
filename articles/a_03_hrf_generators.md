@@ -79,11 +79,14 @@ ggplot(fir_long, aes(Time, value, colour = name)) +
   geom_line(linewidth = 1) +
   labs(title = "Finite Impulse Response Basis",
        x = "Time (s)", y = "Response") +
-  theme_minimal() +
   theme(legend.position = "none")
 ```
 
-![](a_03_hrf_generators_files/figure-html/fir-basis-1.png)
+![](a_03_hrf_generators_files/figure-html/fir-basis-1.png)![](a_03_hrf_generators_files/figure-html/fir-basis-1.phone.png)
+
+![](a_03_hrf_generators_files/figure-html/fir-basis-dark-1.png)
+
+![](a_03_hrf_generators_files/figure-html/fir-basis-dark-1.phone.png)
 
 ## Summary
 

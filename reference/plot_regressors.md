@@ -18,7 +18,8 @@ plot_regressors(
   show_onsets = "first",
   onset_alpha = 0.3,
   precision = 0.33,
-  use_ggplot = TRUE
+  use_ggplot = TRUE,
+  draw = TRUE
 )
 ```
 
@@ -66,6 +67,12 @@ plot_regressors(
 
   Logical; if TRUE and ggplot2 is available, use ggplot2 for plotting.
   If FALSE, use base R graphics. Default is TRUE.
+
+- draw:
+
+  Logical; draw the plot immediately (default TRUE). With \`use_ggplot =
+  TRUE\`, set FALSE to customize or auto-print the returned data frame's
+  \`"plot"\` attribute.
 
 ## Value
 

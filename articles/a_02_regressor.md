@@ -60,7 +60,11 @@ scan_times <- seq(0, 140, by = TR)
 plot(reg1, grid = scan_times)
 ```
 
-![](a_02_regressor_files/figure-html/evaluate_plot_basic-1.png)
+![Modeled SPM response to eleven events spaced 12 seconds apart. Dashed
+vertical lines mark event onsets; the response is sampled every 2
+seconds.](a_02_regressor_files/figure-html/evaluate_plot_basic-1.png)![](a_02_regressor_files/figure-html/evaluate_plot_basic-1.phone.png)
+
+Dashed lines mark event onsets; the curve is the modeled response.
 
 ## Varying Event Durations
 
@@ -82,7 +86,7 @@ scan_times_dur <- seq(0, max(onsets_var_dur) + 30, by = TR)
 plot(reg_var_dur, grid = scan_times_dur)
 ```
 
-![](a_02_regressor_files/figure-html/varying_duration-1.png)
+![](a_02_regressor_files/figure-html/varying_duration-1.png)![](a_02_regressor_files/figure-html/varying_duration-1.phone.png)
 
 ### Duration and Summation
 
@@ -105,7 +109,7 @@ plot_regressors(reg_var_dur, reg_var_dur_nosum,
                 subtitle = "Same events with varying durations")
 ```
 
-![](a_02_regressor_files/figure-html/duration_no_summate-1.png)
+![](a_02_regressor_files/figure-html/duration_no_summate-1.png)![](a_02_regressor_files/figure-html/duration_no_summate-1.phone.png)
 
 ## Varying Event Amplitudes (Parametric Modulation)
 
@@ -131,7 +135,7 @@ scan_times_amp <- seq(0, max(onsets_amp) + 30, by = TR)
 plot(reg_amp, grid = scan_times_amp)
 ```
 
-![](a_02_regressor_files/figure-html/parametric_modulation-1.png)
+![](a_02_regressor_files/figure-html/parametric_modulation-1.png)![](a_02_regressor_files/figure-html/parametric_modulation-1.phone.png)
 
 ## Continuous Features
 
@@ -163,7 +167,7 @@ scan_times_feat <- seq(0, max(feat_times) + 30, by = TR)
 plot(feat, grid = scan_times_feat, precision = dt)
 ```
 
-![](a_02_regressor_files/figure-html/feature_regressor-1.png)
+![](a_02_regressor_files/figure-html/feature_regressor-1.png)![](a_02_regressor_files/figure-html/feature_regressor-1.phone.png)
 
 Using `regressor(times, amplitude = rms, duration = 0)` instead would
 treat each sample as a unit-mass impulse and scale the predicted BOLD by
@@ -197,7 +201,7 @@ scan_times_comb <- seq(0, max(onsets_comb) + 30, by = TR)
 plot(reg_comb, grid = scan_times_comb)
 ```
 
-![](a_02_regressor_files/figure-html/duration_amplitude-1.png)
+![](a_02_regressor_files/figure-html/duration_amplitude-1.png)![](a_02_regressor_files/figure-html/duration_amplitude-1.phone.png)
 
 ## Regressors with HRF Basis Sets
 
@@ -227,7 +231,7 @@ dim(pred_basis_matrix) # rows = time points, cols = basis functions
 plot(reg_basis, grid = scan_times_basis)
 ```
 
-![](a_02_regressor_files/figure-html/basis_set_regressor-1.png)
+![](a_02_regressor_files/figure-html/basis_set_regressor-1.png)![](a_02_regressor_files/figure-html/basis_set_regressor-1.phone.png)
 
 ## Shifting Regressors
 
@@ -257,4 +261,4 @@ plot_regressors(reg_orig, reg_shifted,
                 title = "Shifting a Regressor")
 ```
 
-![](a_02_regressor_files/figure-html/shift_regressor-1.png)
+![](a_02_regressor_files/figure-html/shift_regressor-1.png)![](a_02_regressor_files/figure-html/shift_regressor-1.phone.png)

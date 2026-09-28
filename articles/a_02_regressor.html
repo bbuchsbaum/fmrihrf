@@ -10,8 +10,9 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<script src="../extra.js"></script><meta property="og:title" content="Building fMRI Regressors">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="Building fMRI Regressors">
+<link href="../albers.css" rel="stylesheet">
+<script>window.albersdownDefaults = window.albersdownDefaults || { family: "red", preset: "homage", style: "minimal" };</script><script src="../albers.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -64,7 +65,7 @@
                         <h4 data-toc-skip class="author">Bradley R.
 Buchsbaum</h4>
             
-            <h4 data-toc-skip class="date">2026-09-26</h4>
+            <h4 data-toc-skip class="date">2026-09-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/fmrihrf/blob/main/vignettes/a_02_regressor.Rmd" class="external-link"><code>vignettes/a_02_regressor.Rmd</code></a></small>
       <div class="d-none name"><code>a_02_regressor.Rmd</code></div>
@@ -72,7 +73,7 @@ Buchsbaum</h4>
 
     
     
-<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-interaction","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-interaction");});</script><div class="section level2">
+<script>(function(b){b.className=b.className.replace(/\b(palette|preset|style)-[a-z]+\b/g,"").trim();b.classList.add("palette-red","preset-interaction","style-minimal");document.documentElement.setAttribute("data-albers-marks","");})(document.body);</script><div class="section level2">
 <h2 id="introduction-what-is-a-regressor">Introduction: What is a Regressor?<a class="anchor" aria-label="anchor" href="#introduction-what-is-a-regressor"></a>
 </h2>
 <p>In fMRI analysis, a <strong>regressor</strong> (or predictor)
@@ -124,7 +125,11 @@ times), we use the <code><a href="../reference/evaluate.html">evaluate()</a></co
 <span><span class="co"># Plot the regressor using the plot() method</span></span>
 <span><span class="co"># This automatically evaluates and plots with onset markers</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg1</span>, grid <span class="op">=</span> <span class="va">scan_times</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.png" class="r-plt" alt="" width="630"></p>
+<div class="figure" style="text-align: center">
+<img src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.png" class="r-plt" alt="Modeled SPM response to eleven events spaced 12 seconds apart. Dashed vertical lines mark event onsets; the response is sampled every 2 seconds." width="100%"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/evaluate_plot_basic-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden><p class="caption">
+Dashed lines mark event onsets; the curve is the modeled response.
+</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="varying-event-durations">Varying Event Durations<a class="anchor" aria-label="anchor" href="#varying-event-durations"></a>
@@ -143,7 +148,7 @@ length of <code>onsets</code>.</p>
 <span><span class="co"># Plot the regressor</span></span>
 <span><span class="va">scan_times_dur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_var_dur</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_var_dur</span>, grid <span class="op">=</span> <span class="va">scan_times_dur</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/varying_duration-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/varying_duration-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/varying_duration-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 <div class="section level3">
 <h3 id="duration-and-summation">Duration and Summation<a class="anchor" aria-label="anchor" href="#duration-and-summation"></a>
 </h3>
@@ -162,7 +167,7 @@ peak amplitude does not grow with duration.</p>
 <span>                grid <span class="op">=</span> <span class="va">scan_times_dur</span>,</span>
 <span>                title <span class="op">=</span> <span class="st">"Effect of Summation on Response"</span>,</span>
 <span>                subtitle <span class="op">=</span> <span class="st">"Same events with varying durations"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/duration_no_summate-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/duration_no_summate-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/duration_no_summate-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 </div>
 </div>
 <div class="section level2">
@@ -186,7 +191,7 @@ is scaled by the corresponding amplitude value.</p>
 <span><span class="co"># Plot the parametric regressor</span></span>
 <span><span class="va">scan_times_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_amp</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_amp</span>, grid <span class="op">=</span> <span class="va">scan_times_amp</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/parametric_modulation-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/parametric_modulation-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 </div>
 <div class="section level2">
 <h2 id="continuous-features">Continuous Features<a class="anchor" aria-label="anchor" href="#continuous-features"></a>
@@ -218,7 +223,7 @@ design column.</p>
 <span><span class="va">feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/feature_regressor.html">feature_regressor</a></span><span class="op">(</span><span class="va">rms</span>, dt <span class="op">=</span> <span class="va">dt</span>, hrf <span class="op">=</span> <span class="va">HRF_SPMG1</span><span class="op">)</span></span>
 <span><span class="va">scan_times_feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">feat_times</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">feat</span>, grid <span class="op">=</span> <span class="va">scan_times_feat</span>, precision <span class="op">=</span> <span class="va">dt</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/feature_regressor-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/feature_regressor-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/feature_regressor-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 <p>Using <code>regressor(times, amplitude = rms, duration = 0)</code>
 instead would treat each sample as a unit-mass impulse and scale the
 predicted BOLD by about <code>1/dt</code>. Pass
@@ -247,7 +252,7 @@ vectors to model events that vary in both aspects.</p>
 <span><span class="co"># Plot the combined regressor</span></span>
 <span><span class="va">scan_times_comb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">onsets_comb</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span>, by <span class="op">=</span> <span class="va">TR</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_comb</span>, grid <span class="op">=</span> <span class="va">scan_times_comb</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/duration_amplitude-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/duration_amplitude-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/duration_amplitude-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 </div>
 <div class="section level2">
 <h2 id="regressors-with-hrf-basis-sets">Regressors with HRF Basis Sets<a class="anchor" aria-label="anchor" href="#regressors-with-hrf-basis-sets"></a>
@@ -274,7 +279,7 @@ matrix.</p>
 <span></span>
 <span><span class="co"># Plot using the plot() method - automatically handles multi-basis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">reg_basis</span>, grid <span class="op">=</span> <span class="va">scan_times_basis</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/basis_set_regressor-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/basis_set_regressor-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/basis_set_regressor-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 </div>
 <div class="section level2">
 <h2 id="shifting-regressors">Shifting Regressors<a class="anchor" aria-label="anchor" href="#shifting-regressors"></a>
@@ -300,7 +305,7 @@ matrix.</p>
 <span>                grid <span class="op">=</span> <span class="va">scan_times_shift</span>,</span>
 <span>                show_onsets <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Show onsets for both</span></span>
 <span>                title <span class="op">=</span> <span class="st">"Shifting a Regressor"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a_02_regressor_files/figure-html/shift_regressor-1.png" class="r-plt" alt="" width="630"></p>
+<p><img src="a_02_regressor_files/figure-html/shift_regressor-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img class="albers-phone-twin" src="a_02_regressor_files/figure-html/shift_regressor-1.phone.png" alt="" aria-hidden="true" loading="lazy" data-albers-below="468" hidden></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

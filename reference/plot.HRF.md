@@ -29,7 +29,7 @@ plot(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...)
 - show_peak:
 
   Logical; if TRUE (default for single-basis HRFs), annotate the peak
-  time and amplitude on the plot.
+  time on the plot.
 
 - ...:
 
