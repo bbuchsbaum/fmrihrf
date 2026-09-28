@@ -38,8 +38,9 @@ Suggests:
     tidyr,
     viridis,
     scales,
-    pkgload
+    pkgload,
+    albersdown (>= 2.1.0)
 VignetteBuilder: knitr
 URL: https://bbuchsbaum.github.io/fmrihrf/
 BugReports: https://github.com/bbuchsbaum/fmrihrf/issues
-Config/Needs/website: https://github.com/bbuchsbaum/albersdown, albersdown
+Config/Needs/website: albersdown

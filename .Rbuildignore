@@ -25,3 +25,4 @@ check_rd_tags.R
 ^\.rcmdcheck_result\.rds$
 ^.*\.Rcheck$
 ^\.tmpcheck$
+^\.albersdown\.bak$

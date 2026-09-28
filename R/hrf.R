@@ -1197,7 +1197,7 @@ evaluate.HRF <- function(x, grid, amplitude = 1, duration = 0,
 #' @param normalize Logical; if TRUE, normalize responses to peak at 1.
 #'   Default is FALSE.
 #' @param show_peak Logical; if TRUE (default for single-basis HRFs), annotate
-#'   the peak time and amplitude on the plot.
+#'   the peak time on the plot.
 #' @param ... Additional arguments passed to underlying plot functions.
 #' @return Invisibly returns a data frame with the time and response values
 #'   (useful for further customization).
@@ -1234,15 +1234,23 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
                      col = 1:nb, lty = 1, lwd = 1.5, bty = "n")
   } else {
     # Single-basis HRF
-    graphics::plot(time, y, type = "l", lwd = 1.5,
-                   xlab = "Time (s)", ylab = "Response",
-                   main = hrf_name, ...)
+    args <- list(...)
+    if (show_peak && length(y) > 0 && is.null(args$ylim)) {
+      limits <- range(y, finite = TRUE)
+      limits[2] <- limits[2] + max(diff(limits), abs(limits[2]), 1e-6) * 0.18
+      args$ylim <- limits
+    }
+    defaults <- list(x = time, y = y, type = "l", lwd = 1.5,
+                     xlab = "Time (s)", ylab = "Response",
+                     main = paste(strwrap(hrf_name, 32), collapse = "\n"),
+                     cex.main = 1)
+    do.call(graphics::plot, utils::modifyList(defaults, args))
     if (show_peak && length(y) > 0) {
       peak_idx <- which.max(y)
-      graphics::points(time[peak_idx], y[peak_idx], pch = 19, col = "red")
+      graphics::points(time[peak_idx], y[peak_idx], pch = 19, col = "#B52B24")
       graphics::text(time[peak_idx], y[peak_idx],
-                     sprintf("Peak: %.1fs", time[peak_idx]),
-                     pos = 3, offset = 0.5, col = "red")
+                     sprintf("Peak: %.1f s", time[peak_idx]),
+                     pos = 3, offset = 0.5, cex = 0.85, col = "#B52B24")
     }
   }
 
@@ -1278,6 +1286,9 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
 #'   no subtitle is shown.
 #' @param use_ggplot Logical; if TRUE and ggplot2 is available, use ggplot2
 #'   for plotting. If FALSE, use base R graphics. Default is TRUE.
+#' @param draw Logical; draw the plot immediately (default TRUE). With
+#'   `use_ggplot = TRUE`, set FALSE to customize or auto-print the returned
+#'   data frame's `"plot"` attribute, for example in a themed vignette.
 #' @return Invisibly returns a data frame in long format with columns 'time',
 #'   'HRF', and 'response'. If use_ggplot is TRUE and ggplot2 is available,
 #'   also returns a ggplot object as an attribute 'plot'.
@@ -1307,7 +1318,8 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
 #' plot_hrfs(HRF_SPMG1, HRF_GAMMA, use_ggplot = FALSE)
 #' @export
 plot_hrfs <- function(..., time = NULL, normalize = FALSE, labels = NULL,
-                      title = NULL, subtitle = NULL, use_ggplot = TRUE) {
+                      title = NULL, subtitle = NULL, use_ggplot = TRUE,
+                      draw = TRUE) {
   # Collect HRF objects
   hrfs <- list(...)
 
@@ -1378,20 +1390,23 @@ if (length(hrfs) == 1 && is.list(hrfs[[1]]) && !inherits(hrfs[[1]], "HRF")) {
     # ggplot2 version - use aes() with unquoted names (standard NSE)
     # Note: using aes_string() is deprecated, but direct aes() with unquoted
     # column names works fine when the columns exist in the data
-    p <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = response, color = HRF)) +
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = response, color = HRF, linetype = HRF)) +
+      ggplot2::geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
       ggplot2::geom_line(linewidth = 1) +
       ggplot2::labs(
-        title = title,
-        subtitle = subtitle,
-        x = "Time (seconds)",
-        y = if (normalize) "Response (normalized)" else "Response",
+        title = paste(strwrap(title, 32), collapse = "\n"),
+        subtitle = if (!is.null(subtitle)) paste(strwrap(subtitle, 40), collapse = "\n"),
+        x = "Time (s)",
+        y = if (normalize) "Response / peak" else "Response",
         color = "HRF"
       ) +
-      ggplot2::theme_minimal()
+      ggplot2::guides(color = ggplot2::guide_legend(ncol = 1),
+                      linetype = ggplot2::guide_legend(ncol = 1)) +
+      ggplot2::theme(legend.position = "bottom", legend.title = ggplot2::element_blank())
 
-    print(p)
+    if (draw) print(p)
     attr(df, "plot") <- p
-  } else {
+  } else if (draw) {
     # Base R version
     colors <- grDevices::rainbow(n_hrfs)
     y_range <- range(df$response, na.rm = TRUE)

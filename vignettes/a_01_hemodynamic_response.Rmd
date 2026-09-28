@@ -3,20 +3,11 @@ title: Hemodynamic Response Functions
 author: Bradley R. Buchsbaum
 date: '`r Sys.Date()`'
 output:
-  rmarkdown::html_vignette:
+  albersdown::albers_vignette:
+    family: red
+    preset: interaction
     toc: yes
     toc_depth: 2.0
-    css: albers.css
-    includes:
-      in_header: albers-header.html
-params:
-  family: red
-  preset: interaction
-resource_files:
-- albers.css
-- albers.js
-- albers-header.html
-- fonts
 
 vignette: |
   %\VignetteIndexEntry{Hemodynamic Response Functions}
@@ -25,13 +16,11 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE)) ggplot2::theme_set(ggplot2::theme_minimal())
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7, 
-  fig.height = 5,
-  dpi = 90,
+  # Sharper website figures; keep the CRAN vignette archive compact.
+  fig.retina = if (identical(Sys.getenv("IN_PKGDOWN"), "true")) 2 else 1,
   message = FALSE,
   warning = FALSE
 )
@@ -39,19 +28,6 @@ library(fmrihrf)
 library(dplyr) # For pipe operator %>%
 library(ggplot2) # For plotting
 library(tidyr) # For data manipulation
-```
-
-```{r albers-classes, echo=FALSE, results='asis'}
-cat(sprintf(
-  paste0(
-    '<script>document.addEventListener("DOMContentLoaded",function(){',
-    'document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-interaction","preset-study","preset-structural","preset-adobe","preset-midnight");',
-    'document.body.classList.add("palette-%s","preset-%s");',
-    '});</script>'
-  ),
-  params$family,
-  params$preset
-))
 ```
 
 ## Introduction to Hemodynamic Response Functions (HRFs)
@@ -76,15 +52,18 @@ print(HRF_GAUSSIAN)
 
 These objects are functions themselves, so you can evaluate them at specific time points. The `plot_hrfs()` function provides a convenient way to compare multiple HRFs:
 
-```{r evaluate_basic_hrfs}
+```{r evaluate_basic_hrfs, fig.alt="SPM and Gaussian HRFs normalized to a peak of one. The SPM response includes a negative undershoot."}
 time_points <- seq(0, 25, by = 0.1)
 
 # Compare HRFs using plot_hrfs() - normalize = TRUE scales to peak at 1.0
-plot_hrfs(HRF_SPMG1, HRF_GAUSSIAN,
+comparison <- plot_hrfs(HRF_SPMG1, HRF_GAUSSIAN,
           labels = c("SPM Canonical", "Gaussian"),
           normalize = TRUE,
-          title = "Comparison of SPM Canonical and Gaussian HRFs",
-          subtitle = "HRFs normalized to peak at 1.0 for shape comparison")
+          title = "SPM and Gaussian HRFs",
+          subtitle = "Each curve normalized to peak at 1",
+          draw = FALSE)
+# Auto-print the ggplot so the vignette can render light and dark versions.
+attr(comparison, "plot") + albersdown::scale_color_albers()
 ```
 
 Note that the `span` attribute (e.g., 24 seconds) indicates the approximate time window over which the HRF is non-zero.
@@ -276,18 +255,32 @@ resp_spmg2 <- HRF_SPMG2(time_points)
 resp_spmg3 <- HRF_SPMG3(time_points)
 
 # Plot SPMG2
-matplot(time_points, resp_spmg2, type = 'l', lty = 1, lwd = 1.5,
-        xlab = "Time (seconds)", ylab = "BOLD Response",
-        main = "SPM + Temporal Derivative Basis Set (HRF_SPMG2)")
-legend("topright", legend = c("Canonical", "Temporal Deriv."), col = 1:2, lty = 1, lwd = 1.5)
+basis_df <- data.frame(Time = rep(time_points, 2),
+                       Response = as.vector(resp_spmg2),
+                       Basis = rep(c("Canonical", "Temporal derivative"), each = length(time_points)))
+ggplot(basis_df, aes(Time, Response, color = Basis, linetype = Basis)) +
+  geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
+  geom_line(linewidth = 0.8) +
+  albersdown::scale_color_albers() +
+  labs(title = "SPM basis: two components", x = "Time (s)", y = "Response") +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  guides(color = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1))
 ```
 
-```{r spm_basis_sets_plot2, echo = FALSE, fig.height = 4}
+```{r spm_basis_sets_plot2, echo = FALSE, fig.height = 4.6, fig.alt="Canonical SPM response and its temporal and dispersion derivatives, with all positive and negative values retained."}
 # Plot SPMG3
-matplot(time_points, resp_spmg3, type = 'l', lty = 1, lwd = 1.5,
-        xlab = "Time (seconds)", ylab = "BOLD Response",
-        main = "SPM + Temporal + Dispersion Derivative Basis Set (HRF_SPMG3)")
-legend("topright", legend = c("Canonical", "Temporal Deriv.", "Dispersion Deriv."), col = 1:3, lty = 1, lwd = 1.5)
+basis_df <- data.frame(Time = rep(time_points, 3),
+                       Response = as.vector(resp_spmg3),
+                       Basis = factor(rep(c("Canonical", "Temporal derivative", "Dispersion derivative"),
+                                          each = length(time_points)),
+                                      levels = c("Canonical", "Temporal derivative", "Dispersion derivative")))
+ggplot(basis_df, aes(Time, Response, color = Basis, linetype = Basis)) +
+  geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
+  geom_line(linewidth = 0.8) +
+  albersdown::scale_color_albers() +
+  labs(title = "SPM basis: three components", x = "Time (s)", y = "Response") +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  guides(color = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1))
 ```
 
 ### B-Spline Basis Set
@@ -371,7 +364,7 @@ hrf_gam <- gen_hrf(hrf_gamma, shape = 6, rate = 1, name = "Gamma (shape=6, rate=
 print(hrf_gam)
 ```
 
-```{r gamma_hrf_plot, echo = FALSE, fig.height = 4}
+```{r gamma_hrf_plot, echo = FALSE, fig.height = 4, fig.alt="Gamma HRF with shape 6 and rate 1, peaking at 5 seconds."}
 plot(hrf_gam, time = time_points)
 ```
 
@@ -543,8 +536,7 @@ ggplot(plot_df_wt, aes(x = Time, y = Response, color = Method)) +
   geom_line(linewidth = 1) +
   labs(title = "Weighted HRF: Constant vs. Linear Interpolation",
        x = "Time (seconds)",
-       y = "Weight") +
-  theme_minimal()
+       y = "Weight")
 ```
 
 #### Sub-second Precision
@@ -626,7 +618,6 @@ ggplot(plot_df_windows, aes(x = Time, y = Response, color = Window)) +
        subtitle = "Normalized boxcars for extracting mean signal in different windows",
        x = "Time (seconds)",
        y = "Response") +
-  theme_minimal() +
   scale_color_manual(values = c("Early (2-6s)" = "blue",
                                  "Late (8-12s)" = "red",
                                  "SPM (scaled)" = "gray50"))
@@ -669,8 +660,7 @@ ggplot(plot_df_design, aes(x = Time, y = Response, color = HRF)) +
   labs(title = "Design Matrix Regressors: Boxcar vs. Traditional HRF",
        subtitle = "Events at t = 0, 20, 40 seconds",
        x = "Time (seconds)",
-       y = "Regressor Value") +
-  theme_minimal()
+       y = "Regressor Value")
 ```
 
 ## Creating Custom Basis Sets with `gen_hrf_set`
@@ -804,7 +794,6 @@ ggplot(pc_df_long, aes(x = Time, y = Value, color = Component)) +
        subtitle = paste0("First ", n_components, " Principal Components"),
        x = "Time (seconds)",
        y = "Component Value") +
-  theme_minimal() +
   theme(legend.position = "right")
 ```
 

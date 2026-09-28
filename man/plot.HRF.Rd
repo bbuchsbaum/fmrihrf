@@ -16,7 +16,7 @@ seq(0, span, by = 0.1) where span is the HRF's span attribute.}
 Default is FALSE.}
 
 \item{show_peak}{Logical; if TRUE (default for single-basis HRFs), annotate
-the peak time and amplitude on the plot.}
+the peak time on the plot.}
 
 \item{...}{Additional arguments passed to underlying plot functions.}
 }

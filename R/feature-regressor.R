@@ -310,7 +310,7 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
 
   hrf_name <- attr(x$hrf, "name") %||% "custom"
   n_samp <- length(x$onsets)
-  title <- sprintf("Feature regressor: %d samples, HRF: %s", n_samp, hrf_name)
+  title <- sprintf("Feature regressor: %d samples\nHRF: %s", n_samp, hrf_name)
 
   if (is.matrix(response)) {
     nb <- ncol(response)
@@ -318,7 +318,7 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
                       xlab = "Time (s)", ylab = "Response",
                       main = title, ...)
     if (show_onsets) {
-      graphics::abline(v = x$onsets, lty = 2, col = onset_color, lwd = 0.5)
+      graphics::abline(v = x$onsets, lty = 2, col = grDevices::adjustcolor(onset_color, alpha.f = onset_alpha), lwd = 0.5)
     }
     graphics::legend("topright", paste("Basis", 1:nb),
                      col = 1:nb, lty = 1, lwd = 1.5, bty = "n")
@@ -329,7 +329,7 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
                    xlab = "Time (s)", ylab = "Response",
                    main = title, ...)
     if (show_onsets) {
-      graphics::abline(v = x$onsets, lty = 2, col = onset_color, lwd = 0.5)
+      graphics::abline(v = x$onsets, lty = 2, col = grDevices::adjustcolor(onset_color, alpha.f = onset_alpha), lwd = 0.5)
     }
     df <- data.frame(time = grid, response = response)
   }

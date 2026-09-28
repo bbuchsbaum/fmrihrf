@@ -323,7 +323,7 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
     hrf_name <- attr(x$hrf, "name") %||% "custom"
   }
   n_events <- length(x$onsets)
-  title <- sprintf("Regressor: %d events, HRF: %s", n_events, hrf_name)
+  title <- sprintf("Regressor: %d events\nHRF: %s", n_events, hrf_name)
 
   if (is.matrix(response)) {
     # Multi-basis regressor
@@ -332,7 +332,7 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
                       xlab = "Time (s)", ylab = "Response",
                       main = title, ...)
     if (show_onsets) {
-      graphics::abline(v = x$onsets, lty = 2, col = onset_color,
+      graphics::abline(v = x$onsets, lty = 2, col = grDevices::adjustcolor(onset_color, alpha.f = onset_alpha),
                        lwd = 0.5)
     }
     graphics::legend("topright", paste("Basis", 1:nb),
@@ -346,7 +346,7 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
                    xlab = "Time (s)", ylab = "Response",
                    main = title, ...)
     if (show_onsets) {
-      graphics::abline(v = x$onsets, lty = 2, col = onset_color,
+      graphics::abline(v = x$onsets, lty = 2, col = grDevices::adjustcolor(onset_color, alpha.f = onset_alpha),
                        lwd = 0.5)
     }
 
@@ -379,6 +379,9 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
 #' @param precision Numeric sampling precision for HRF evaluation. Default is 0.33.
 #' @param use_ggplot Logical; if TRUE and ggplot2 is available, use ggplot2
 #'   for plotting. If FALSE, use base R graphics. Default is TRUE.
+#' @param draw Logical; draw the plot immediately (default TRUE). With
+#'   `use_ggplot = TRUE`, set FALSE to customize or auto-print the returned
+#'   data frame's `"plot"` attribute.
 #' @return Invisibly returns a data frame in long format with columns 'time',
 #'   'Regressor', and 'response'.
 #' @examples
@@ -408,7 +411,7 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
 plot_regressors <- function(..., grid = NULL, labels = NULL,
                             title = NULL, subtitle = NULL,
                             show_onsets = "first", onset_alpha = 0.3,
-                            precision = 0.33, use_ggplot = TRUE) {
+                            precision = 0.33, use_ggplot = TRUE, draw = TRUE) {
 
   # Collect regressor objects
   regs <- list(...)
@@ -489,15 +492,15 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
   if (use_ggplot && has_ggplot) {
     # ggplot2 version
     p <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = response, color = Regressor)) +
-      ggplot2::geom_line(linewidth = 1) +
       ggplot2::labs(
-        title = title,
-        subtitle = subtitle,
+        title = paste(strwrap(title, 32), collapse = "\n"),
+        subtitle = if (!is.null(subtitle)) paste(strwrap(subtitle, 40), collapse = "\n"),
         x = "Time (seconds)",
         y = "Response",
         color = "Regressor"
       ) +
-      ggplot2::theme_minimal()
+      ggplot2::guides(color = ggplot2::guide_legend(ncol = 1)) +
+      ggplot2::theme(legend.position = "bottom", legend.title = ggplot2::element_blank())
 
     # Add onset lines if requested
     if (!is.null(onset_data) && nrow(onset_data) > 0) {
@@ -508,9 +511,10 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
       )
     }
 
-    print(p)
+    p <- p + ggplot2::geom_line(linewidth = 1)
+    if (draw) print(p)
     attr(df, "plot") <- p
-  } else {
+  } else if (draw) {
     # Base R version
     colors <- grDevices::rainbow(n_regs)
     y_range <- range(df$response, na.rm = TRUE)

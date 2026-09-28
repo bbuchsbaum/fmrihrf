@@ -58,3 +58,52 @@ test_that("print.HRF reports its public summary and returns the object", {
   )
   expect_identical(returned, HRF_SPMG3)
 })
+
+test_that("single HRF plots leave room for the peak label", {
+  hrf <- gen_hrf(hrf_gamma, shape = 6, rate = 1)
+  time <- seq(0, 25, by = 0.1)
+  .with_pdf_device({
+    plotted <- plot(hrf, time = time)
+    expect_equal(plotted$response, hrf(time))
+    expect_gt(graphics::par("usr")[4] - max(plotted$response),
+              2 * graphics::strheight("Peak: 5.0 s", cex = 0.85))
+    expect_no_error(plot(hrf, time = time, main = "Custom title", ylim = c(0, 0.3)))
+  })
+})
+
+test_that("comparison plots can be customized without drawing", {
+  skip_if_not_installed("ggplot2")
+  original_device <- grDevices::dev.cur()
+  time <- seq(0, 20, by = 0.5)
+  h <- withVisible(plot_hrfs(HRF_SPMG1, HRF_GAMMA, time = time, draw = FALSE))
+  r <- withVisible(plot_regressors(regressor(c(2, 8), HRF_SPMG1),
+                                   grid = time, draw = FALSE))
+  expect_identical(grDevices::dev.cur(), original_device)
+  expect_false(h$visible)
+  expect_false(r$visible)
+  expect_equal(h$value$response, c(evaluate(HRF_SPMG1, time), evaluate(HRF_GAMMA, time)))
+  expect_equal(r$value$response, evaluate(regressor(c(2, 8), HRF_SPMG1), time))
+  expect_true(inherits(attr(h$value, "plot"), "ggplot"))
+  expect_true(inherits(attr(r$value, "plot"), "ggplot"))
+  expect_false(isTRUE(attr(attr(h$value, "plot")$theme, "complete")))
+})
+
+test_that("onset transparency is respected by event and feature plots", {
+  skip_if_not(capabilities("cairo"))
+  render <- function(x, show, alpha) {
+    path <- tempfile(fileext = ".png")
+    on.exit(unlink(path), add = TRUE)
+    grDevices::png(path, width = 600, height = 400, type = "cairo")
+    tryCatch(plot(x, grid = seq(0, 16, by = 0.1), show_onsets = show,
+                  onset_alpha = alpha), finally = grDevices::dev.off())
+    readBin(path, "raw", n = file.info(path)$size)
+  }
+  for (x in list(regressor(c(2, 8), HRF_SPMG1),
+                 feature_regressor(c(1, 2, 1), dt = 2))) {
+    hidden <- render(x, FALSE, 0)
+    transparent <- render(x, TRUE, 0)
+    opaque <- render(x, TRUE, 1)
+    expect_identical(transparent, hidden)
+    expect_false(identical(transparent, opaque))
+  }
+})
