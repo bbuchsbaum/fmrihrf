@@ -31,12 +31,21 @@ hrf_ident <- function(t) {
 
 #' B-spline HRF (hemodynamic response function)
 #'
-#' The `hrf_bspline` function computes the B-spline representation of an HRF (hemodynamic response function) at given time points `t`.
+#' The `hrf_bspline` function computes a B-spline basis for an HRF at time
+#' points `t`. The `N` basis functions are the interior functions of a clamped
+#' B-spline basis on \code{[0, span]} with evenly spaced knots: the functions
+#' anchored at the two boundaries are dropped, so every basis function (and
+#' therefore every fitted HRF) is zero at onset and at the end of the span.
+#' Outside \code{[0, span]} the basis is zero.
 #'
 #' @param t A vector of time points.
-#' @param span A numeric value representing the temporal window over which the basis set spans. Default value is 20.
-#' @param N An integer representing the number of basis functions. Default value is 5.
+#' @param span A numeric value representing the temporal window over which the basis set spans. Default value is 24.
+#' @param N An integer representing the number of basis functions. Must be at
+#'   least \code{degree - 1}. Default value is 5.
 #' @param degree An integer representing the degree of the spline. Default value is 3.
+#' @param ... Further arguments passed to \code{\link[splines]{bs}}
+#'   (\code{intercept}, \code{df} and \code{knots} are set internally and
+#'   ignored if supplied).
 #' @return A matrix representing the B-spline basis for the HRF at the given time points `t`.
 #' @family hrf_functions
 #' @examples
@@ -44,41 +53,39 @@ hrf_ident <- function(t) {
 #' hrfb <- hrf_bspline(seq(0, 20, by = .5), N = 4, degree = 2)
 #' @export
 #' @importFrom splines bs
-#' @param ... Additional arguments passed to `splines::bs`.
 hrf_bspline <- function(t, span=24, N=5, degree=3, ...) {
-	
-	ord <- 1 + degree
-	# Check if requested N is sufficient for the degree
-	if (N < ord) {
-	    warning(paste0("Requested N=", N, " basis functions is less than degree+1=", ord, ". ",
-	                   "Using minimum required of ", ord, " basis functions."))
-	    # We don't change N here, let splines::bs handle the df inconsistency if needed,
-	    # but the warning informs the user.
-	}
-	
-	nIknots <- N - ord + 1
-	if (nIknots < 0) {
-		nIknots <- 0
-		#warning("'df' was too small; have used  ", ord - (1 - intercept))
-	}
-	
-	knots <- if (nIknots > 0) {
-				knots <- seq.int(from = 0, to = 1, length.out = nIknots + 2)[-c(1, nIknots + 2)]
-				stats::quantile(seq(0,span), knots)
-			} else {
-				0
-			}
-	
-	t <- as.numeric(t)
-	in_support <- !is.na(t) & t >= 0 & t <= span
-	t_eval <- t
-	t_eval[!in_support] <- 0
+  degree <- as.integer(degree)
+  N <- as.integer(N)
+  if (N < max(1L, degree - 1L)) {
+    stop(sprintf("N must be at least %d for degree = %d.", max(1L, degree - 1L), degree),
+         call. = FALSE)
+  }
+  # Clamped basis with N + 2 functions on [0, span]; the first and last are
+  # the only ones that are non-zero at t = 0 and t = span, so dropping them
+  # leaves N functions that vanish at both ends.
+  n_interior <- N + 2L - (degree + 1L)
+  knots <- if (n_interior > 0L) {
+    seq(0, span, length.out = n_interior + 2L)[-c(1L, n_interior + 2L)]
+  } else {
+    numeric(0)
+  }
 
-	basis <- splines::bs(t_eval, df=N, knots=knots, degree=degree, Boundary.knots=c(0,span),...)
-	if (any(!in_support)) {
-		basis[!in_support, ] <- 0
-	}
-	basis
+  dots <- list(...)
+  dots[c("intercept", "df", "knots")] <- NULL
+
+  t <- as.numeric(t)
+  in_support <- !is.na(t) & t >= 0 & t <= span
+  t_eval <- t
+  t_eval[!in_support] <- 0
+
+  full <- do.call(splines::bs, c(list(x = t_eval, knots = knots, degree = degree,
+                                      intercept = TRUE, Boundary.knots = c(0, span)),
+                                 dots))
+  basis <- full[, -c(1L, ncol(full)), drop = FALSE]
+  if (any(!in_support)) {
+    basis[!in_support, ] <- 0
+  }
+  basis
 }
 
 
@@ -584,9 +591,11 @@ hrf_lwu <- function(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none") {
 #' window starting at t=0 and zero outside. Unlike traditional HRFs, this has
 #' no hemodynamic delay - it represents an instantaneous response.
 #'
-#' When used in a GLM, the estimated coefficient represents a (weighted) average
-#' of the data within the specified time window. If \code{normalize = TRUE}, the
-#' coefficient directly estimates the mean signal in that window.
+#' In a least-squares GLM, an isolated event's coefficient for a boxcar of
+#' amplitude 1 estimates the mean signal in the window. With
+#' \code{normalize = TRUE} the boxcar has unit area (amplitude
+#' \code{1/width}), so the coefficient estimates the integrated signal over
+#' the window (the mean multiplied by \code{width}).
 #'
 #' For delayed windows (not starting at t=0), use \code{\link{lag_hrf}} to shift
 #' the boxcar in time.
@@ -605,9 +614,9 @@ hrf_lwu <- function(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none") {
 #' @param width Duration of the boxcar window in seconds.
 #' @param amplitude Height of the boxcar (default: 1).
 #' @param normalize Logical; if \code{TRUE}, the boxcar is scaled so that its
-#'   integral equals 1 (i.e., amplitude = 1/width). This makes the regression
-#'   coefficient interpretable as the mean signal in the window.
-#'   Default is \code{FALSE}.
+#'   integral equals 1 (i.e., amplitude = 1/width), so the regression
+#'   coefficient estimates the integrated signal in the window rather than its
+#'   mean. Default is \code{FALSE}.
 #' @return An HRF object that can be used with \code{regressor()} and other
 #'   fmrihrf functions.
 #' @family hrf_functions
@@ -620,9 +629,9 @@ hrf_lwu <- function(t, tau = 6, sigma = 2.5, rho = 0.35, normalize = "none") {
 #' t <- seq(-1, 10, by = 0.1)
 #' plot(t, evaluate(hrf1, t), type = "s", main = "Simple Boxcar HRF")
 #'
-#' # Normalized boxcar - coefficient will estimate mean signal in window
+#' # Unit-area boxcar: beta estimates the integrated signal over 0-5 s
+#' # (5 x the mean); with amplitude 1, beta estimates the mean itself
 #' hrf2 <- hrf_boxcar(width = 5, normalize = TRUE)
-#' # integral is now 1, so beta estimates mean(Y[0:5])
 #'
 #' # Use in a regressor with trial-varying widths
 #' hrf_short <- hrf_boxcar(width = 4, normalize = TRUE)
@@ -663,14 +672,21 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
 #' Unlike traditional HRFs, this has no built-in hemodynamic delay - it directly
 #' maps weights to time points, allowing for arbitrary temporal response shapes.
 #'
-#' This is useful for extracting weighted averages of data at specific time points.
-#' When \code{normalize = TRUE} and the HRF is used in a GLM, the estimated
-#' coefficient represents a weighted mean of the data at the specified times.
+#' This is useful for summarising the signal in chosen post-stimulus windows
+#' with a chosen temporal profile. In a least-squares GLM, an isolated event's
+#' coefficient is the amplitude of the weight profile \eqn{w(t)} that best
+#' matches the data, \eqn{\sum_t w(t) y(t) / \sum_t w(t)^2}. This equals the
+#' mean signal in the window only when all non-zero weights are 1 (a boxcar);
+#' in general it is not a weighted mean. Normalizing rescales the coefficient
+#' but does not change this.
 #'
 #' There are two ways to specify the temporal structure:
 #' \enumerate{
-#'   \item \code{width + weights}: Weights are evenly spaced from 0 to \code{width}
-#'   \item \code{times + weights}: Explicit time points for each weight (relative to t=0)
+#'   \item \code{width + weights}: the window \code{[0, width)} is divided
+#'     into \code{length(weights)} equal bins (constant method) or the weights
+#'     are placed at evenly spaced points from 0 to \code{width} (linear method)
+#'   \item \code{times + weights}: explicit time points for each weight
+#'     (relative to t=0)
 #' }
 #'
 #' For delayed windows (not starting at t=0), use \code{\link{lag_hrf}} to shift
@@ -690,22 +706,27 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
 #'
 #' @param weights Numeric vector of weights. Required.
 #' @param width Total duration of the window in seconds. If provided without
-#'   \code{times}, weights are evenly spaced from 0 to \code{width}.
+#'   \code{times}, \code{[0, width)} is divided into \code{length(weights)}
+#'   equal bins (constant method), or the weights are placed at evenly spaced
+#'   points from 0 to \code{width} (linear method).
 #' @param times Numeric vector of time points (in seconds, relative to t=0) where
 #'   weights are specified. Must be strictly increasing and start at 0 for
 #'   consistency with other HRFs. If provided, \code{width} is ignored.
 #' @param method Interpolation method between time points:
 #'   \describe{
-#'     \item{"constant"}{Step function - weight is constant until the next time
-#'       point (default). Good for discrete time bins.
+#'     \item{"constant"}{Step function (default): each weight applies to one
+#'       time bin. With \code{times}, weight \code{i} covers
+#'       \code{[times[i], times[i + 1])} and the last weight covers a bin as
+#'       wide as the one before it. Every weight is used.
 #'     }
 #'     \item{"linear"}{Linear interpolation between points. Good for smooth
 #'       weight transitions.
 #'     }
 #'   }
-#' @param normalize Logical; if \code{TRUE}, weights are scaled so they sum to 1
-#'   (for \code{method = "constant"}) or integrate to 1 (for \code{method = "linear"}).
-#'   This makes the regression coefficient interpretable as a weighted mean.
+#' @param normalize Logical; if \code{TRUE}, weights are scaled so all of them
+#'   sum to 1 (for \code{method = "constant"}) or the curve integrates to 1
+#'   (for \code{method = "linear"}). This fixes the scale of the weight
+#'   profile; see Details for what the regression coefficient estimates.
 #'   Default is \code{FALSE}.
 #' @return An HRF object that can be used with \code{regressor()} and other
 #'   fmrihrf functions.
@@ -715,7 +736,7 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
 #'   \code{\link{empirical_hrf}} for HRFs from measured data
 #' @export
 #' @examples
-#' # Simple: 6s window with 4 evenly-spaced weights (at 0, 2, 4, 6s)
+#' # Simple: 6 s window split into 4 bins of 1.5 s (starting at 0, 1.5, 3, 4.5 s)
 #' hrf1 <- hrf_weighted(width = 6, weights = c(0.2, 0.5, 0.8, 0.3))
 #' t <- seq(-1, 10, by = 0.1)
 #' plot(t, evaluate(hrf1, t), type = "s", main = "Weighted HRF (width + weights)")
@@ -728,7 +749,7 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
 #' )
 #' plot(t, evaluate(hrf2, t), type = "l", main = "Smooth Weighted HRF")
 #'
-#' # Normalized weights - coefficient estimates weighted mean of signal
+#' # Normalized weights: all four bin weights sum to 1
 #' hrf3 <- hrf_weighted(
 #'   width = 8,
 #'   weights = c(1, 2, 2, 1),
@@ -745,6 +766,7 @@ hrf_boxcar <- function(width, amplitude = 1, normalize = FALSE) {
 hrf_weighted <- function(weights, width = NULL, times = NULL,
                          method = c("constant", "linear"), normalize = FALSE) {
   method <- match.arg(method)
+  from_width <- is.null(times)
 
   assertthat::assert_that(
     is.numeric(weights) && length(weights) >= 2,
@@ -774,19 +796,27 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
       is.numeric(width) && length(width) == 1 && width > 0,
       msg = "`width` must be a single positive numeric value."
     )
-    # Generate evenly spaced times from 0 to width
     n_weights <- length(weights)
-    times <- seq(0, width, length.out = n_weights)
+    times <- if (method == "constant") {
+      # n equal bins covering [0, width): times are the bin starts
+      seq(0, width, length.out = n_weights + 1L)[seq_len(n_weights)]
+    } else {
+      # linear: weights at evenly spaced points from 0 to width
+      seq(0, width, length.out = n_weights)
+    }
   } else {
     stop("Either `width` or `times` must be provided.")
   }
+  # Bin edges for the step function: the last bin is as wide as the one before
+  # it (with `width`, that closes the window exactly at `width`).
+  edges <- c(times, times[length(times)] + diff(times)[length(times) - 1L])
 
   # Normalize weights if requested
   if (normalize) {
     if (method == "constant") {
-      # For step function, normalize so weights sum to 1
-      # (each weight applies to its interval)
-      weight_sum <- sum(weights[-length(weights)])  # last weight has no interval
+      # For step function, normalize so all weights sum to 1
+      # (each weight applies to its own bin)
+      weight_sum <- sum(weights)
       if (abs(weight_sum) > 1e-10) {
         # Scale all weights proportionally
         weights <- weights / weight_sum
@@ -807,15 +837,21 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
   if (method == "linear") {
     f <- stats::approxfun(times, weights, yleft = 0, yright = 0, rule = 1)
   } else {
-    # Piecewise constant (step function)
-    # For step function, each weight applies from times[i] to times[i+1]
-    f <- stats::approxfun(times, weights, yleft = 0, yright = 0,
-                          method = "constant", rule = 1)
+    # Piecewise constant: weight i on [edges[i], edges[i + 1]); zero outside
+    # (right-open, so the end of the window has no stray sample).
+    bin_weights <- weights
+    f <- function(t) {
+      idx <- findInterval(t, edges)
+      out <- numeric(length(t))
+      inside <- !is.na(idx) & idx >= 1L & idx <= length(bin_weights)
+      out[inside] <- bin_weights[idx[inside]]
+      out
+    }
   }
 
   # Name reflects how it was specified
-  hrf_name <- if (!is.null(width) && is.null(times)) {
-    sprintf("weighted[w=%.2g, %d wts]", max(times), length(weights))
+  hrf_name <- if (from_width) {
+    sprintf("weighted[w=%.2g, %d wts]", width, length(weights))
   } else {
     sprintf("weighted[%d pts, %s]", length(times), method)
   }
@@ -823,7 +859,7 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
   .as_closed_hrf(f,
          name = hrf_name,
          nbasis = 1L,
-         span = max(times),
+         span = if (method == "constant") edges[length(edges)] else max(times),
          params = list(times = times, weights = weights, width = width,
                        method = method, normalize = normalize))
 }

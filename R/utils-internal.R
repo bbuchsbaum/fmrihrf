@@ -1,7 +1,7 @@
 # Put this in R/utils-internal.R
 
 # Declare global variables to avoid R CMD check NOTEs for ggplot2 aes() usage
-utils::globalVariables(c("time", "response", "HRF", "Regressor", "onset"))
+utils::globalVariables(c("time", "response", "HRF", "Regressor", "onset", ".data"))
 
 #' @keywords keyword
 #' @noRd

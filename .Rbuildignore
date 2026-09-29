@@ -26,3 +26,4 @@ check_rd_tags.R
 ^.*\.Rcheck$
 ^\.tmpcheck$
 ^\.albersdown\.bak$
+^\.ruff_cache$
