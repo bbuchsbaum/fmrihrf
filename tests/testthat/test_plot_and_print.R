@@ -88,12 +88,36 @@ test_that("comparison plots can be customized without drawing", {
   expect_false(isTRUE(attr(attr(h$value, "plot")$theme, "complete")))
 })
 
+# capabilities("cairo") can be TRUE while the Cairo device cannot load (CRAN's
+# macOS R links it against XQuartz). Find a PNG device type that actually
+# writes a file without warnings.
+.working_png_type <- function() {
+  for (type in c("cairo", "quartz")) {
+    path <- tempfile(fileext = ".png")
+    ok <- tryCatch({
+      grDevices::png(path, width = 50, height = 50, type = type)
+      graphics::par(mar = c(0, 0, 0, 0))
+      graphics::plot.new()
+      grDevices::dev.off()
+      file.exists(path) && file.info(path)$size > 0
+    }, warning = function(w) FALSE, error = function(e) FALSE)
+    if (!ok && grDevices::dev.cur() > 1 &&
+        identical(names(grDevices::dev.cur()), "png")) {
+      grDevices::dev.off()
+    }
+    unlink(path)
+    if (isTRUE(ok)) return(type)
+  }
+  NULL
+}
+
 test_that("onset transparency is respected by event and feature plots", {
-  skip_if_not(capabilities("cairo"))
+  png_type <- .working_png_type()
+  skip_if(is.null(png_type), "no working PNG device")
   render <- function(x, show, alpha) {
     path <- tempfile(fileext = ".png")
     on.exit(unlink(path), add = TRUE)
-    grDevices::png(path, width = 600, height = 400, type = "cairo")
+    grDevices::png(path, width = 600, height = 400, type = png_type)
     tryCatch(plot(x, grid = seq(0, 16, by = 0.1), show_onsets = show,
                   onset_alpha = alpha), finally = grDevices::dev.off())
     readBin(path, "raw", n = file.info(path)$size)
