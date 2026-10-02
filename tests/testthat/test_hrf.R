@@ -786,7 +786,8 @@ test_that("hrf_weighted with times creates valid HRF", {
   hrf <- hrf_weighted(times = 0:5, weights = c(0, 1, 2, 2, 1, 0))
 
   expect_true(inherits(hrf, "HRF"))
-  expect_equal(attr(hrf, "span"), 5)
+  # Six 1-second bins: the last weight covers [5, 6)
+  expect_equal(attr(hrf, "span"), 6)
 })
 
 test_that("hrf_weighted constant method creates step function", {
@@ -826,9 +827,10 @@ test_that("hrf_weighted linear method interpolates correctly", {
   expect_equal(result[t == 5], 0)
 })
 
-test_that("hrf_weighted width generates evenly spaced times", {
-  # 4 weights over width=6 should give times at 0, 2, 4, 6
+test_that("hrf_weighted width divides the window into equal bins", {
+  # 4 weights over width = 6 give bins [0, 1.5), [1.5, 3), [3, 4.5), [4.5, 6)
   hrf <- hrf_weighted(width = 6, weights = c(1, 2, 3, 0), method = "constant")
+  expect_equal(evaluate(hrf, c(1.49, 1.5, 2.99, 3, 4.49, 4.5)), c(1, 2, 2, 3, 3, 0))
 
   t <- seq(0, 8, by = 0.5)
   result <- evaluate(hrf, t)
@@ -848,8 +850,8 @@ test_that("hrf_weighted normalization works for constant method", {
 
   # Test normalization by checking the evaluated output integrates to ~1
 
-  # For step function with 1-second intervals, sum of weights should equal integral
-  t <- seq(0, 3.99, by = 0.01)  # Evaluate within the range
+  # Five 1-second bins whose weights sum to 1, so the integral is 1
+  t <- seq(0, 4.99, by = 0.01)  # Evaluate within the window [0, 5)
   result <- evaluate(hrf_norm, t)
   dt <- t[2] - t[1]
   integral <- sum(result) * dt
@@ -1173,4 +1175,38 @@ test_that("list-of-HRFs with mixed HRF types works", {
   # Second event should show boxcar response
   expect_true(any(result[t >= 10 & t <= 25] > 0))
   expect_true(any(result[t >= 30 & t <= 36] > 0))
+})
+
+
+test_that("hrf_weighted constant method uses every weight and has no stray end sample", {
+  hrf <- hrf_weighted(c(0.1, 0.3, 1, 1, 0.3, 0.1), width = 10)
+  t <- seq(0, 12, by = 0.01)
+  y <- evaluate(hrf, t)
+  # The last weight covers its own bin [8.33, 10)
+  expect_equal(y[t >= 8.34 & t < 10], rep(0.1, sum(t >= 8.34 & t < 10)))
+  # Right-open window: nothing at or after t = 10
+  expect_equal(evaluate(hrf, c(10, 10.5)), c(0, 0))
+  expect_equal(attr(hrf, "span"), 10)
+
+  hrf_t <- hrf_weighted(c(1, 2, 2, 1), times = c(4, 6, 8, 10), normalize = TRUE)
+  expect_equal(sum(attr(hrf_t, "params")$weights), 1)
+  expect_equal(evaluate(hrf_t, c(5, 7, 9, 11, 12)), c(1, 2, 2, 1, 0) / 6)
+})
+
+test_that("B-spline basis is zero at both ends of the span", {
+  t <- seq(0, 24, by = 0.1)
+  for (deg in c(1, 2, 3)) {
+    B <- hrf_bspline(t, span = 24, N = 6, degree = deg)
+    expect_equal(ncol(B), 6)
+    expect_equal(unname(B[1, ]), rep(0, 6))
+    expect_equal(unname(B[length(t), ]), rep(0, 6), tolerance = 1e-12)
+  }
+  expect_error(hrf_bspline(t, N = 1, degree = 3), "at least 2")
+  # Supplied intercept/df are ignored rather than changing the basis
+  expect_equal(hrf_bspline(t, N = 5, intercept = FALSE), hrf_bspline(t, N = 5))
+  # No step at the end of the span in a regressor built from the basis
+  reg <- regressor(0, HRF_BSPLINE)
+  g <- seq(23, 25, by = 0.1)
+  y <- evaluate(reg, g, precision = 0.1)
+  expect_lt(max(abs(diff(y))), 0.05)
 })

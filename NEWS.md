@@ -1,5 +1,65 @@
 # fmrihrf 0.4.0
 
+## Breaking changes
+
+* `hrf_bspline()`, `hrf_bspline_generator()` and `HRF_BSPLINE` now return a
+  basis that is zero at both ends of the span. Previously the last basis
+  function equalled 1 at `span` and was cut to 0 beyond it, so any weight on
+  it produced a step at the end of every response. The `N` functions are now
+  the interior functions of a clamped basis with `N + 2` functions (the same
+  construction as `fmrireg::estimate_hrf()`). Fitted coefficients and design
+  matrices built from these bases change; `N` must be at least `degree - 1`.
+  The tent basis (`hrf_tent_generator()`, `getHRF("tent")`, and
+  `hrf_bspline(degree = 1)`) changes the same way: its tents now peak at
+  interior knots and the basis is zero at both ends (with `N = 5` over 24 s,
+  peaks at 4, 8, ..., 20 s instead of 4.8, ..., 24 s).
+
+* `hrf_weighted(method = "constant")` now uses every weight: `n` weights fill
+  `n` bins. With `width`, the window is split into `n` equal bins; with
+  `times`, weight `i` covers `[times[i], times[i + 1])` and the last bin is as
+  wide as the one before it. Previously the last weight only closed the
+  window (and was returned at the single time `times[n]`). `normalize = TRUE`
+  now makes all `n` weights sum to 1. The `method = "linear"` form is
+  unchanged. Weight vectors that ended with a 0 as an end marker give the same
+  values as before, with `span` one bin longer.
+
+* Corrected the documentation of `normalize` in `hrf_boxcar()` and
+  `hrf_weighted()`. A unit-area boxcar makes the GLM coefficient the
+  integrated signal in the window, not its mean, and a weighted HRF's
+  coefficient is a least-squares amplitude, not a weighted mean. Behaviour is
+  unchanged.
+
+## Plotting
+
+* New `hrf_palette()` and matching ggplot2 scales `scale_colour_hrf()`,
+  `scale_color_hrf()` and `scale_fill_hrf()`. The categorical palette has at
+  least 3:1 contrast on white and near-black backgrounds and stays
+  distinguishable under common colour-vision deficiencies; the ordered palette
+  is for basis functions and parameter sweeps. All package plots use them.
+
+* `plot_hrfs()` and `plot_regressors()` now plot every column of a basis set
+  (`basis = "first"` restores the old behaviour), accept `layout = "stack"` for
+  one panel per curve, and choose the palette with `palette`.
+  `plot_hrfs()` gains `reference` for a dashed grey comparison curve.
+  `plot_regressors()` accepts a `regressor_set()`, draws events as bars whose
+  width is the event duration, and shows scan-time values with `samples`.
+
+* `plot_regressors()`, `plot.Reg()` and `plot.FeatureReg()` evaluate with a
+  precision matched to the plotting grid by default (`precision = NULL`), so
+  sharp HRF edges are drawn where they occur.
+
+* Inside knitr documents, `plot_hrfs()` and `plot_regressors()` return their
+  result visibly and let knitr print the plot, like a ggplot object. This lets
+  document themes add dark-mode figure versions. Assigning the result inside a
+  chunk no longer draws it; print it explicitly.
+
+* The base-graphics `plot()` methods use the same palette, mark onsets with
+  ticks on the time axis, and draw multi-basis regressors one panel per basis
+  function (`layout = "overlay"` for the old style).
+
+* All vignette figures were redrawn with these helpers; the reconstruction
+  section of the advanced vignette now fits basis weights to target HRFs.
+
 ## Improvements
 
 * Improved vignette plots for narrow screens: compact legends, shared-axis
