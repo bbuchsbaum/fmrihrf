@@ -1,8 +1,10 @@
 # Plot an HRF Object
 
-Creates a visualization of an HRF object. For single-basis HRFs, shows
-the response curve with peak annotation. For multi-basis HRFs (e.g.,
-HRF_SPMG3), shows all basis functions on the same plot.
+Draws an HRF with base graphics. Single-basis HRFs show the response
+curve with its peak annotated. Multi-basis HRFs (e.g.,
+[HRF_SPMG3](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md))
+show every basis function, coloured along the ordered
+[`hrf_palette()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.md).
 
 ## Usage
 
@@ -33,12 +35,19 @@ plot(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...)
 
 - ...:
 
-  Additional arguments passed to underlying plot functions.
+  Additional arguments passed to
+  [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html),
+  such as `main` or `ylim`.
 
 ## Value
 
 Invisibly returns a data frame with the time and response values (useful
 for further customization).
+
+## See also
+
+[`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md)
+for ggplot2 comparisons of several HRFs.
 
 ## Examples
 

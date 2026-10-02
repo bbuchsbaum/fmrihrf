@@ -40,26 +40,26 @@ print(HRF_GAUSSIAN)
 These objects are functions themselves, so you can evaluate them at
 specific time points. The
 [`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md)
-function provides a convenient way to compare multiple HRFs:
+function draws one or more HRFs on shared axes; every figure in these
+vignettes uses its colours (see
+[`hrf_palette()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.md)):
 
 ``` r
 
 time_points <- seq(0, 25, by = 0.1)
 
-# Compare HRFs using plot_hrfs() - normalize = TRUE scales to peak at 1.0
-comparison <- plot_hrfs(HRF_SPMG1, HRF_GAUSSIAN,
-          labels = c("SPM Canonical", "Gaussian"),
+# normalize = TRUE scales each HRF to peak at 1.0
+plot_hrfs(HRF_SPMG1, HRF_GAUSSIAN,
+          labels = c("SPM canonical", "Gaussian"),
           normalize = TRUE,
+          time = time_points,
           title = "SPM and Gaussian HRFs",
-          subtitle = "Each curve normalized to peak at 1",
-          draw = FALSE)
-# Auto-print the ggplot so the vignette can render light and dark versions.
-attr(comparison, "plot") + albersdown::scale_color_albers()
+          subtitle = "Each curve normalized to peak at 1")
 ```
 
 ![SPM and Gaussian HRFs normalized to a peak of one. The SPM response
-includes a negative
-undershoot.](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png)![](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.phone.png)
+includes a negative undershoot after about 12 seconds; the Gaussian does
+not.](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.png)![](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.phone.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-dark-1.png)
 
@@ -67,6 +67,10 @@ undershoot.](a_01_hemodynamic_response_files/figure-html/evaluate_basic_hrfs-1.p
 
 Note that the `span` attribute (e.g., 24 seconds) indicates the
 approximate time window over which the HRF is non-zero.
+
+For a quick look at a single HRF, the base-graphics
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) method draws it
+and marks the peak: `plot(HRF_SPMG1)`.
 
 ## Choosing a Fixed HRF Scale
 
@@ -105,12 +109,27 @@ peak times (`mean`) and widths (`sd`).
 
 # Create Gaussian HRFs with different parameters using gen_hrf
 # Note: hrf_gaussian is the underlying function, not the HRF object HRF_GAUSSIAN
-hrf_gauss_7_3 <- gen_hrf(hrf_gaussian, mean = 7, sd = 3, name = "Gaussian (Mean=7, SD=3)")
-hrf_gauss_5_2 <- gen_hrf(hrf_gaussian, mean = 5, sd = 2, name = "Gaussian (Mean=5, SD=2)")
 hrf_gauss_4_1 <- gen_hrf(hrf_gaussian, mean = 4, sd = 1, name = "Gaussian (Mean=4, SD=1)")
+hrf_gauss_5_2 <- gen_hrf(hrf_gaussian, mean = 5, sd = 2, name = "Gaussian (Mean=5, SD=2)")
+hrf_gauss_7_3 <- gen_hrf(hrf_gaussian, mean = 7, sd = 3, name = "Gaussian (Mean=7, SD=3)")
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.phone.png)
+``` r
+
+plot_hrfs(hrf_gauss_4_1, hrf_gauss_5_2, hrf_gauss_7_3,
+          labels = c("mean 4, sd 1", "mean 5, sd 2", "mean 7, sd 3"),
+          time = time_points, palette = "ordered",
+          title = "Gaussian HRF parameters",
+          subtitle = "Later mean, later peak; larger sd, broader")
+```
+
+![Three Gaussian HRFs. Later means peak later, and larger standard
+deviations give lower, broader
+curves.](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/modify_gaussian_params_plot-dark-1.phone.png)
 
 `gen_hrf` can also directly incorporate lags and durations (see later
 sections).
@@ -134,14 +153,33 @@ hrf_spm_w2 <- block_hrf(HRF_SPMG1, width = 2)
 hrf_spm_w4 <- block_hrf(HRF_SPMG1, width = 4)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.phone.png)
+The three durations below and in the next sections use the ordered
+palette: violet is the shortest event and ochre the longest.
+
+``` r
+
+plot_hrfs(hrf_spm_w1, hrf_spm_w2, hrf_spm_w4,
+          labels = c("1 s event", "2 s event", "4 s event"),
+          time = time_points, palette = "ordered",
+          title = "Longer events: larger responses",
+          subtitle = "block_hrf(HRF_SPMG1, width = 1, 2, 4)")
+```
+
+![SPM canonical responses to 1, 2 and 4 second events. Longer events
+produce higher and later
+peaks.](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_hrfs_plot-dark-1.phone.png)
 
 ### Normalization
 
 By default, longer durations lead to higher peak responses (assuming
 summation, see next section). Setting `normalize=TRUE` in `block_hrf`
-(or `gen_hrf`) rescales the response so the peak amplitude is
-approximately 1, regardless of duration.
+(or `gen_hrf`) rescales the response so the peak amplitude is 1,
+regardless of duration. What remains is the change in shape: longer
+events rise later and stay up longer.
 
 ``` r
 
@@ -151,15 +189,32 @@ hrf_spm_w2_norm <- block_hrf(HRF_SPMG1, width = 2, normalize = TRUE)
 hrf_spm_w4_norm <- block_hrf(HRF_SPMG1, width = 4, normalize = TRUE)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.phone.png)
+``` r
 
-### Modeling Saturation with `summate`
+plot_hrfs(hrf_spm_w1_norm, hrf_spm_w2_norm, hrf_spm_w4_norm,
+          labels = c("1 s event", "2 s event", "4 s event"),
+          time = time_points, palette = "ordered",
+          title = "Normalized: only shape changes",
+          subtitle = "block_hrf(..., normalize = TRUE)")
+```
 
-The `summate` argument in `block_hrf` controls whether the response
-accumulates over the duration (`summate=TRUE`, default) or stays
-constant (`summate=FALSE`). When `summate=FALSE`, the temporal profile
-is identical to the summated version but the peak amplitude does not
-grow with block duration.
+![Normalized SPM responses to 1, 2 and 4 second events. All peak at 1;
+longer events peak later and are
+broader.](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_normalized_plot-dark-1.phone.png)
+
+### Averaging instead of summing: `summate`
+
+The `summate` argument in `block_hrf` controls how the response to a
+sustained event is built. With `summate = TRUE` (the default) the
+responses to each moment of the event add up, so longer events give
+larger peaks. With `summate = FALSE` they are averaged instead: the
+result is the summated response divided by the event width. The peak no
+longer grows with duration; for long events it falls, because the same
+response is spread over a longer time.
 
 ``` r
 
@@ -169,19 +224,26 @@ hrf_spm_w4_nosum <- block_hrf(HRF_SPMG1, width = 4, summate = FALSE)
 hrf_spm_w8_nosum <- block_hrf(HRF_SPMG1, width = 8, summate = FALSE)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.phone.png)
-
-We can combine `summate=FALSE` and `normalize=TRUE`:
-
 ``` r
 
-# Create normalized, non-summating blocked HRFs
-hrf_spm_w2_nosum_norm <- block_hrf(HRF_SPMG1, width = 2, summate = FALSE, normalize = TRUE)
-hrf_spm_w4_nosum_norm <- block_hrf(HRF_SPMG1, width = 4, summate = FALSE, normalize = TRUE)
-hrf_spm_w8_nosum_norm <- block_hrf(HRF_SPMG1, width = 8, summate = FALSE, normalize = TRUE)
+plot_hrfs(hrf_spm_w2_nosum, hrf_spm_w4_nosum, hrf_spm_w8_nosum,
+          labels = c("2 s event", "4 s event", "8 s event"),
+          time = time_points, palette = "ordered",
+          title = "Averaging: peaks do not grow",
+          subtitle = "block_hrf(..., summate = FALSE)")
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_norm_plot-1.phone.png)
+![Averaged (summate = FALSE) SPM responses to 2, 4 and 8 second events.
+Peaks do not grow with duration; the 8 second response is lower and
+broader.](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/blocked_summate_false_plot-dark-1.phone.png)
+
+`summate = FALSE` and `normalize = TRUE` can be combined; with a unit
+peak, only the shape differences shown in the normalized figure above
+remain.
 
 ## Modeling Temporal Shifts with `lag_hrf`
 
@@ -199,7 +261,22 @@ hrf_gauss_lag_0 <- HRF_GAUSSIAN # Original (lag=0)
 hrf_gauss_lag_pos3 <- lag_hrf(HRF_GAUSSIAN, lag = 3)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.phone.png)
+``` r
+
+plot_hrfs(hrf_gauss_lag_neg2, hrf_gauss_lag_0, hrf_gauss_lag_pos3,
+          labels = c("lag -2 s", "lag 0 s", "lag +3 s"),
+          time = time_points, palette = "ordered",
+          title = "Lag moves the response in time",
+          subtitle = "lag_hrf(HRF_GAUSSIAN, lag = -2, 0, 3)")
+```
+
+![Gaussian HRF shifted by -2, 0 and +3 seconds. The shape is unchanged;
+only the peak time
+moves.](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/lagged_hrfs_plot-dark-1.phone.png)
 
 ## Combining Lag and Duration
 
@@ -214,20 +291,33 @@ hrf_lb_3 <- HRF_GAUSSIAN %>% lag_hrf(3) %>% block_hrf(width = 3, normalize = TRU
 hrf_lb_5 <- HRF_GAUSSIAN %>% lag_hrf(5) %>% block_hrf(width = 5, normalize = TRUE)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.phone.png)
+``` r
 
-Alternatively, `gen_hrf` can apply lag and width directly:
+plot_hrfs(hrf_lb_1, hrf_lb_3, hrf_lb_5,
+          labels = c("lag 1 s, width 1 s", "lag 3 s, width 3 s", "lag 5 s, width 5 s"),
+          time = time_points, palette = "ordered",
+          title = "Lag and duration combined",
+          subtitle = "lag_hrf() %>% block_hrf(normalize = TRUE)")
+```
+
+![Gaussian HRFs with lag and width both equal to 1, 3 and 5 seconds,
+normalized to peak at 1. Larger values peak later and are
+broader.](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/lagged_blocked_hrfs_plot-dark-1.phone.png)
+
+Alternatively, `gen_hrf` can apply lag and width directly, and gives the
+same function:
 
 ``` r
 
-# Using gen_hrf directly
 hrf_lb_gen_3 <- gen_hrf(hrf_gaussian, lag = 3, width = 3, normalize = TRUE)
-resp_lb_gen_3 <- hrf_lb_gen_3(time_points)
 
-# Compare (should be very similar to hrf_lb_3 from piped version)
-# plot(time_points, resp_lb_3, type = 'l', col = 2, lwd = 2, main = "Piped vs gen_hrf")
-# lines(time_points, resp_lb_gen_3, col = 1, lty = 2, lwd = 2)
-# legend("topright", legend = c("Piped", "gen_hrf"), col = c(2, 1), lty = c(1, 2), lwd = 2)
+# Largest difference from the piped version over 0-25 s
+max(abs(hrf_lb_gen_3(time_points) - hrf_lb_3(time_points)))
+#> [1] 0.0004053635
 ```
 
 ## Multivariate HRFs: Basis Sets
@@ -236,7 +326,9 @@ Instead of assuming a fixed HRF shape, we can model the response using a
 linear combination of multiple basis functions. This allows for more
 flexibility in capturing variations in HRF shape across brain regions or
 individuals. The resulting HRF function returns a matrix where each
-column corresponds to a basis function.
+column corresponds to a basis function, and
+[`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md)
+draws one curve per column.
 
 ### SPM Basis Sets
 
@@ -259,19 +351,50 @@ print(HRF_SPMG3)
 #>    Span: 24 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.phone.png)
+`HRF_SPMG2` is the first two columns of `HRF_SPMG3`, so one figure shows
+both:
+
+``` r
+
+plot_hrfs(HRF_SPMG3,
+          labels = c("Canonical", "Temporal derivative", "Dispersion derivative"),
+          time = time_points,
+          title = "SPM canonical and derivatives")
+```
+
+![Canonical SPM response and its temporal and dispersion derivatives,
+with all positive and negative values
+retained.](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-1.phone.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-dark-1.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot-dark-1.phone.png)
 
-![Canonical SPM response and its temporal and dispersion derivatives,
-with all positive and negative values
-retained.](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-1.png)![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-1.phone.png)
+Why the temporal derivative? Adding a small multiple of it to the
+canonical HRF shifts the peak in time. This is how a GLM with
+`HRF_SPMG2` absorbs small latency differences:
 
-![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-dark-1.png)
+``` r
 
-![](a_01_hemodynamic_response_files/figure-html/spm_basis_sets_plot2-dark-1.phone.png)
+spm_early <- gen_empirical_hrf(time_points,
+  drop(HRF_SPMG2(time_points) %*% c(1, 0.5)))
+spm_late <- gen_empirical_hrf(time_points,
+  drop(HRF_SPMG2(time_points) %*% c(1, -0.5)))
+
+plot_hrfs(spm_early, spm_late,
+          labels = c("canonical + 0.5 x derivative", "canonical - 0.5 x derivative"),
+          time = time_points, reference = HRF_SPMG1, reference_label = "canonical",
+          title = "The derivative shifts the peak")
+```
+
+![Canonical SPM HRF (dashed grey) and the canonical plus or minus 0.5
+times its temporal derivative. Adding the derivative moves the peak
+earlier; subtracting it moves the peak
+later.](a_01_hemodynamic_response_files/figure-html/spm_derivative_shift-1.png)![](a_01_hemodynamic_response_files/figure-html/spm_derivative_shift-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/spm_derivative_shift-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/spm_derivative_shift-dark-1.phone.png)
 
 ### B-Spline Basis Set
 
@@ -288,22 +411,54 @@ print(hrf_bs_5_3)
 #>    Basis functions: 5 
 #>    Span: 24 s
 
-# B-spline basis with N=10 basis functions, degree=1 (linear -> tent functions)
-hrf_bs_10_1 <- gen_hrf(hrf_bspline, N = 10, degree = 1, name = "Tent Set (N=10)")
+# B-spline basis with N=11 basis functions, degree=1 (linear -> tent functions):
+# tents peak every 2 s, at 2, 4, ..., 22 s
+hrf_bs_10_1 <- gen_hrf(hrf_bspline, N = 11, degree = 1, name = "Tent Set (N=11)")
 print(hrf_bs_10_1)
-#> -- HRF: Tent Set (N=10) ----------------------------------- 
-#>    Basis functions: 10 
+#> -- HRF: Tent Set (N=11) ----------------------------------- 
+#>    Basis functions: 11 
 #>    Span: 24 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.phone.png)
+Each basis function covers a different stretch of the 24-second window;
+their weighted sum can take almost any smooth shape. Every function is
+zero at 0 s and at 24 s, so any weighted combination starts and ends at
+baseline.
 
-![](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.phone.png)
+``` r
+
+bspline_times <- seq(0, 24, by = 0.1)
+plot_hrfs(hrf_bs_5_3, time = bspline_times,
+          title = "Cubic B-spline basis (N = 5)")
+```
+
+![Five cubic B-spline basis functions on 0 to 24 seconds, labelled B1 to
+B5 at their peaks, tiling the window from early to
+late.](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/bspline_basis_plot-dark-1.phone.png)
+
+``` r
+
+plot_hrfs(hrf_bs_10_1, time = bspline_times,
+          title = "Tent basis: linear B-splines (N = 11)")
+```
+
+![Eleven piecewise-linear tent functions peaking every 2 seconds from 2
+to 22 seconds, each overlapping its neighbours and all zero at 0 and 24
+seconds.](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/tent_basis_plot-dark-1.phone.png)
 
 ### Sine Basis Set
 
 The `hrf_sine` function creates a basis set using sine waves of
-different frequencies.
+different frequencies. Overlaid, five sine waves are hard to read, so
+each gets its own panel:
 
 ``` r
 
@@ -314,80 +469,101 @@ print(hrf_sin_5)
 #>    Span: 24 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.phone.png)
+``` r
+
+plot_hrfs(hrf_sin_5, time = bspline_times, layout = "stack",
+          title = "Sine basis (N = 5)")
+```
+
+![Five sine basis functions in separate panels, with one to five full
+cycles over the 24 second
+window.](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/sine_basis_plot-dark-1.phone.png)
 
 ### Half-Cosine Basis Set (FLOBS-like)
 
-The `hrf_half_cosine` function implements the basis set described by
-Woolrich et al. (2004), often used in FSL’s FLOBS (FMRIB’s Linear
-Optimal Basis Sets). It uses four half-cosine functions to model initial
-dip, rise, fall/undershoot, and recovery.
+The `hrf_half_cosine` function implements the half-cosine HRF described
+by Woolrich et al. (2004), the model behind FSL’s FLOBS (FMRIB’s Linear
+Optimal Basis Sets). Four half-cosine segments of durations `h1`–`h4`
+model the initial dip, rise, fall, and recovery; `f1` and `f2` set the
+height of the initial dip and the undershoot. The defaults set both to
+zero, giving a single bump; negative values add the dip and undershoot:
 
-![](a_01_hemodynamic_response_files/figure-html/half_cosine-1.png)![](a_01_hemodynamic_response_files/figure-html/half_cosine-1.phone.png)
+``` r
+
+hrf_hc_default <- gen_hrf(hrf_half_cosine, name = "Half-cosine (default)")
+hrf_hc_dip <- gen_hrf(hrf_half_cosine, f1 = -0.1, f2 = -0.2,
+                      name = "Half-cosine (f1 = -0.1, f2 = -0.2)")
+plot_hrfs(hrf_hc_default, hrf_hc_dip,
+          labels = c("defaults (f1 = f2 = 0)", "f1 = -0.1, f2 = -0.2"),
+          time = time_points,
+          title = "Half-cosine HRF",
+          subtitle = "Woolrich et al. (2004)")
+```
+
+![Two half-cosine HRFs. The default has no dip or undershoot; with f1 =
+-0.1 and f2 = -0.2 an initial dip to -0.1 and an undershoot to -0.2 at
+about 13 seconds
+appear.](a_01_hemodynamic_response_files/figure-html/half_cosine-1.png)![](a_01_hemodynamic_response_files/figure-html/half_cosine-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/half_cosine-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/half_cosine-dark-1.phone.png)
 
 ## Other HRF Shapes
 
-### Gamma HRF
-
-The `hrf_gamma` function uses the gamma probability density function.
-
-\`\`\`\`
+`fmrihrf` has several other parametric shapes. Each is created with
+[`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md):
 
 ``` r
 
+# Gamma probability density
 hrf_gam <- gen_hrf(hrf_gamma, shape = 6, rate = 1, name = "Gamma (shape=6, rate=1)")
-print(hrf_gam)
-#> -- HRF: Gamma (shape=6, rate=1) --------------------------- 
-#>    Basis functions: 1 
-#>    Span: 24 s
-```
 
-![Gamma HRF with shape 6 and rate 1, peaking at 5
-seconds.](a_01_hemodynamic_response_files/figure-html/gamma_hrf_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/gamma_hrf_plot-1.phone.png)
-
-### Mexican Hat Wavelet HRF
-
-The `hrf_mexhat` function uses the Mexican hat wavelet (second
-derivative of a Gaussian).
-
-``` r
-
+# Mexican hat wavelet (second derivative of a Gaussian)
 hrf_mh <- gen_hrf(hrf_mexhat, mean = 6, sd = 1.5, name = "Mexican Hat (mean=6, sd=1.5)")
-print(hrf_mh)
-#> -- HRF: Mexican Hat (mean=6, sd=1.5) ---------------------- 
-#>    Basis functions: 1 
-#>    Span: 24 s
+
+# Difference of two inverse-logit (sigmoid) functions: separate rise and fall
+hrf_il <- gen_hrf(hrf_inv_logit, mu1 = 5, s1 = 1, mu2 = 15, s2 = 1.5, name = "Inv. Logit Diff.")
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/mexhat_hrf_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/mexhat_hrf_plot-1.phone.png)
-
-### Inverse Logit Difference HRF
-
-The `hrf_inv_logit` function creates an HRF shape by subtracting two
-inverse logit (sigmoid) functions, allowing control over rise and fall
-times.
+The gamma peaks at `(shape - 1) / rate` = 5 s; the Mexican hat has
+negative lobes on both sides of its peak; the inverse-logit difference
+rises around `mu1` and falls around `mu2`, giving a plateau:
 
 ``` r
 
-hrf_il <- gen_hrf(hrf_inv_logit, mu1 = 5, s1 = 1, mu2 = 15, s2 = 1.5, name = "Inv. Logit Diff.")
-print(hrf_il)
-#> -- HRF: Inv. Logit Diff. ---------------------------------- 
-#>    Basis functions: 1 
-#>    Span: 24 s
+plot_hrfs(hrf_gam, hrf_mh, hrf_il,
+          labels = c("Gamma (shape 6, rate 1)", "Mexican hat (mean 6, sd 1.5)",
+                     "Inverse-logit (rise 5 s, fall 15 s)"),
+          time = time_points, layout = "stack",
+          title = "Other HRF shapes")
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/inv_logit_hrf_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/inv_logit_hrf_plot-1.phone.png)
+![Three HRF shapes in separate panels: a gamma peaking at 5 seconds, a
+Mexican hat with negative side lobes around a peak at 6 seconds, and an
+inverse-logit difference that rises around 5 seconds and falls around 15
+seconds.](a_01_hemodynamic_response_files/figure-html/other_shapes_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/other_shapes_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/other_shapes_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/other_shapes_plot-dark-1.phone.png)
 
 ## Boxcar and Weighted HRFs (No Hemodynamic Delay)
 
 Traditional HRFs model the hemodynamic delay—the sluggish blood flow
 response that peaks several seconds after neural activity. However,
 sometimes you want to extract signal from specific time windows
-*without* assuming any hemodynamic transformation. This is useful for: -
-Extracting raw signal averages from specific post-stimulus windows -
-Trial-wise analyses where you want the mean (or weighted mean) of the
-BOLD signal - Comparing signal in different temporal windows directly -
-Creating custom temporal weighting schemes
+*without* assuming any hemodynamic transformation. This is useful for:
+
+- Extracting raw signal averages from specific post-stimulus windows
+- Trial-wise analyses where you want the mean (or weighted mean) of the
+  BOLD signal
+- Comparing signal in different temporal windows directly
+- Creating custom temporal weighting schemes
 
 ### Simple Boxcar HRF (`hrf_boxcar`)
 
@@ -407,8 +583,6 @@ print(hrf_box)
 #>    Parameters: width = 5, amplitude = 1, normalize = FALSE
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/boxcar_basic_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/boxcar_basic_plot-1.phone.png)
-
 To create a boxcar that starts at a later time point—useful for
 capturing signal in a specific post-stimulus window—use
 [`lag_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/lag_hrf.md):
@@ -420,19 +594,37 @@ capturing signal in a specific post-stimulus window—use
 hrf_delayed <- hrf_boxcar(width = 4) %>% lag_hrf(lag = 4)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.phone.png)
+``` r
 
-### Normalized Boxcar: Estimating Mean Signal
+plot_hrfs(hrf_box, hrf_delayed,
+          labels = c("Boxcar, 0-5 s", "Boxcar, 4-8 s"),
+          normalize = TRUE, time = seq(0, 25, by = 0.05),
+          reference = HRF_SPMG1, reference_label = "SPM canonical (peak = 1)",
+          title = "Boxcars select a time window",
+          subtitle = "No hemodynamic delay: a boxcar weights only its window")
+```
 
-When `normalize = TRUE`, the boxcar is scaled so its integral equals 1.
-This has an important interpretation: **when used in a GLM, the
-regression coefficient β directly estimates the mean signal within the
-time window**.
+![A 0 to 5 second boxcar, a 4 to 8 second boxcar, and the normalized SPM
+canonical HRF as a dashed grey reference. The delayed boxcar covers the
+rising edge and peak of the canonical
+response.](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/boxcar_delayed_plot-dark-1.phone.png)
+
+### What β Estimates: Boxcar Height
+
+The height of a boxcar sets the units of its regression coefficient.
+With the default amplitude of 1, an isolated event’s β estimates the
+**mean** signal in the window. With `normalize = TRUE`, the boxcar is
+scaled to unit area (height `1/width`), so β estimates the
+**integrated** signal over the window: the mean multiplied by the window
+width.
 
 ``` r
 
-# Normalized boxcar - integral = 1
-# A 4-second boxcar lagged by 4 seconds (captures 4-8s window)
+# Unit-area boxcar: a 4-second window lagged by 4 seconds (4-8 s)
 hrf_norm <- hrf_boxcar(width = 4, normalize = TRUE) %>% lag_hrf(lag = 4)
 
 # Check: amplitude should be 1/4 = 0.25
@@ -449,66 +641,85 @@ cat("Integral of normalized boxcar:", round(integral, 3), "\n")
 #> Integral of normalized boxcar: 1
 ```
 
-**Interpretation**: If you fit a GLM with this normalized boxcar HRF,
-the estimated β coefficient represents the average BOLD signal from 4-8
-seconds post-stimulus.
+A quick least-squares check with a signal of 5 inside the 4-8 s window:
+
+``` r
+
+scan_t <- seq(0, 40, by = 0.5)
+y <- ifelse(scan_t >= 4 & scan_t < 8, 5, 0)
+beta <- function(hrf) {
+  x <- evaluate(regressor(0, hrf), scan_t)
+  unname(coef(lm(y ~ x))["x"])
+}
+c(height_1 = beta(hrf_boxcar(width = 4) %>% lag_hrf(lag = 4)),  # about 5: the mean
+  unit_area = beta(hrf_norm))                                   # about 20: 5 x 4 s
+#>  height_1 unit_area 
+#>  4.861713 19.446853
+```
+
+Use the default height when you want β in signal units (the window
+mean); use `normalize = TRUE` when you want the window’s integrated
+response.
 
 ### Weighted HRF (`hrf_weighted`)
 
 The `hrf_weighted` function provides more flexibility by allowing you to
-specify different weights at different time points. You can either: -
-Use `width` + `weights`: evenly space the weights across the specified
-width - Use `times` + `weights`: explicitly specify the time points for
-each weight
+specify different weights at different time points. You can either:
+
+- Use `width` + `weights`: evenly space the weights across the specified
+  width
+- Use `times` + `weights`: explicitly specify the time points for each
+  weight
 
 This creates either a step function (`method = "constant"`) or a
-smoothly interpolated function (`method = "linear"`).
-
-#### Using `width` for Evenly Spaced Weights
+smoothly interpolated function (`method = "linear"`). With
+`method = "constant"`, each weight fills one time bin: with `width`, the
+window is split into equal bins; with `times`, weight *i* runs from
+`times[i]` to `times[i + 1]`, and the last bin is as wide as the one
+before it.
 
 ``` r
 
-# 6 weights evenly spaced over 10 seconds (at 0, 2, 4, 6, 8, 10)
+# 6 weights over a 10-second window: six equal bins of 10/6 s
 hrf_wt_width <- hrf_weighted(
   weights = c(0.1, 0.3, 1.0, 1.0, 0.3, 0.1),
   width = 10,
   method = "constant"
 )
-```
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_width_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_width_plot-1.phone.png)
-
-#### Using Explicit `times` for Custom Spacing
-
-``` r
-
-# Weighted step function with explicit time points
+# The same weights in 2-second bins starting at 2, 4, ..., 12 s (window 2-14 s)
 hrf_wt <- hrf_weighted(
   weights = c(0.1, 0.3, 1.0, 1.0, 0.3, 0.1),
   times = c(2, 4, 6, 8, 10, 12),
   method = "constant"
 )
-```
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_times_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_times_plot-1.phone.png)
-
-#### Smooth Weights (Linear Interpolation)
-
-``` r
-
-# Smooth weights using linear interpolation
+# Smooth weights using linear interpolation between the same time points
 hrf_smooth <- hrf_weighted(
-  weights = c(0, 0.3, 1.0, 1.0, 0.3, 0),
+  weights = c(0.1, 0.3, 1.0, 1.0, 0.3, 0.1),
   times = c(2, 4, 6, 8, 10, 12),
   method = "linear"
 )
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-1.phone.png)
+``` r
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-dark-1.png)
+plot_hrfs(hrf_wt_width, hrf_wt, hrf_smooth,
+          labels = c("width = 10: six bins, 0-10 s",
+                     "times = 2, ..., 12: bins, 2-14 s",
+                     "method = linear: 2-12 s"),
+          time = seq(0, 16, by = 0.02), layout = "stack",
+          title = "Weighted HRFs", subtitle = "Weights 0.1, 0.3, 1, 1, 0.3, 0.1")
+```
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_linear_plot-dark-1.phone.png)
+![Three weighted HRFs in separate panels: steps from 0 to 10 seconds,
+the same steps from 2 to 12 seconds, and a linear interpolation through
+the same weights from 2 to 12
+seconds.](a_01_hemodynamic_response_files/figure-html/weighted_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/weighted_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/weighted_plot-dark-1.phone.png)
 
 #### Sub-second Precision
 
@@ -522,19 +733,33 @@ times_fine <- seq(4, 10, by = 0.25)
 weights_gaussian <- dnorm(times_fine, mean = 7, sd = 1)
 
 hrf_gauss_wt <- hrf_weighted(weights_gaussian, times = times_fine, method = "linear")
+
+plot_hrfs(hrf_gauss_wt, labels = "Gaussian weights, 0.25 s spacing",
+          time = seq(0, 14, by = 0.02),
+          title = "Weights at sub-second spacing")
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/weighted_subsecond_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_subsecond_plot-1.phone.png)
+![A Gaussian-shaped weighting function centred at 7 seconds, built from
+weights every 0.25 seconds between 4 and 10
+seconds.](a_01_hemodynamic_response_files/figure-html/weighted_subsecond-1.png)![](a_01_hemodynamic_response_files/figure-html/weighted_subsecond-1.phone.png)
 
-### Normalized Weighted HRF: Estimating Weighted Mean
+![](a_01_hemodynamic_response_files/figure-html/weighted_subsecond-dark-1.png)
 
-When `normalize = TRUE`, the weights are scaled to sum (constant) or
-integrate (linear) to 1. The regression coefficient then estimates a
-**weighted mean** of the signal:
+![](a_01_hemodynamic_response_files/figure-html/weighted_subsecond-dark-1.phone.png)
+
+### Normalized Weighted HRF
+
+When `normalize = TRUE`, the weights are scaled to sum to 1
+(`method = "constant"`) or the curve to integrate to 1
+(`method = "linear"`). This fixes the scale of the weighting profile,
+which makes coefficients comparable across profiles. It does not turn β
+into a weighted mean: least squares fits the amplitude of the whole
+profile, β = Σ w(t) y(t) / Σ w(t)², which equals a plain mean only for a
+boxcar. To summarise a window as a weighted mean, compute that mean
+directly from the data.
 
 ``` r
 
-# Normalized weights - creates weighted average interpretation
 hrf_wt_norm <- hrf_weighted(
   weights = c(1, 2, 2, 1),  # Will be normalized
   times = c(4, 6, 8, 10),
@@ -542,16 +767,10 @@ hrf_wt_norm <- hrf_weighted(
   normalize = TRUE
 )
 
-# The coefficient β will estimate: (1*Y[4-6] + 2*Y[6-8] + 2*Y[8-10] + 1*Y[10+]) / 6
-# where Y[a-b] is the signal in that interval
-
-t_check <- seq(0, 12, by = 0.01)
-resp_wt_norm <- evaluate(hrf_wt_norm, t_check)
-
-# Verify: integral should be approximately 1
-integral_wt <- sum(resp_wt_norm) * 0.01
-cat("Integral of normalized weighted HRF:", round(integral_wt, 3), "\n")
-#> Integral of normalized weighted HRF: 2.002
+# Four 2-second bins (4-6, 6-8, 8-10, 10-12 s); weights 1, 2, 2, 1 are
+# rescaled to 1/6, 2/6, 2/6, 1/6
+evaluate(hrf_wt_norm, c(5, 7, 9, 11, 13))
+#> [1] 0.1666667 0.3333333 0.3333333 0.1666667 0.0000000
 ```
 
 ### Practical Example: Comparing Early vs. Late Response Windows
@@ -562,13 +781,33 @@ trial. Here’s how to set up HRFs for this:
 ``` r
 
 # Early window: 2-6 seconds (4-second boxcar lagged by 2 seconds)
-hrf_early <- hrf_boxcar(width = 4, normalize = TRUE) %>% lag_hrf(lag = 2)
+hrf_early <- hrf_boxcar(width = 4) %>% lag_hrf(lag = 2)
 
 # Late window: 8-12 seconds (4-second boxcar lagged by 8 seconds)
-hrf_late <- hrf_boxcar(width = 4, normalize = TRUE) %>% lag_hrf(lag = 8)
+hrf_late <- hrf_boxcar(width = 4) %>% lag_hrf(lag = 8)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.phone.png)
+These boxcars have height 1, so each β is the mean signal in its window.
+Drawn against the canonical response (scaled to the same height), the
+early window covers the rise and peak, and the late window the return to
+baseline:
+
+``` r
+
+spm_ref <- gen_empirical_hrf(time_points,
+  HRF_SPMG1(time_points) / max(HRF_SPMG1(time_points)))
+plot_hrfs(hrf_early, hrf_late,
+          labels = c("Early window, 2-6 s", "Late window, 8-12 s"),
+          time = seq(0, 25, by = 0.05),
+          reference = spm_ref, reference_label = "SPM canonical, scaled to peak 1",
+          title = "Early and late windows",
+          subtitle = "Each beta is the mean signal in its window")
+```
+
+![Early (2 to 6 seconds) and late (8 to 12 seconds) boxcar windows of
+height 1, drawn with the SPM canonical HRF scaled to the same height.
+The early window covers the peak; the late window covers the
+decline.](a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-1.phone.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/early_late_comparison_plot-dark-1.png)
 
@@ -595,16 +834,34 @@ reg_boxcar <- regressor(
 reg_spm <- regressor(onsets = c(0, 20, 40), hrf = HRF_SPMG1)
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.phone.png)
+The two regressors have different units, so each gets its own panel (and
+y axis). Grey bars under each panel mark the event onsets. The small
+notches at 24 and 44 s are where the previous event’s canonical response
+is cut off at the end of its 24-second span (see the regressor
+vignette):
+
+``` r
+
+plot_regressors(reg_spm, reg_boxcar,
+                labels = c("SPM canonical HRF", "Boxcar HRF, 4-8 s window"),
+                grid = seq(0, 60, by = 0.05), layout = "stack",
+                title = "Boxcar vs. canonical regressor",
+                subtitle = "Events at t = 0, 20, 40 s")
+```
+
+![Two regressors for events at 0, 20 and 40 seconds, in separate panels:
+the smooth SPM canonical regressor, and a boxcar regressor with 4 second
+plateaus from 4 to 8 seconds after each
+event.](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-1.phone.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-dark-1.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/boxcar_regressor_plot-dark-1.phone.png)
 
-## Creating Custom Basis Sets with `gen_hrf_set`
+## Creating Custom Basis Sets with `hrf_set`
 
-The `gen_hrf_set` function allows you to combine *any* set of HRF
-functions into a single multivariate HRF object (a basis set).
+The `hrf_set` function allows you to combine *any* set of HRF functions
+into a single multivariate HRF object (a basis set).
 
 For example, we can create a basis set from a series of lagged Gaussian
 HRFs:
@@ -618,14 +875,27 @@ list_of_hrfs <- lapply(lag_times, function(lag) {
 })
 
 # Combine them into a single HRF basis set object
-hrf_custom_set <- do.call(gen_hrf_set, list_of_hrfs)
+hrf_custom_set <- do.call(hrf_set, list_of_hrfs)
 print(hrf_custom_set) # Note: name is default 'hrf_set', nbasis is 6
 #> -- HRF: hrf_set ------------------------------------------- 
 #>    Basis functions: 6 
 #>    Span: 34 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.phone.png)
+``` r
+
+plot_hrfs(hrf_custom_set, time = time_points,
+          title = "Lagged-Gaussian basis set",
+          subtitle = "HRF_GAUSSIAN lagged by 0, 2, ..., 10 s")
+```
+
+![Six Gaussian basis functions, labelled B1 to B6, peaking every 2
+seconds from 6 to 16
+seconds.](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/custom_basis_lagged_plot-dark-1.phone.png)
 
 ## Creating Empirical HRFs
 
@@ -658,7 +928,15 @@ print(emp_hrf)
 #>    Span: 24 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.phone.png)
+The points are the measured profile; the line is the interpolating HRF:
+
+![Empirical HRF drawn as a line through 25 measured points, one per
+second, peaking near 6 seconds with an undershoot after 12
+seconds.](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_single_plot-dark-1.phone.png)
 
 ### Empirical Basis Set via PCA
 
@@ -678,7 +956,16 @@ sim_mat <- replicate(n_sim, {
 })
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.phone.png)
+The 50 simulated responses vary in latency and width; PCA finds the few
+shapes that capture most of this variation:
+
+![Fifty simulated HRFs drawn as thin grey lines, with their mean as a
+thick line. Peak times range from about 3 to 8
+seconds.](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-1.phone.png)
+
+![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-dark-1.png)
+
+![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot1-dark-1.phone.png)
 
 ``` r
 
@@ -700,21 +987,38 @@ list_pc_hrfs <- list()
 
 for (i in 1:n_components) {
   pc_vec <- pc_vectors[, i]
+  # The sign of a principal component is arbitrary; make its largest
+  # deviation positive so PC1 looks like an HRF rather than its mirror image
+  pc_vec <- pc_vec * sign(pc_vec[which.max(abs(pc_vec - pc_vec[1]))] - pc_vec[1])
   pc_vec_zeroed <- pc_vec - pc_vec[1]
   max_abs <- max(abs(pc_vec_zeroed))
   pc_vec_norm <- pc_vec_zeroed / max_abs
   list_pc_hrfs[[i]] <- gen_empirical_hrf(sim_times, pc_vec_norm)
 }
 
-# 4. Combine PC HRFs into a basis set using gen_hrf_set
-emp_pca_basis <- do.call(gen_hrf_set, list_pc_hrfs)
+# 4. Combine PC HRFs into a basis set using hrf_set
+emp_pca_basis <- do.call(hrf_set, list_pc_hrfs)
 print(emp_pca_basis)
 #> -- HRF: hrf_set ------------------------------------------- 
 #>    Basis functions: 3 
 #>    Span: 24 s
 ```
 
-![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.phone.png)
+``` r
+
+plot_hrfs(emp_pca_basis,
+          labels = paste0("PC", 1:n_components, " (",
+                          round(variance_explained * 100), "% of variance)"),
+          time = seq(0, 24, by = 0.1),
+          title = "Empirical basis from PCA",
+          subtitle = "Each component scaled to a maximum absolute value of 1")
+```
+
+![The first three principal components of the simulated HRFs, each
+scaled to a maximum absolute value of one. PC1 resembles the average
+HRF; PC2 and PC3 have alternating positive and negative lobes that shift
+and reshape the
+response.](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.png)![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-1.phone.png)
 
 ![](a_01_hemodynamic_response_files/figure-html/empirical_hrf_pca_plot2-dark-1.png)
 

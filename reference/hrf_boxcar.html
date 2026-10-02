@@ -69,9 +69,9 @@ no hemodynamic delay - it represents an instantaneous response.</p>
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, the boxcar is scaled so that its
-integral equals 1 (i.e., amplitude = 1/width). This makes the regression
-coefficient interpretable as the mean signal in the window.
-Default is <code>FALSE</code>.</p></dd>
+integral equals 1 (i.e., amplitude = 1/width), so the regression
+coefficient estimates the integrated signal in the window rather than its
+mean. Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -81,9 +81,11 @@ Default is <code>FALSE</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>When used in a GLM, the estimated coefficient represents a (weighted) average
-of the data within the specified time window. If <code>normalize = TRUE</code>, the
-coefficient directly estimates the mean signal in that window.</p>
+    <p>In a least-squares GLM, an isolated event's coefficient for a boxcar of
+amplitude 1 estimates the mean signal in the window. With
+<code>normalize = TRUE</code> the boxcar has unit area (amplitude
+<code>1/width</code>), so the coefficient estimates the integrated signal over
+the window (the mean multiplied by <code>width</code>).</p>
 <p>For delayed windows (not starting at t=0), use <code><a href="lag_hrf.html">lag_hrf</a></code> to shift
 the boxcar in time.</p>
     </div>
@@ -126,9 +128,9 @@ convolved with this HRF). For trial-varying boxcar widths, use a list of HRFs:</
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">t</span>, <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">hrf1</span>, <span class="va">t</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"s"</span>, main <span class="op">=</span> <span class="st">"Simple Boxcar HRF"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="hrf_boxcar-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Normalized boxcar - coefficient will estimate mean signal in window</span></span></span>
+<span class="r-in"><span><span class="co"># Unit-area boxcar: beta estimates the integrated signal over 0-5 s</span></span></span>
+<span class="r-in"><span><span class="co"># (5 x the mean); with amplitude 1, beta estimates the mean itself</span></span></span>
 <span class="r-in"><span><span class="va">hrf2</span> <span class="op">&lt;-</span> <span class="fu">hrf_boxcar</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">5</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># integral is now 1, so beta estimates mean(Y[0:5])</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Use in a regressor with trial-varying widths</span></span></span>
 <span class="r-in"><span><span class="va">hrf_short</span> <span class="op">&lt;-</span> <span class="fu">hrf_boxcar</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>

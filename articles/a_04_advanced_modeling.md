@@ -3,7 +3,7 @@
 ## Introduction
 
 This vignette explores advanced features of `fmrihrf` for systematic HRF
-modeling, regularization, and experimental design. We’ll cover five key
+modeling, regularization, and experimental design. We’ll cover four key
 functions that extend the basic HRF framework:
 
 - **[`hrf_library()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_library.md)**:
@@ -80,19 +80,22 @@ gamma_long <- gamma_long %>%
   mutate(Shape = factor(Shape, levels = c("4", "6", "8")),
          Rate = factor(Rate, levels = c("0.8", "1", "1.2")))
 
-# Create a more informative plot
-ggplot(gamma_long, aes(x = Time, y = Response, color = Rate, linetype = Rate)) +
-  geom_line(linewidth = 0.8) +
+# One panel per shape; rate (an ordered parameter) uses the ordered palette
+ggplot(gamma_long, aes(x = Time, y = Response, color = Rate)) +
+  geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
+  geom_line(linewidth = 0.9) +
   facet_wrap(~Shape, ncol = 1, labeller = label_both) +
-  albersdown::scale_color_albers() +
-  labs(title = "Gamma HRF library", x = "Time (s)",
-       y = "Response", color = "Rate", linetype = "Rate") +
-  theme(legend.position = "bottom")
+  scale_colour_hrf("ordered") +
+  scale_y_continuous(breaks = c(0, 0.2)) +
+  labs(title = "Gamma HRF library", subtitle = "Peak time = (shape - 1) / rate",
+       x = "Time (s)", y = "Response", color = "Rate") +
+  theme(legend.position = "bottom", legend.justification = "left",
+        strip.text = element_text(hjust = 0), plot.title.position = "plot")
 ```
 
 ![Nine gamma HRFs grouped into panels by shape (4, 6, 8), with rate
-(0.8, 1, 1.2) distinguished by color and line type. All panels share the
-same
+(0.8, 1, 1.2) distinguished by color. Higher rates peak earlier and
+higher; all panels share the same
 axes.](a_04_advanced_modeling_files/figure-html/gamma_library-1.png)![](a_04_advanced_modeling_files/figure-html/gamma_library-1.phone.png)
 
 ![](a_04_advanced_modeling_files/figure-html/gamma_library-dark-1.png)
@@ -129,24 +132,17 @@ print(spm_lag_lib)
 #>    Basis functions: 7 
 #>    Span: 28 s
 
-# Evaluate and plot
-spm_lag_responses <- spm_lag_lib(time_points)
-spm_lag_df <- as.data.frame(spm_lag_responses)
-names(spm_lag_df) <- paste0("Lag_", lag_params$lag, "s")
-spm_lag_df$Time <- time_points
-
-spm_lag_long <- pivot_longer(spm_lag_df, -Time, names_to = "Lag", values_to = "Response")
-
-ggplot(spm_lag_long, aes(x = Time, y = Response, color = Lag)) +
-  geom_line(linewidth = 1) +
-  scale_color_viridis_d() +
-  labs(title = "Library of Lagged SPM Canonical HRFs",
-       subtitle = "Temporal lags from -2 to +4 seconds",
-       x = "Time (seconds)",
-       y = "HRF Response")
+# The library is a basis set: one column per lag
+plot_hrfs(spm_lag_lib, time = time_points,
+          labels = sprintf("%+d s", lag_params$lag), palette = "ordered",
+          title = "Library of lagged SPM canonical HRFs",
+          subtitle = "Lags from -2 to +4 s")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png)![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.phone.png)
+![Seven SPM canonical HRFs lagged from -2 to +4 seconds in 1 second
+steps, coloured from violet (earliest) to ochre (latest). The shapes are
+identical and evenly spaced in
+time.](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.png)![](a_04_advanced_modeling_files/figure-html/spm_lag_library-1.phone.png)
 
 ![](a_04_advanced_modeling_files/figure-html/spm_lag_library-dark-1.png)
 
@@ -160,168 +156,165 @@ interpreting estimated HRFs from fMRI analyses.
 
 ### How Reconstruction Works
 
+A flexible basis set describes an HRF by a vector of weights, one per
+basis function. The reconstruction matrix holds the basis functions
+evaluated on a time grid (one column per function), so multiplying it by
+the weights gives the HRF on that grid.
+
 ``` r
 
-# Five cubic B-splines with explicit 24-second support.
-# Evaluate through 30 seconds to show that the basis is zero beyond its support.
-basis_set <- hrf_bspline_generator(nbasis = 5, span = 24)
-eval_times <- seq(0, 30, by = 0.1)
+# Ten cubic B-splines with 24-second support
+basis_set <- hrf_bspline_generator(nbasis = 10, span = 24)
+eval_times <- seq(0, 24, by = 0.1)
 
 # The reconstruction matrix: each column is a basis function evaluated at time points
-recon_matrix <- basis_set(eval_times)
-print(paste("Reconstruction matrix dimensions:", nrow(recon_matrix), "time points x", 
-            ncol(recon_matrix), "basis functions"))
-#> [1] "Reconstruction matrix dimensions: 301 time points x 5 basis functions"
-
-# Let's visualize the basis functions themselves first
-basis_df <- as.data.frame(recon_matrix)
-names(basis_df) <- paste0("B", 1:5)
-basis_df$Time <- eval_times
-
-basis_long <- pivot_longer(basis_df, -Time, names_to = "Basis", values_to = "Value")
-
-ggplot(basis_long, aes(x = Time, y = Value, color = Basis)) +
-  geom_line(linewidth = 1.2) +
-  scale_color_viridis_d(option = "turbo") +
-  labs(title = "B-spline Basis Functions",
-       subtitle = "Each basis function covers a different time window",
-       x = "Time (seconds)",
-       y = "Basis Function Value")
+recon_matrix <- reconstruction_matrix(basis_set, eval_times)
+dim(recon_matrix)
+#> [1] 241  10
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-1.phone.png)
-
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-1.png)
-
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-1.phone.png)
+Every function is zero at 0 s and at 24 s, so any weighted sum starts
+and ends at baseline.
 
 ``` r
 
+plot_hrfs(basis_set, time = eval_times,
+          title = "Cubic B-spline basis, N = 10",
+          subtitle = "24 s span; each function covers part of it")
+```
 
-# Now demonstrate reconstruction with different coefficient patterns
-coefficient_sets <- list(
-  "Early Peak" = c(0.2, 1.0, 0.3, 0.0, 0.0),
-  "Canonical" = c(0.0, 0.3, 1.0, 0.4, -0.1),
-  "Late Peak" = c(0.0, 0.0, 0.3, 1.0, 0.2),
-  "Double Peak" = c(0.0, 0.8, 0.2, 0.9, 0.0)
+![Ten cubic B-spline basis functions on 0 to 24 seconds, labelled B1 to
+B10 at their peaks and coloured from violet (early) to ochre
+(late).](a_04_advanced_modeling_files/figure-html/reconstruction_basis-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_basis-1.phone.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_basis-dark-1.png)
+
+![](a_04_advanced_modeling_files/figure-html/reconstruction_basis-dark-1.phone.png)
+
+In an analysis the weights come from the GLM. Here we obtain them by
+least-squares fits of three target responses: the SPM canonical HRF, the
+same response delayed by 3 s, and the response to a sustained 6-second
+event. The basis is the same each time; only the weights change.
+
+``` r
+
+targets <- list(
+  "Canonical" = HRF_SPMG1,
+  "Delayed" = lag_hrf(HRF_SPMG1, 3),      # canonical, 3 s later
+  "Sustained" = block_hrf(HRF_SPMG1, width = 6, normalize = TRUE)  # 6 s event
 )
+fits <- lapply(targets, function(h) {
+  y <- h(eval_times)
+  y <- y / max(y)                       # unit peak
+  w <- qr.solve(recon_matrix, y)        # least-squares weights
+  list(weights = w, fitted = drop(recon_matrix %*% w), target = y)
+})
 
-# Reconstruct HRFs for each coefficient set
-reconstruction_df <- data.frame()
-for (name in names(coefficient_sets)) {
-  coefs <- coefficient_sets[[name]]
-  hrf_values <- as.vector(recon_matrix %*% coefs)
-  
-  df <- data.frame(
-    Time = eval_times,
-    HRF = hrf_values,
-    Pattern = name
-  )
-  reconstruction_df <- rbind(reconstruction_df, df)
-}
+# Fit quality (R^2) for each target
+sapply(fits, function(f) {
+  1 - sum((f$target - f$fitted)^2) / sum((f$target - mean(f$target))^2)
+})
+#> Canonical   Delayed Sustained 
+#> 0.9980561 0.9964472 0.9996352
 
-ggplot(reconstruction_df, aes(x = Time, y = HRF, color = Pattern)) +
-  geom_line(linewidth = 1.5) +
-  scale_color_manual(values = c("Early Peak" = "#E69F00", 
-                               "Canonical" = "#009E73",
-                               "Late Peak" = "#0072B2",
-                               "Double Peak" = "#D55E00")) +
-  labs(title = "Different HRF Shapes from Same Basis Set",
-       subtitle = "Varying coefficients produces diverse HRF patterns",
-       x = "Time (seconds)",
-       y = "HRF Response") +
-  theme(legend.position = "bottom")
+canonical_coefs <- fits[["Canonical"]]$weights
+round(canonical_coefs, 2)
+#>  [1] -0.18  0.52  1.26  0.41  0.09 -0.09 -0.09 -0.07 -0.02 -0.03
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-2.phone.png)
+### Building an HRF from Weighted Basis Functions
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-2.png)
-
-![](a_04_advanced_modeling_files/figure-html/reconstruction_demo-dark-2.phone.png)
-
-### Building an HRF Step by Step
-
-The solid line is the cumulative response; the dashed line is the
-contribution added at each step. All panels use the same axes. The basis
-has 24-second support and is zero afterward, through the end of the
-30-second evaluation grid.
+Each panel shows the weighted basis functions (thin grey lines), their
+sum, the reconstructed HRF (thick coloured line), and the target it was
+fitted to (dashed). The canonical response is carried mainly by B3, with
+help from B2 and B4; its undershoot comes from the small negative
+weights on B6–B8. The fits are not perfect: the small dip in the first
+second of the canonical fit, and the wiggle before the delayed rise, are
+fitting errors, not modelled features. Because every basis function is
+zero at 24 s, the fits also return to zero there even where a target is
+still slightly below baseline (most visibly the sustained response’s
+undershoot).
 
 ``` r
 
-# Let's build up a canonical HRF step by step
-canonical_coefs <- c(0.0, 0.3, 1.0, 0.4, -0.1)
-
-# Create data for cumulative reconstruction
-cumulative_df <- data.frame()
-for (i in 1:5) {
-  # Zero out coefficients after position i
-  temp_coefs <- canonical_coefs
-  if (i < 5) temp_coefs[(i+1):5] <- 0
-  
-  # Calculate cumulative HRF
-  cumulative_hrf <- as.vector(recon_matrix %*% temp_coefs)
-  
-  # Store individual contribution
-  individual_coefs <- rep(0, 5)
-  individual_coefs[i] <- canonical_coefs[i]
-  individual_contribution <- as.vector(recon_matrix %*% individual_coefs)
-  
-  df <- data.frame(
-    Time = rep(eval_times, 2),
-    Value = c(cumulative_hrf, individual_contribution),
-    Type = rep(c("Cumulative", "Individual"), each = length(eval_times)),
-    Step = i,
-    Basis = paste0(i, ". Add B", i, "  (weight ", round(canonical_coefs[i], 2), ")")
+component_df <- do.call(rbind, lapply(names(fits), function(nm) {
+  w <- fits[[nm]]$weights
+  data.frame(
+    Time = rep(eval_times, length(w)),
+    Value = as.vector(sweep(recon_matrix, 2, w, `*`)),
+    Basis = factor(rep(paste0("B", seq_along(w)), each = length(eval_times)),
+                   levels = paste0("B", seq_along(w))),
+    Target = nm
   )
-  cumulative_df <- rbind(cumulative_df, df)
-}
+}))
+sum_df <- do.call(rbind, lapply(names(fits), function(nm) {
+  data.frame(Time = eval_times, Value = fits[[nm]]$fitted,
+             Target_value = fits[[nm]]$target, Target = nm)
+}))
+component_df$Target <- factor(component_df$Target, levels = names(fits))
+sum_df$Target <- factor(sum_df$Target, levels = names(fits))
 
-# Create faceted plot showing the build-up
-ggplot(cumulative_df, aes(x = Time, y = Value, color = Type, linetype = Type)) +
-  geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
-  geom_line(linewidth = 0.9) +
-  facet_wrap(~Basis, ncol = 1) +
-  albersdown::scale_color_albers() +
-  scale_linetype_manual(values = c("Cumulative" = "solid", "Individual" = "dashed")) +
-  scale_y_continuous(breaks = c(0, 0.4, 0.8)) +
-  labs(title = "Building an HRF step by step",
-       x = "Time (s)", y = "Response", color = NULL, linetype = NULL) +
-  theme(legend.position = "bottom",
-        strip.text = element_text(size = 10))
+ggplot(component_df, aes(Time, Value)) +
+  geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
+  geom_line(aes(group = Basis), colour = "grey60", linewidth = 0.4) +
+  geom_line(data = sum_df, aes(colour = Target), linewidth = 1.1) +
+  geom_line(data = sum_df, aes(y = Target_value), colour = "grey15",
+            linewidth = 0.5, linetype = "22") +
+  facet_wrap(~Target, nrow = 1) +
+  scale_colour_hrf() +
+  scale_x_continuous(breaks = c(0, 10, 20)) +
+  scale_y_continuous(breaks = c(0, 0.5, 1)) +
+  labs(title = "Same basis, different weights",
+       subtitle = "Grey: weighted basis functions\nColour: their sum. Dashed: target",
+       x = "Time (s)", y = "Response / peak") +
+  theme(legend.position = "none", strip.text = element_text(hjust = 0),
+        plot.title.position = "plot")
 ```
 
-![Five sequential reconstruction panels on common axes. Each shows the
-cumulative HRF and the weighted basis function added at that step,
-including the negative fifth
-contribution.](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-1.phone.png)
+![Three panels for the canonical, delayed and sustained targets. In
+each, thin grey curves are the ten basis functions scaled by their
+weights, a thick coloured curve is their sum, and a dashed curve is the
+target. The canonical sum peaks at 5 seconds, the delayed at 8 seconds,
+and the sustained around 8 seconds with a broader
+peak.](a_04_advanced_modeling_files/figure-html/reconstruction_components-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_components-1.phone.png)
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-dark-1.png)
+![](a_04_advanced_modeling_files/figure-html/reconstruction_components-dark-1.png)
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_interactive-dark-1.phone.png)
+![](a_04_advanced_modeling_files/figure-html/reconstruction_components-dark-1.phone.png)
+
+The weights themselves summarize the shape. For the delayed response the
+largest weight moves from B3 to B4 (and B2 turns slightly negative to
+delay the rise); a sustained event spreads it over B3 to B5:
 
 ``` r
 
-# Show coefficient importance
-coef_importance <- data.frame(
-  Basis = paste0("B", 1:5),
-  Coefficient = canonical_coefs,
-  `Absolute Value` = abs(canonical_coefs)
-)
+coef_df <- do.call(rbind, lapply(names(fits), function(nm) {
+  w <- fits[[nm]]$weights
+  data.frame(Basis = factor(paste0("B", seq_along(w)), levels = paste0("B", seq_along(w))),
+             Weight = w, Target = nm)
+}))
+coef_df$Target <- factor(coef_df$Target, levels = names(fits))
 
-coef_importance$Sign <- factor(sign(coef_importance$Coefficient),
-                              levels = c(-1, 0, 1), labels = c("Negative", "Zero", "Positive"))
-ggplot(coef_importance, aes(x = Basis, y = Coefficient, fill = Sign)) +
-  geom_col() +
-  geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5) +
-  albersdown::scale_fill_albers() +
-  labs(title = "Coefficient Values for Canonical HRF",
-       subtitle = "B3 dominates the shape, B5 provides the undershoot",
-       x = "Basis Function",
-       y = "Coefficient Value",
-       fill = "Sign")
+coef_df$Index <- as.integer(coef_df$Basis)
+ggplot(coef_df, aes(Index, Weight, colour = Target)) +
+  geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
+  geom_segment(aes(xend = Index, y = 0, yend = Weight), linewidth = 0.9) +
+  geom_point(size = 2.2) +
+  facet_wrap(~Target, ncol = 1) +
+  scale_colour_hrf() +
+  scale_x_continuous(breaks = 1:10, minor_breaks = NULL) +
+  scale_y_continuous(breaks = c(0, 1)) +
+  labs(title = "Basis weights for each target", x = "Basis function (B1-B10)",
+       y = "Weight") +
+  theme(legend.position = "none", strip.text = element_text(hjust = 0),
+        plot.title.position = "plot")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.phone.png)
+![Lollipop charts of the ten basis weights for each target, coloured
+like the fitted curves above. The canonical fit puts its largest weight
+on B3, the delayed fit on B4, and the sustained fit on B3 to B5; later
+weights are small and mostly
+negative.](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.png)![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-1.phone.png)
 
 ![](a_04_advanced_modeling_files/figure-html/reconstruction_coefficients-dark-1.png)
 
@@ -375,57 +368,30 @@ design_matrix <- evaluate(reg_set, scan_times)
 
 print(dim(design_matrix)) # Time points x 3 conditions
 #> [1] 121   3
-
-# Visualize the design matrix
-design_df <- as.data.frame(design_matrix)
-names(design_df) <- c("TaskA", "TaskB", "TaskC")
-design_df$Time <- scan_times
-
-design_long <- pivot_longer(design_df, -Time, names_to = "Condition", values_to = "Response")
-
-ggplot(design_long, aes(x = Time, y = Response, color = Condition)) +
-  geom_line(linewidth = 1) +
-  scale_color_viridis_d() +
-  labs(title = "Multi-Condition fMRI Design Matrix",
-       subtitle = "Three experimental conditions with shared HRF",
-       x = "Time (seconds)",
-       y = "Predicted BOLD Response",
-       color = "Condition")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-1.phone.png)
-
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-1.png)
-
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-1.phone.png)
+[`plot_regressors()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_regressors.md)
+accepts a regressor set directly. With `layout = "stack"`, each
+condition gets its own panel and its own events are marked below its
+curve. `scales = "fixed"` puts all panels on one y axis, so response
+sizes can be compared across conditions:
 
 ``` r
 
-
-# Add event markers
-onset_df <- data.frame(
-  Time = all_onsets,
-  Condition = conditions,
-  Marker = 1
-)
-
-ggplot(design_long, aes(x = Time, y = Response, color = Condition)) +
-  geom_line(linewidth = 1) +
-  geom_point(data = onset_df, aes(x = Time, y = -0.1, color = Condition), 
-             size = 2, alpha = 0.7) +
-  scale_color_viridis_d() +
-  labs(title = "Design Matrix with Event Onsets",
-       subtitle = "Points show stimulus onset times",
-       x = "Time (seconds)",
-       y = "Predicted BOLD Response",
-       color = "Condition")
+plot_regressors(reg_set, grid = seq(0, total_duration, by = 0.1),
+                layout = "stack", scales = "fixed",
+                title = "Multi-condition design",
+                subtitle = "8 random onsets per condition")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.png)![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-2.phone.png)
+![Three stacked panels, one per condition, each showing that condition's
+predicted BOLD response over 240 seconds with its eight event onsets
+marked below. Closely spaced events produce larger, merged
+responses.](a_04_advanced_modeling_files/figure-html/regressor_set_plot-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_set_plot-1.phone.png)
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-2.png)
+![](a_04_advanced_modeling_files/figure-html/regressor_set_plot-dark-1.png)
 
-![](a_04_advanced_modeling_files/figure-html/regressor_set_demo-dark-2.phone.png)
+![](a_04_advanced_modeling_files/figure-html/regressor_set_plot-dark-1.phone.png)
 
 ## Regressor Design: Complex Block Designs
 
@@ -436,7 +402,7 @@ creates design matrices directly.
 
 ``` r
 
-# Create a sampling frame for 2 blocks of 120 seconds each
+# Create a sampling frame for 2 blocks of 120 scans (240 s) each
 sframe <- sampling_frame(
   blocklens = c(120, 120),  # Two 4-minute blocks (120 scans each at TR = 2s)
   TR = 2                    # 2-second TR
@@ -476,30 +442,44 @@ design_mat <- regressor_design(
 print(dim(design_mat)) # Total time points across both blocks x 2 conditions
 #> [1] 240   2
 
-# Convert to data frame for plotting
-# Use global=TRUE to get continuous time across blocks
-time_points <- samples(sframe, global = TRUE)
-design_plot_df <- as.data.frame(design_mat)
-names(design_plot_df) <- c("Faces", "Houses")
-design_plot_df$Time <- time_points
-design_plot_df$Block <- rep(1:2, each = 120) # 120 scans per block
+# The same design on a 0.1 s grid shows the continuous responses; the design
+# matrix itself is those responses sampled once per scan (TR = 2 s).
+sframe_fine <- sampling_frame(blocklens = c(2400, 2400), TR = 0.1, precision = 0.05)
+design_fine <- regressor_design(onsets = block_onsets, fac = event_conditions,
+                                block = block_ids, sframe = sframe_fine, hrf = HRF_SPMG1)
+fine_df <- data.frame(Time = rep(samples(sframe_fine, global = TRUE), 2),
+                      Response = as.vector(design_fine),
+                      Condition = rep(c("Faces", "Houses"), each = nrow(design_fine)))
+scan_df <- data.frame(Time = rep(samples(sframe, global = TRUE), 2),
+                      Response = as.vector(design_mat),
+                      Condition = rep(c("Faces", "Houses"), each = nrow(design_mat)))
+scan_df <- scan_df[abs(scan_df$Response) > 0.01, ]   # samples during responses
+# Highest scan sample in each block, labelled on the Faces panel
+peak_df <- do.call(rbind, lapply(split(scan_df[scan_df$Condition == "Faces", ],
+                                       scan_df$Time[scan_df$Condition == "Faces"] > 240),
+                                 function(d) d[which.max(d$Response), ]))
 
-design_plot_long <- pivot_longer(design_plot_df, c("Faces", "Houses"),
-                                names_to = "Condition", values_to = "Response")
-
-# Plot with block separation (block boundary at 240 seconds)
-ggplot(design_plot_long, aes(x = Time, y = Response, color = Condition)) +
-  geom_line(linewidth = 1) +
-  geom_vline(xintercept = 240, linetype = "dashed", alpha = 0.7) +
-  scale_color_viridis_d() +
-  labs(title = "Multi-Block Experimental Design",
-       subtitle = "Two blocks with different event schedules (dashed line = block boundary)",
-       x = "Time (seconds)",
-       y = "Predicted BOLD Response",
-       color = "Condition")
+ggplot(fine_df, aes(Time, Response, colour = Condition)) +
+  geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
+  geom_vline(xintercept = 240, colour = "grey45", linetype = "dashed") +
+  geom_line(linewidth = 0.7) +
+  geom_point(data = scan_df, size = 0.9) +
+  geom_text(data = peak_df, aes(label = sprintf("max %.3f", Response)),
+            hjust = -0.15, vjust = -0.4, size = 3, show.legend = FALSE) +
+  facet_wrap(~Condition, ncol = 1) +
+  scale_colour_hrf() +
+  scale_y_continuous(breaks = c(0, 0.15), expand = expansion(mult = c(0.05, 0.35))) +
+  labs(title = "Two-block design",
+       subtitle = "Points: scan samples (TR = 2 s)\nDashed line: start of block 2",
+       x = "Time (s)", y = "Predicted BOLD response") +
+  theme(legend.position = "none", strip.text = element_text(hjust = 0),
+        plot.title.position = "plot")
 ```
 
-![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.phone.png)
+![Faces and Houses responses in two stacked panels across two 240-second
+blocks, with points at the 2 second scan samples. A dashed line marks
+the block boundary at 240 seconds; each block has its own event
+schedule.](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.png)![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-1.phone.png)
 
 ![](a_04_advanced_modeling_files/figure-html/regressor_design_demo-dark-1.png)
 
@@ -529,3 +509,12 @@ print(timing_df)
 #> 9      2                   75          315    Houses
 #> 10     2                   95          335     Faces
 ```
+
+The curves are the same in both blocks, but the scan samples (points)
+are not. Scans are taken at odd seconds (the middle of each 2-second
+TR). Block 1’s events (10, 30, … s) peak 5 s later, at odd seconds, so a
+scan lands on each peak (0.175). Block 2 starts at 240 s, so its events
+fall at 255, 275, … s and peak at even seconds, between two scans; the
+highest sampled value is 0.160. This is a property of the design matrix
+sampled at TR = 2 s, not a difference between blocks; it is one reason
+to jitter onsets relative to the scan grid.

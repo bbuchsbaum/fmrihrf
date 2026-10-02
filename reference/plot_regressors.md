@@ -1,10 +1,13 @@
 # Compare Multiple Regressor Objects
 
-Creates a comparison plot of multiple regressor objects. This function
-provides a convenient way to visualize different regressors on the same
-plot, with options for showing event onsets and customization. Uses
-ggplot2 if available for publication-quality figures, otherwise falls
-back to base R graphics.
+Plots one or more regressors on a shared time axis. Regressors built
+from a basis set are expanded into one curve per basis function, and a
+[`regressor_set()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor_set.md)
+is expanded into one curve per condition. Event onsets (and durations)
+are drawn as bars under the curves; zero-duration events get a minimum
+bar width of 0.4% of the time range so that they stay visible. Uses
+ggplot2 when available, otherwise base graphics. Colours come from
+[`hrf_palette()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.md).
 
 ## Usage
 
@@ -15,11 +18,16 @@ plot_regressors(
   labels = NULL,
   title = NULL,
   subtitle = NULL,
-  show_onsets = "first",
-  onset_alpha = 0.3,
-  precision = 0.33,
+  show_onsets = NULL,
+  onset_alpha = 0.8,
+  precision = NULL,
   use_ggplot = TRUE,
-  draw = TRUE
+  draw = TRUE,
+  basis = c("all", "first"),
+  layout = c("overlay", "stack"),
+  samples = NULL,
+  palette = c("auto", "categorical", "ordered"),
+  scales = c("free_y", "fixed")
 )
 ```
 
@@ -27,23 +35,25 @@ plot_regressors(
 
 - ...:
 
-  Regressor objects to compare. Can be passed as individual arguments or
-  as a named list.
+  Regressor objects (`Reg`) or a `RegSet` to compare. Can be passed as
+  individual arguments or as a named list.
 
 - grid:
 
-  Numeric vector of time points for evaluation. If NULL (default),
-  automatically generates a grid covering all regressors.
+  Numeric vector of time points for evaluation. If NULL (default), a
+  0.25 s grid covering all regressors is used. Use a fine grid for the
+  curve and `samples` to show scan times.
 
 - labels:
 
-  Character vector of labels for each regressor. If NULL (default), uses
+  Character vector of labels, one per regressor or one per plotted
+  curve. If NULL (default), uses list names, condition levels, or
   "Regressor_1", "Regressor_2", etc.
 
 - title:
 
   Character string for the plot title. If NULL (default), uses
-  "Regressor Comparison".
+  "Regressor comparison".
 
 - subtitle:
 
@@ -51,17 +61,20 @@ plot_regressors(
 
 - show_onsets:
 
-  Logical or character. If TRUE, show onset lines for all regressors. If
-  "first", show only for the first regressor. If FALSE, hide onsets.
-  Default is "first".
+  Logical or character. If TRUE, mark events for every regressor in its
+  own colour. If "first", mark only the first regressor's events, in
+  grey. If FALSE, hide event marks. If NULL (default), uses "first" for
+  `layout = "overlay"` and TRUE for `layout = "stack"`, so each panel
+  shows its own events.
 
 - onset_alpha:
 
-  Alpha transparency for onset lines. Default is 0.3.
+  Alpha transparency for event marks. Default is 0.8.
 
 - precision:
 
-  Numeric sampling precision for HRF evaluation. Default is 0.33.
+  Numeric sampling precision for HRF evaluation. If NULL (default), the
+  grid spacing capped at 0.33 s.
 
 - use_ggplot:
 
@@ -70,14 +83,50 @@ plot_regressors(
 
 - draw:
 
-  Logical; draw the plot immediately (default TRUE). With \`use_ggplot =
-  TRUE\`, set FALSE to customize or auto-print the returned data frame's
-  \`"plot"\` attribute.
+  Logical; draw the plot (default TRUE). With `use_ggplot = TRUE`, set
+  FALSE to customize the returned data frame's `"plot"` attribute.
+
+- basis:
+
+  Either `"all"` (default) to plot every basis column of a multi-basis
+  regressor, or `"first"` for the first column only.
+
+- layout:
+
+  Either `"overlay"` (default) or `"stack"` (one panel per curve on a
+  shared time axis). Stacked panels mark their own events in grey.
+
+- samples:
+
+  Optional numeric vector of sample times (for example scan acquisition
+  times). The regressors are evaluated there and drawn as points on the
+  curves.
+
+- palette:
+
+  Colour palette: `"auto"` (default), `"categorical"`, or `"ordered"`;
+  see
+  [`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md).
+
+- scales:
+
+  For `layout = "stack"`: `"free_y"` (default) gives each panel its own
+  y range; `"fixed"` shares one range so amplitudes can be compared.
 
 ## Value
 
-Invisibly returns a data frame in long format with columns 'time',
-'Regressor', and 'response'.
+A data frame in long format with columns 'time', 'Regressor', and
+'response'. With ggplot2, the plot is stored in the `"plot"` attribute.
+The value is invisible except when drawing inside knitr, where it prints
+like a ggplot object (see
+[`plot_hrfs()`](https://bbuchsbaum.github.io/fmrihrf/reference/plot_hrfs.md)).
+
+## Details
+
+Inside a knitr document the result is returned visibly and printed by
+knitr, which lets document themes (for example dark-mode figure twins)
+handle the ggplot. At the console the plot is drawn immediately and the
+data are returned invisibly.
 
 ## Examples
 
@@ -93,17 +142,16 @@ plot_regressors(reg1, reg2, reg3,
                 labels = c("SPM Canonical", "Gamma", "Gaussian"))
 
 
-# Compare regressors with different event timings
-reg_fast <- regressor(seq(0, 60, by = 10), HRF_SPMG1)
-reg_slow <- regressor(seq(0, 60, by = 20), HRF_SPMG1)
-plot_regressors(reg_fast, reg_slow,
-                labels = c("Fast (10s ISI)", "Slow (20s ISI)"),
-                title = "Effect of Inter-Stimulus Interval")
+# Show the scan-time samples of a regressor (TR = 2 s)
+plot_regressors(reg1, samples = seq(0, 80, by = 2), labels = "SPMG1")
+
+
+# One panel per basis function of a basis-set regressor
+plot_regressors(regressor(c(10, 40), HRF_SPMG3), layout = "stack")
 
 
 # Compare original vs shifted regressor
-reg_orig <- regressor(c(10, 30, 50), HRF_SPMG1)
-reg_shifted <- shift(reg_orig, 5)
-plot_regressors(reg_orig, reg_shifted,
-                labels = c("Original", "Shifted +5s"))
+reg_shifted <- shift(reg1, 5)
+plot_regressors(reg1, reg_shifted, labels = c("Original", "Shifted +5s"),
+                show_onsets = TRUE)
 ```

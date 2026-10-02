@@ -71,7 +71,9 @@ maps weights to time points, allowing for arbitrary temporal response shapes.</p
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>Total duration of the window in seconds. If provided without
-<code>times</code>, weights are evenly spaced from 0 to <code>width</code>.</p></dd>
+<code>times</code>, <code>[0, width)</code> is divided into <code>length(weights)</code>
+equal bins (constant method), or the weights are placed at evenly spaced
+points from 0 to <code>width</code> (linear method).</p></dd>
 
 
 <dt id="arg-times">times<a class="anchor" aria-label="anchor" href="#arg-times"></a></dt>
@@ -82,8 +84,10 @@ consistency with other HRFs. If provided, <code>width</code> is ignored.</p></dd
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>Interpolation method between time points:</p><dl><dt>"constant"</dt>
-<dd><p>Step function - weight is constant until the next time
-    point (default). Good for discrete time bins.</p></dd>
+<dd><p>Step function (default): each weight applies to one
+    time bin. With <code>times</code>, weight <code>i</code> covers
+    <code>[times[i], times[i + 1])</code> and the last weight covers a bin as
+    wide as the one before it. Every weight is used.</p></dd>
 
   <dt>"linear"</dt>
 <dd><p>Linear interpolation between points. Good for smooth
@@ -94,9 +98,10 @@ consistency with other HRFs. If provided, <code>width</code> is ignored.</p></dd
 
 
 <dt id="arg-normalize">normalize<a class="anchor" aria-label="anchor" href="#arg-normalize"></a></dt>
-<dd><p>Logical; if <code>TRUE</code>, weights are scaled so they sum to 1
-(for <code>method = "constant"</code>) or integrate to 1 (for <code>method = "linear"</code>).
-This makes the regression coefficient interpretable as a weighted mean.
+<dd><p>Logical; if <code>TRUE</code>, weights are scaled so all of them
+sum to 1 (for <code>method = "constant"</code>) or the curve integrates to 1
+(for <code>method = "linear"</code>). This fixes the scale of the weight
+profile; see Details for what the regression coefficient estimates.
 Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
@@ -107,11 +112,18 @@ Default is <code>FALSE</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This is useful for extracting weighted averages of data at specific time points.
-When <code>normalize = TRUE</code> and the HRF is used in a GLM, the estimated
-coefficient represents a weighted mean of the data at the specified times.</p>
-<p>There are two ways to specify the temporal structure:</p><ol><li><p><code>width + weights</code>: Weights are evenly spaced from 0 to <code>width</code></p></li>
-<li><p><code>times + weights</code>: Explicit time points for each weight (relative to t=0)</p></li>
+    <p>This is useful for summarising the signal in chosen post-stimulus windows
+with a chosen temporal profile. In a least-squares GLM, an isolated event's
+coefficient is the amplitude of the weight profile \(w(t)\) that best
+matches the data, \(\sum_t w(t) y(t) / \sum_t w(t)^2\). This equals the
+mean signal in the window only when all non-zero weights are 1 (a boxcar);
+in general it is not a weighted mean. Normalizing rescales the coefficient
+but does not change this.</p>
+<p>There are two ways to specify the temporal structure:</p><ol><li><p><code>width + weights</code>: the window <code>[0, width)</code> is divided
+    into <code>length(weights)</code> equal bins (constant method) or the weights
+    are placed at evenly spaced points from 0 to <code>width</code> (linear method)</p></li>
+<li><p><code>times + weights</code>: explicit time points for each weight
+    (relative to t=0)</p></li>
 </ol><p>For delayed windows (not starting at t=0), use <code><a href="lag_hrf.html">lag_hrf</a></code> to shift
 the weighted HRF in time.</p>
     </div>
@@ -150,7 +162,7 @@ trial-varying weighted HRFs, use a list of HRFs:</p><div class="sourceCode"><pre
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simple: 6s window with 4 evenly-spaced weights (at 0, 2, 4, 6s)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simple: 6 s window split into 4 bins of 1.5 s (starting at 0, 1.5, 3, 4.5 s)</span></span></span>
 <span class="r-in"><span><span class="va">hrf1</span> <span class="op">&lt;-</span> <span class="fu">hrf_weighted</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">6</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">10</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">t</span>, <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">hrf1</span>, <span class="va">t</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"s"</span>, main <span class="op">=</span> <span class="st">"Weighted HRF (width + weights)"</span><span class="op">)</span></span></span>
@@ -165,7 +177,7 @@ trial-varying weighted HRFs, use a list of HRFs:</p><div class="sourceCode"><pre
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">t</span>, <span class="fu"><a href="evaluate.html">evaluate</a></span><span class="op">(</span><span class="va">hrf2</span>, <span class="va">t</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Smooth Weighted HRF"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="hrf_weighted-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Normalized weights - coefficient estimates weighted mean of signal</span></span></span>
+<span class="r-in"><span><span class="co"># Normalized weights: all four bin weights sum to 1</span></span></span>
 <span class="r-in"><span><span class="va">hrf3</span> <span class="op">&lt;-</span> <span class="fu">hrf_weighted</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  width <span class="op">=</span> <span class="fl">8</span>,</span></span>
 <span class="r-in"><span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>

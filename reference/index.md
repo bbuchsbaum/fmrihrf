@@ -115,6 +115,9 @@
 - [`hrf_mexhat()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_mexhat.md)
   : Mexican Hat HRF (hemodynamic response function)
 
+- [`hrf_palette()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.md)
+  : Colour palettes for HRF and regressor plots
+
 - [`hrf_sine()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.md)
   : hrf_sine
 
@@ -206,6 +209,11 @@
 
   A `sampling_frame` describes the block structure and temporal sampling
   of an fMRI paradigm.
+
+- [`scale_colour_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/scale_colour_hrf.md)
+  [`scale_color_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/scale_colour_hrf.md)
+  [`scale_fill_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/scale_colour_hrf.md)
+  : ggplot2 colour scales matching fmrihrf plots
 
 - [`shift()`](https://bbuchsbaum.github.io/fmrihrf/reference/shift.md) :
   Shift a time series object

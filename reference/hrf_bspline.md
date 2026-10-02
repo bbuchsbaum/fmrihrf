@@ -1,7 +1,11 @@
 # B-spline HRF (hemodynamic response function)
 
-The \`hrf_bspline\` function computes the B-spline representation of an
-HRF (hemodynamic response function) at given time points \`t\`.
+The \`hrf_bspline\` function computes a B-spline basis for an HRF at
+time points \`t\`. The \`N\` basis functions are the interior functions
+of a clamped B-spline basis on `[0, span]` with evenly spaced knots: the
+functions anchored at the two boundaries are dropped, so every basis
+function (and therefore every fitted HRF) is zero at onset and at the
+end of the span. Outside `[0, span]` the basis is zero.
 
 ## Usage
 
@@ -18,12 +22,12 @@ hrf_bspline(t, span = 24, N = 5, degree = 3, ...)
 - span:
 
   A numeric value representing the temporal window over which the basis
-  set spans. Default value is 20.
+  set spans. Default value is 24.
 
 - N:
 
-  An integer representing the number of basis functions. Default value
-  is 5.
+  An integer representing the number of basis functions. Must be at
+  least `degree - 1`. Default value is 5.
 
 - degree:
 
@@ -31,7 +35,9 @@ hrf_bspline(t, span = 24, N = 5, degree = 3, ...)
 
 - ...:
 
-  Additional arguments passed to \`splines::bs\`.
+  Further arguments passed to [`bs`](https://rdrr.io/r/splines/bs.html)
+  (`intercept`, `df` and `knots` are set internally and ignored if
+  supplied).
 
 ## Value
 

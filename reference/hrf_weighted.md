@@ -26,7 +26,9 @@ hrf_weighted(
 - width:
 
   Total duration of the window in seconds. If provided without `times`,
-  weights are evenly spaced from 0 to `width`.
+  `[0, width)` is divided into `length(weights)` equal bins (constant
+  method), or the weights are placed at evenly spaced points from 0 to
+  `width` (linear method).
 
 - times:
 
@@ -40,8 +42,10 @@ hrf_weighted(
 
   "constant"
 
-  :   Step function - weight is constant until the next time point
-      (default). Good for discrete time bins.
+  :   Step function (default): each weight applies to one time bin. With
+      `times`, weight `i` covers `[times[i], times[i + 1])` and the last
+      weight covers a bin as wide as the one before it. Every weight is
+      used.
 
   "linear"
 
@@ -50,10 +54,11 @@ hrf_weighted(
 
 - normalize:
 
-  Logical; if `TRUE`, weights are scaled so they sum to 1 (for
-  `method = "constant"`) or integrate to 1 (for `method = "linear"`).
-  This makes the regression coefficient interpretable as a weighted
-  mean. Default is `FALSE`.
+  Logical; if `TRUE`, weights are scaled so all of them sum to 1 (for
+  `method = "constant"`) or the curve integrates to 1 (for
+  `method = "linear"`). This fixes the scale of the weight profile; see
+  Details for what the regression coefficient estimates. Default is
+  `FALSE`.
 
 ## Value
 
@@ -63,16 +68,21 @@ and other fmrihrf functions.
 
 ## Details
 
-This is useful for extracting weighted averages of data at specific time
-points. When `normalize = TRUE` and the HRF is used in a GLM, the
-estimated coefficient represents a weighted mean of the data at the
-specified times.
+This is useful for summarising the signal in chosen post-stimulus
+windows with a chosen temporal profile. In a least-squares GLM, an
+isolated event's coefficient is the amplitude of the weight profile
+\\w(t)\\ that best matches the data, \\\sum_t w(t) y(t) / \sum_t
+w(t)^2\\. This equals the mean signal in the window only when all
+non-zero weights are 1 (a boxcar); in general it is not a weighted mean.
+Normalizing rescales the coefficient but does not change this.
 
 There are two ways to specify the temporal structure:
 
-1.  `width + weights`: Weights are evenly spaced from 0 to `width`
+1.  `width + weights`: the window `[0, width)` is divided into
+    `length(weights)` equal bins (constant method) or the weights are
+    placed at evenly spaced points from 0 to `width` (linear method)
 
-2.  `times + weights`: Explicit time points for each weight (relative to
+2.  `times + weights`: explicit time points for each weight (relative to
     t=0)
 
 For delayed windows (not starting at t=0), use
@@ -118,7 +128,7 @@ Other hrf_functions:
 ## Examples
 
 ``` r
-# Simple: 6s window with 4 evenly-spaced weights (at 0, 2, 4, 6s)
+# Simple: 6 s window split into 4 bins of 1.5 s (starting at 0, 1.5, 3, 4.5 s)
 hrf1 <- hrf_weighted(width = 6, weights = c(0.2, 0.5, 0.8, 0.3))
 t <- seq(-1, 10, by = 0.1)
 plot(t, evaluate(hrf1, t), type = "s", main = "Weighted HRF (width + weights)")
@@ -133,7 +143,7 @@ hrf2 <- hrf_weighted(
 plot(t, evaluate(hrf2, t), type = "l", main = "Smooth Weighted HRF")
 
 
-# Normalized weights - coefficient estimates weighted mean of signal
+# Normalized weights: all four bin weights sum to 1
 hrf3 <- hrf_weighted(
   width = 8,
   weights = c(1, 2, 2, 1),

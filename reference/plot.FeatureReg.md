@@ -10,9 +10,10 @@ plot(
   x,
   grid = NULL,
   show_onsets = FALSE,
-  onset_color = "red",
+  onset_color = NULL,
   onset_alpha = 0.5,
-  precision = 0.33,
+  precision = NULL,
+  layout = c("stack", "overlay"),
   ...
 )
 ```
@@ -21,29 +22,35 @@ plot(
 
 - x:
 
-  A \`FeatureReg\` object created by \[feature_regressor()\].
+  A `FeatureReg` object created by
+  [`feature_regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/feature_regressor.md).
 
 - grid:
 
-  Numeric vector of time points for evaluation. If \`NULL\` (default), a
-  grid from 0 to max(times) + span with step 0.5s is used.
+  Numeric vector of time points for evaluation. If `NULL` (default), a
+  grid from 0 to max(times) + span with step 0.25 s is used.
 
 - show_onsets:
 
-  Logical; if \`TRUE\`, show vertical lines at sample times. Defaults to
-  \`FALSE\` because a dense feature has one sample per bin.
+  Logical; if `TRUE`, mark sample times with ticks on the time axis.
+  Defaults to `FALSE` because a dense feature has one sample per bin.
 
 - onset_color:
 
-  Color for sample-time lines. Default is \`"red"\`.
+  Colour for sample-time ticks. If NULL (default), a neutral grey.
 
 - onset_alpha:
 
-  Alpha transparency for sample-time lines. Default is 0.5.
+  Alpha transparency for sample-time ticks. Default is 0.5.
 
 - precision:
 
-  Numeric sampling precision for HRF evaluation. Default is 0.33.
+  Numeric sampling precision for HRF evaluation. If NULL (default), the
+  grid spacing capped at 0.33 s.
+
+- layout:
+
+  For multi-basis HRFs, `"stack"` (default) or `"overlay"`.
 
 - ...:
 

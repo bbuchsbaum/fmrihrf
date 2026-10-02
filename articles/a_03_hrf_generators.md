@@ -52,37 +52,40 @@ use it in model formulas like any other HRF.
 times <- seq(0, 32, by = 0.5)
 mat <- bs8(times)
 head(mat)
-#>              1          2            3 4 5 6 7 8
-#> [1,] 0.0000000 0.00000000 0.0000000000 0 0 0 0 0
-#> [2,] 0.3081055 0.02164714 0.0003255208 0 0 0 0 0
-#> [3,] 0.4960938 0.07942708 0.0026041667 0 0 0 0 0
-#> [4,] 0.5844727 0.16259766 0.0087890625 0 0 0 0 0
-#> [5,] 0.5937500 0.26041667 0.0208333333 0 0 0 0 0
-#> [6,] 0.5444336 0.36214193 0.0406901042 0 0 0 0 0
+#>              2          3           4 5 6 7 8 9
+#> [1,] 0.0000000 0.00000000 0.000000000 0 0 0 0 0
+#> [2,] 0.3472245 0.02905801 0.000516915 0 0 0 0 0
+#> [3,] 0.5356084 0.10485991 0.004135320 0 0 0 0 0
+#> [4,] 0.5977173 0.21034749 0.013956706 0 0 0 0 0
+#> [5,] 0.5661169 0.32846258 0.033082562 0 0 0 0 0
+#> [6,] 0.4733728 0.44214696 0.064614378 0 0 0 0 0
 ```
 
 ## Visualising FIR Basis Functions
 
-Here is a quick look at an FIR basis generated with 10 bins over a 20
-second window:
+A finite impulse response (FIR) basis makes no assumption about the
+shape of the response: each basis function is a boxcar covering one time
+bin after the event, and the fitted weights trace out the response bin
+by bin. Here we create a basis with 10 bins over a 20-second window;
+each bin is a 2-second boxcar, labelled at its top:
 
 ``` r
 
-# Use the pre-defined FIR basis or create one with gen_hrf
-fir10 <- HRF_FIR  # Pre-defined FIR with 12 basis functions
-resp <- fir10(times)
+fir10 <- hrf_fir_generator(nbasis = 10, span = 20)
+print(fir10)
+#> -- HRF: fir ----------------------------------------------- 
+#>    Basis functions: 10 
+#>    Span: 20 s
+#>    Parameters: nbasis = 10, span = 20, bin_width = 2
 
-fir_df <- data.frame(Time = times, resp)
-fir_long <- tidyr::pivot_longer(fir_df, -Time)
-
-ggplot(fir_long, aes(Time, value, colour = name)) +
-  geom_line(linewidth = 1) +
-  labs(title = "Finite Impulse Response Basis",
-       x = "Time (s)", y = "Response") +
-  theme(legend.position = "none")
+plot_hrfs(fir10, time = seq(0, 22, by = 0.02),
+          title = "FIR basis: 10 bins of 2 s")
 ```
 
-![](a_03_hrf_generators_files/figure-html/fir-basis-1.png)![](a_03_hrf_generators_files/figure-html/fir-basis-1.phone.png)
+![Ten FIR basis functions, each a 2 second boxcar of height 1 labelled
+B1 to B10; bin k covers 2(k-1) to 2k seconds after the event, so
+together they tile 0 to 20
+seconds.](a_03_hrf_generators_files/figure-html/fir-basis-1.png)![](a_03_hrf_generators_files/figure-html/fir-basis-1.phone.png)
 
 ![](a_03_hrf_generators_files/figure-html/fir-basis-dark-1.png)
 
