@@ -31,11 +31,12 @@ duration > 0 (default: 0.2). It controls numerical accuracy only: the
 result converges as `precision` decreases and does not otherwise depend on
 it.}
 
-\item{summate}{Logical; whether the HRF response should accumulate over the duration (default: TRUE),
-giving the integral over a unit-height block, so peak amplitude grows with duration. If FALSE, the
-result is divided by the block duration, giving the duration-averaged (unit-mass) response: the
-temporal profile is preserved, peak amplitude does not grow with duration, and the value approaches
-the impulse response as duration approaches 0.}
+\item{summate}{Logical; if TRUE (default), integrate the HRF over a
+unit-height block. If FALSE, divide by the duration to obtain a temporal
+average. The peak still varies
+with duration and can decrease for longer blocks. The average approaches
+the impulse response as duration approaches zero. Use `normalize = TRUE`
+for unit-peak scaling on the evaluated grid.}
 
 \item{normalize}{Logical; scale output so that the peak absolute value is 1 (default: FALSE). Applied *after* amplitude scaling and duration processing.}
 

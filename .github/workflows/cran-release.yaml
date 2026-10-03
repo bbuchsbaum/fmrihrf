@@ -1,0 +1,132 @@
+name: CRAN candidate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cran-release.yaml'
+      - 'DESCRIPTION'
+      - 'R/**'
+      - 'src/**'
+      - 'man/**'
+      - 'tests/**'
+      - 'vignettes/**'
+      - 'NEWS.md'
+      - 'README.md'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Build one source tarball with vignettes
+        shell: bash
+        run: |
+          R CMD build . 2>&1 | tee "$RUNNER_TEMP/fmrihrf-build.log"
+          mkdir -p candidate
+          mv "$RUNNER_TEMP/fmrihrf-build.log" candidate/build.log
+          mv fmrihrf_*.tar.gz candidate/
+          git rev-parse HEAD > candidate/source-sha.txt
+          Rscript -e 'sessionInfo()' > candidate/build-session.txt
+          cd candidate
+          sha256sum fmrihrf_*.tar.gz > SHA256SUMS
+          cat source-sha.txt SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cran-candidate
+          path: candidate
+          retention-days: 30
+          if-no-files-found: error
+
+  check:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, r: release}
+          - {os: ubuntu-latest, r: devel}
+          - {os: macos-latest, r: release}
+          - {os: windows-latest, r: release}
+    runs-on: ${{ matrix.config.os }}
+    name: Exact tarball / ${{ matrix.config.os }} / ${{ matrix.config.r }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::digest, any::V8, any::tinytex
+      - name: Install PDF manual fonts and indexer
+        shell: Rscript {0}
+        run: |
+          stopifnot(tinytex::tlmgr_install(c("courier", "makeindex")) == 0L)
+          print(Sys.which(c("pdflatex", "makeindex", "texi2dvi")))
+          stopifnot(all(nzchar(Sys.which(c("pdflatex", "makeindex")))))
+      - name: Install HTML manual validator (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tidy
+      - uses: actions/download-artifact@v4
+        with:
+          name: cran-candidate
+          path: candidate
+      - name: Verify and check the exact source artifact
+        shell: Rscript {0}
+        run: |
+          tarball <- list.files("candidate", "[.]tar[.]gz$", full.names = TRUE)
+          stopifnot(length(tarball) == 1L)
+          expected <- strsplit(readLines("candidate/SHA256SUMS"), " +")[[1]][1]
+          actual <- digest::digest(file = tarball, algo = "sha256")
+          stopifnot(identical(actual, expected))
+          dir.create("check-results")
+          writeLines(c(readLines("candidate/source-sha.txt"), actual),
+                     "check-results/identity.txt")
+          capture.output(sessionInfo(), file = "check-results/session.txt")
+          Sys.setenv(NOT_CRAN = "false")
+          Sys.unsetenv("_R_CHECK_SYSTEM_CLOCK_")
+          result <- rcmdcheck::rcmdcheck(tarball, args = "--as-cran",
+                                        check_dir = "check-results",
+                                        error_on = "never")
+          saveRDS(result, "check-results/result.rds")
+          check_log <- readLines("check-results/fmrihrf.Rcheck/00check.log")
+          status <- grep("^Status:", check_log, value = TRUE)
+          writeLines(c(status, paste("Parsed errors:", length(result$errors)),
+                       paste("Warnings:", length(result$warnings)),
+                       paste("Notes:", length(result$notes)), result$notes),
+                     "check-results/summary.txt")
+          # Some rcmdcheck versions miss a PDF-manual ERROR in $errors.
+          stopifnot(length(status) == 1L,
+                    !grepl("ERROR|WARNING", status),
+                    length(result$errors) == 0L, length(result$warnings) == 0L)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: check-${{ matrix.config.os }}-${{ matrix.config.r }}
+          path: check-results
+          retention-days: 30

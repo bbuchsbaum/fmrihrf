@@ -49,13 +49,24 @@ lag_hrf <- function(hrf, lag) {
 #' stimulus by convolving the input HRF with a boxcar function of a given width.
 #'
 #' @param hrf The HRF object (of class `HRF`) to block.
-#' @param width The width of the block in seconds.
+#' @param width The width of the block in seconds. Every positive width is
+#'   integrated, including widths smaller than `precision`. Zero retains the
+#'   original impulse response.
 #' @param precision The sampling precision in seconds used for the internal convolution (default: 0.1).
 #' @param half_life The half-life of an optional exponential decay applied during the block (default: Inf, meaning no decay).
 #' @param summate Logical; if TRUE (default), responses within the block are
 #'   integrated (summed). If FALSE, the integrated response is divided by the
-#'   total block weight so amplitude does not grow with block width.
-#' @param normalize Logical; if TRUE, the resulting blocked HRF is scaled so that its peak value is 1 (default: FALSE).
+#'   block width to obtain a temporal average. With finite `half_life`, decay
+#'   attenuates the integrand but does not change this divisor. This does not fix peak
+#'   height: longer blocks can have smaller peaks. Use `normalize = TRUE` for
+#'   unit-peak scaling.
+#' @param normalize Logical; if TRUE, scale each basis independently by its
+#'   peak absolute value on a fixed reference grid over the full blocked span
+#'   (the original span plus `width`). Uses the same approximately 0.02-second
+#'   reference spacing as [normalize_hrf()] with `"unit_peak_per_basis"`.
+#'   The factors are computed once at construction, so scalar, vector, and
+#'   chunked queries have the same scale. Signs are preserved and zero bases
+#'   remain zero. Default: FALSE.
 #'
 #' @return A new HRF object representing the blocked function.
 #'
@@ -92,8 +103,9 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
 
   # Create the blocked function
   blocked_func <- function(t) {
-    if (width < precision) {
-      # If width is negligible, just return the original hrf value
+    if (width == 0) {
+      # Exactly zero denotes an impulse; a positive width always denotes a
+      # block, regardless of the numerical integration step.
       res <- hrf(t)
     } else {
       quad <- .block_offsets_weights(width, precision)
@@ -105,9 +117,6 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
                                 nbasis = orig_nbasis, summate = summate)
     }
 
-    if (normalize) {
-      res <- .normalise_result(res)
-    }
     return(res)
   }
 
@@ -121,13 +130,21 @@ block_hrf <- function(hrf, width, precision = 0.1, half_life = Inf, summate = TR
   )
   
   # Create new HRF object using as_hrf
-  .as_closed_hrf(
+  blocked <- .as_closed_hrf(
     f = blocked_func,
     name = paste0(orig_name, "_block(w=", width, ")"),
     nbasis = orig_nbasis,
     span = orig_span + width, # Span increases by the block width
     params = c(orig_params, block_params) # Add block params for bookkeeping
   )
+  if (normalize) {
+    # Share the existing fixed-grid policy, but retain this constructor's
+    # name and parameter metadata. Never scale against a caller's query grid.
+    normalized <- normalize_hrf(blocked, "unit_peak_per_basis")
+    attributes(normalized) <- attributes(blocked)
+    return(normalized)
+  }
+  blocked
 }
 
 

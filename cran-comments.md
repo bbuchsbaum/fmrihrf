@@ -32,18 +32,107 @@ This is an update from version 0.3.0 to version 0.4.0.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+Checked on October 3, 2026, using the same source tarball on every platform:
 
-Checked on 2026-09-27. All 776 test expectations passed with no test warnings or
-skips. Examples, vignette rebuilds, and PDF and HTML manual checks passed.
+| Environment | Errors | Warnings | Notes | Full check step | Vignette rebuild |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Ubuntu 24.04, R 4.6.1 | 0 | 0 | 0 | 140 s | 26 s |
+| Ubuntu 24.04, R-devel (2026-10-02 r90631) | 0 | 0 | 0 | 99 s | 17 s |
+| Windows, R 4.6.1 (ucrt) | 0 | 0 | 0 | 192 s | 29 s |
+| macOS, R 4.6.1 | 0 | 0 | 1 | 147 s | 24 s |
 
-No checks were disabled. The source tarball is 4.88 MB; incoming feasibility
-passed without a size note.
+All checks used `R CMD check --as-cran`, including the indexed PDF manual,
+examples (also `--run-donttest`), and vignette rebuilds. `NOT_CRAN=false`;
+the system-clock check was not disabled. CRAN incoming feasibility passed
+on every platform. There were no test failures, warnings, or skips: 1,013
+expectations passed on Linux and macOS, and 1,012 on Windows.
 
-## Test environment
+The macOS NOTE reports that the runner's system HTML Tidy is too old to validate
+the HTML manual. HTML validation and math rendering passed on both Linux checks
+and Windows. The PDF manual and vignette rebuilds passed on every platform.
 
-* macOS Sonoma 14.3 (aarch64-apple-darwin20), R 4.5.1
-  (`R CMD check --as-cran` on the source tarball, including the PDF manual;
-  `LANG=en_US.UTF-8`, `LC_ALL=en_US.UTF-8`)
-* HTML Tidy 5.8.0, selected with `R_TIDYCMD` for HTML manual validation.
-* albersdown 2.1.0, installed from CRAN source into an isolated library.
+Full check timings are conservative wall-clock durations of the checksum/check
+step, including check setup and result capture. Vignette times are elapsed times
+reported in `00check.log`. All are below the preparation gates of 600 seconds
+for the full check and 180 seconds for vignette rebuilds. No tests or vignette
+computation were disabled to achieve those times.
+
+## Source artifact
+
+Built with R 4.6.1 from commit
+`6edcd1c897007b98c309f9ffea27022becf2d937`.
+
+* File: `fmrihrf_0.4.0.tar.gz` (3,438,017 bytes)
+* SHA-256: `51cb90a54318cca05bcd40d1b8990f9f6b0e0ac7f4029c3e231c83bcdf95cad0`
+* Validation and retained logs:
+  https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154021156
+
+Every platform verified this checksum before checking. Subsequent edits to this
+file do not enter the source archive (`cran-comments.md` is build-ignored).
+
+Independent scientific review identified query-dependent block normalization
+and impulse substitution for positive durations below the quadrature step.
+Both are corrected: normalization uses fixed per-basis absolute peaks over the
+full blocked support; every positive duration is integrated. Sixty-eight new
+expectations cover analytic integrals, signed/multiple bases, query invariance,
+and method agreement. The implementation was independently re-reviewed before
+these final checks. Linux BLAS summation order required a 64-machine-epsilon
+tolerance for query-shape comparisons; analytic tolerances are unchanged.
+
+## Additional pre-submission gates — upload held
+
+win-builder R-devel (2026-09-30 r90605 ucrt) checked the exact uploaded
+artifact with Status OK (0 errors, 0 warnings, 0 notes):
+https://win-builder.r-project.org/15rv407Tq7Pj
+
+Installation took 25 seconds and checking 193 seconds. Examples took 12 seconds,
+tests 15 seconds (1,012 passes, no failures/warnings/skips), vignette rebuilding
+26 seconds, and the PDF manual 13 seconds. Incoming feasibility and HTML checks
+passed. Logs, binary, and returned test sources have been preserved locally.
+The binary's Packaged timestamp matches the source archive, and the returned
+block-contract/native-error test sources match the final Git files. The service
+does not publish a checksum of the uploaded source archive.
+
+R-hub checks of the same source commit completed at:
+https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154495928
+
+* ubuntu-clang: 0 errors, 0 warnings, 1 NOTE. All 1,013 expectations pass;
+  the NOTE is test CPU time 3.2 times elapsed time (28s/9s), on a threaded
+  OpenBLAS runner. Vignette rebuild elapsed time is 18 seconds.
+* clang-asan: Status OK, all 1,013 expectations pass, no sanitizer failure.
+* rchk: failed on Rcpp header protection diagnostics. Analysis-limit messages
+  in R internals and incomplete-analysis notices in generated wrappers also
+  appear. Independent review classified the specific findings as non-blocking
+  analyzer
+  limitations, with no actionable package defect. The raw service status remains
+  failed, not green: Armor/Shield balance protection across object lifetimes,
+  and the names attribute remains reachable through its preserved owning vector.
+
+R-hub creates supplemental archives from the verified source commit and does
+not check the byte-identical submission archive. Its defaults omit manuals;
+the full manual evidence is supplied by the four exact-artifact checks.
+Twenty local named-list/error-recovery/evaluation cycles under gctorture2(10)
+pass against the exact installed archive, supporting but not replacing review
+of the static findings. Independent review also ran ten named-list construction
+cycles with garbage collection at every allocation; all passed.
+
+Service diagnostics and runtime notes have now been reviewed. The corrected
+artifact is recommended for submission, but CRAN upload remains held until the
+parent explicitly authorizes this exact SHA-256. No baseline-control run is
+needed after the independent rchk adjudication.
+
+## Compatibility and reverse dependencies
+
+The B-spline and tent bases now vanish at both endpoints, and constant weighted
+windows use all weights. Together with the SPMG and block-convolution changes,
+these require rebuilding design matrices and refitting analyses. Old coefficients
+and inferential results must not be assumed interchangeable. README and NEWS
+provide migration guidance. The default 24-second support is retained; users who
+need more of the SPMG undershoot can explicitly choose a longer span.
+
+CRAN's source package metadata, retrieved October 3, 2026, lists no reverse
+Depends, Imports, LinkingTo, or Suggests dependencies for fmrihrf.
+
+This preparation also removes a direct `Rf_error()` call from the C++ wrapper
+(issue #42) and clarifies temporal averaging versus peak normalization (issue
+#49). Version 0.4.0 has not been submitted by this release-preparation task.
