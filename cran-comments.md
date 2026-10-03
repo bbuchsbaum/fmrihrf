@@ -81,8 +81,19 @@ tolerance for query-shape comparisons; analytic tolerances are unchanged.
 
 ## Additional pre-submission gates — upload held
 
-The exact artifact has been uploaded to win-builder R-devel for checking;
-results and elapsed time are pending. R-hub checks of the same source commit completed at:
+win-builder R-devel (2026-09-30 r90605 ucrt) checked the exact uploaded
+artifact with Status OK (0 errors, 0 warnings, 0 notes):
+https://win-builder.r-project.org/15rv407Tq7Pj
+
+Installation took 25 seconds and checking 193 seconds. Examples took 12 seconds,
+tests 15 seconds (1,012 passes, no failures/warnings/skips), vignette rebuilding
+26 seconds, and the PDF manual 13 seconds. Incoming feasibility and HTML checks
+passed. Logs, binary, and returned test sources have been preserved locally.
+The binary's Packaged timestamp matches the source archive, and the returned
+block-contract/native-error test sources match the final Git files. The service
+does not publish a checksum of the uploaded source archive.
+
+R-hub checks of the same source commit completed at:
 https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154495928
 
 * ubuntu-clang: 0 errors, 0 warnings, 1 NOTE. All 1,013 expectations pass;
@@ -91,17 +102,24 @@ https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154495928
 * clang-asan: Status OK, all 1,013 expectations pass, no sanitizer failure.
 * rchk: failed on Rcpp header protection diagnostics. Analysis-limit messages
   in R internals and incomplete-analysis notices in generated wrappers also
-  appear. The concrete Rcpp findings remain under review and are not waived.
+  appear. Independent review classified the specific findings as non-blocking
+  analyzer
+  limitations, with no actionable package defect. The raw service status remains
+  failed, not green: Armor/Shield balance protection across object lifetimes,
+  and the names attribute remains reachable through its preserved owning vector.
 
 R-hub creates supplemental archives from the verified source commit and does
 not check the byte-identical submission archive. Its defaults omit manuals;
 the full manual evidence is supplied by the four exact-artifact checks.
 Twenty local named-list/error-recovery/evaluation cycles under gctorture2(10)
 pass against the exact installed archive, supporting but not replacing review
-of the static findings.
+of the static findings. Independent review also ran ten named-list construction
+cycles with garbage collection at every allocation; all passed.
 
-CRAN upload remains held until all service diagnostics and runtime notes are
-reviewed and the exact artifact is explicitly authorized.
+Service diagnostics and runtime notes have now been reviewed. The corrected
+artifact is recommended for submission, but CRAN upload remains held until the
+parent explicitly authorizes this exact SHA-256. No baseline-control run is
+needed after the independent rchk adjudication.
 
 ## Compatibility and reverse dependencies
 
