@@ -39,7 +39,7 @@ policy with each analysis. `summate = FALSE` means a temporal average, not a
 constant peak; use `normalize = TRUE` when unit-peak scaling is intended.
 The default 24-second SPMG support remains unchanged and truncates some of the
 undershoot. Choose an explicit longer support when needed, for example
-`getHRF("spmg1", span = 32)`. The kernels are continuous and unorthogonalized;
+`gen_hrf(hrf_spmg1, span = 32)`. The kernels are continuous and unorthogonalized;
 matching SPM/Nilearn sampled designs requires matching sampling, support,
 normalization, and basis processing as well.
 
