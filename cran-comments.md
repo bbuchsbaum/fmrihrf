@@ -30,49 +30,78 @@ This is an update from version 0.3.0 to version 0.4.0.
 * Improved narrow-screen plot layouts, peak annotations and onset transparency.
   Website figures use Retina resolution; CRAN vignette figures remain compact.
 
-## Release review hold
-
-The candidate and checks recorded below are superseded. Independent review
-identified query-dependent normalization and incorrect impulse substitution for
-positive blocks shorter than the quadrature step. Fixes are in preparation;
-this archive must not be submitted. New exact-artifact checks will replace these
-results before submission.
-
-## Previous R CMD check results
+## R CMD check results
 
 Checked on October 3, 2026, using the same source tarball on every platform:
 
-| Environment | Errors | Warnings | Notes |
-| --- | ---: | ---: | ---: |
-| Ubuntu 24.04, R 4.6.1 | 0 | 0 | 0 |
-| Ubuntu 24.04, R-devel (2026-10-02 r90631) | 0 | 0 | 0 |
-| Windows, R 4.6.1 (ucrt) | 0 | 0 | 0 |
-| macOS, R 4.6.1 | 0 | 0 | 1 |
+| Environment | Errors | Warnings | Notes | Full check step | Vignette rebuild |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Ubuntu 24.04, R 4.6.1 | 0 | 0 | 0 | 140 s | 26 s |
+| Ubuntu 24.04, R-devel (2026-10-02 r90631) | 0 | 0 | 0 | 99 s | 17 s |
+| Windows, R 4.6.1 (ucrt) | 0 | 0 | 0 | 192 s | 29 s |
+| macOS, R 4.6.1 | 0 | 0 | 1 | 147 s | 24 s |
 
 All checks used `R CMD check --as-cran`, including the indexed PDF manual,
-examples, and vignette rebuilds. `NOT_CRAN=false`; the system-clock check was
-not disabled. There were no test failures, warnings, or skips: 945 expectations
-passed on Linux and macOS, and 944 on Windows.
+examples (also `--run-donttest`), and vignette rebuilds. `NOT_CRAN=false`;
+the system-clock check was not disabled. CRAN incoming feasibility passed
+on every platform. There were no test failures, warnings, or skips: 1,013
+expectations passed on Linux and macOS, and 1,012 on Windows.
 
 The macOS NOTE reports that the runner's system HTML Tidy is too old to validate
 the HTML manual. HTML validation and math rendering passed on both Linux checks
 and Windows. The PDF manual and vignette rebuilds passed on every platform.
 
-Minimal CI TeX installations initially lacked Courier and/or `makeindex`.
-Installing those tools resolved the PDF failures; no manual check was disabled.
+Full check timings are conservative wall-clock durations of the checksum/check
+step, including check setup and result capture. Vignette times are elapsed times
+reported in `00check.log`. All are below the preparation gates of 600 seconds
+for the full check and 180 seconds for vignette rebuilds. No tests or vignette
+computation were disabled to achieve those times.
 
 ## Source artifact
 
 Built with R 4.6.1 from commit
-`4e8ccb6e665d1738becb1db9d2d34e5ec2694cfd`.
+`6edcd1c897007b98c309f9ffea27022becf2d937`.
 
-* File: `fmrihrf_0.4.0.tar.gz` (3,435,052 bytes)
-* SHA-256: `1fa5f66a19ded2e0cedcf9de952c1f64c3e382ecb252aec7f1749461716f8f44`
+* File: `fmrihrf_0.4.0.tar.gz` (3,438,017 bytes)
+* SHA-256: `51cb90a54318cca05bcd40d1b8990f9f6b0e0ac7f4029c3e231c83bcdf95cad0`
 * Validation and retained logs:
-  https://github.com/bbuchsbaum/fmrihrf/actions/runs/37151994419
+  https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154021156
 
 Every platform verified this checksum before checking. Subsequent edits to this
 file do not enter the source archive (`cran-comments.md` is build-ignored).
+
+Independent scientific review identified query-dependent block normalization
+and impulse substitution for positive durations below the quadrature step.
+Both are corrected: normalization uses fixed per-basis absolute peaks over the
+full blocked support; every positive duration is integrated. Sixty-eight new
+expectations cover analytic integrals, signed/multiple bases, query invariance,
+and method agreement. The implementation was independently re-reviewed before
+these final checks. Linux BLAS summation order required a 64-machine-epsilon
+tolerance for query-shape comparisons; analytic tolerances are unchanged.
+
+## Additional pre-submission gates — upload held
+
+The exact artifact has been uploaded to win-builder R-devel for checking;
+results and elapsed time are pending. R-hub checks of the same source commit completed at:
+https://github.com/bbuchsbaum/fmrihrf/actions/runs/37154495928
+
+* ubuntu-clang: 0 errors, 0 warnings, 1 NOTE. All 1,013 expectations pass;
+  the NOTE is test CPU time 3.2 times elapsed time (28s/9s), on a threaded
+  OpenBLAS runner. Vignette rebuild elapsed time is 18 seconds.
+* clang-asan: Status OK, all 1,013 expectations pass, no sanitizer failure.
+* rchk: failed on Rcpp header protection diagnostics. Analysis-limit messages
+  in R internals and incomplete-analysis notices in generated wrappers also
+  appear. The concrete Rcpp findings remain under review and are not waived.
+
+R-hub creates supplemental archives from the verified source commit and does
+not check the byte-identical submission archive. Its defaults omit manuals;
+the full manual evidence is supplied by the four exact-artifact checks.
+Twenty local named-list/error-recovery/evaluation cycles under gctorture2(10)
+pass against the exact installed archive, supporting but not replacing review
+of the static findings.
+
+CRAN upload remains held until all service diagnostics and runtime notes are
+reviewed and the exact artifact is explicitly authorized.
 
 ## Compatibility and reverse dependencies
 
