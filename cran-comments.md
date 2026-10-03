@@ -30,14 +30,41 @@ This is an update from version 0.3.0 to version 0.4.0.
 * Improved narrow-screen plot layouts, peak annotations and onset transparency.
   Website figures use Retina resolution; CRAN vignette figures remain compact.
 
-## Validation status
+## R CMD check results
 
-Release-candidate validation is in progress. The previous September 27 check
-predates the B-spline and weighted-window corrections and is not evidence for
-this candidate. The CRAN candidate workflow builds once on current R release,
-records the source commit and SHA-256, and checks that same tarball with
-`R CMD check --as-cran` on Linux R release/devel and macOS/Windows R release,
-including vignette rebuilds and the PDF manual.
+Checked on October 3, 2026, using the same source tarball on every platform:
+
+| Environment | Errors | Warnings | Notes |
+| --- | ---: | ---: | ---: |
+| Ubuntu 24.04, R 4.6.1 | 0 | 0 | 0 |
+| Ubuntu 24.04, R-devel (2026-10-02 r90631) | 0 | 0 | 0 |
+| Windows, R 4.6.1 (ucrt) | 0 | 0 | 0 |
+| macOS, R 4.6.1 | 0 | 0 | 1 |
+
+All checks used `R CMD check --as-cran`, including the indexed PDF manual,
+examples, and vignette rebuilds. `NOT_CRAN=false`; the system-clock check was
+not disabled. There were no test failures, warnings, or skips: 945 expectations
+passed on Linux and macOS, and 944 on Windows.
+
+The macOS NOTE reports that the runner's system HTML Tidy is too old to validate
+the HTML manual. HTML validation and math rendering passed on both Linux checks
+and Windows. The PDF manual and vignette rebuilds passed on every platform.
+
+Minimal CI TeX installations initially lacked Courier and/or `makeindex`.
+Installing those tools resolved the PDF failures; no manual check was disabled.
+
+## Source artifact
+
+Built with R 4.6.1 from commit
+`4e8ccb6e665d1738becb1db9d2d34e5ec2694cfd`.
+
+* File: `fmrihrf_0.4.0.tar.gz` (3,435,052 bytes)
+* SHA-256: `1fa5f66a19ded2e0cedcf9de952c1f64c3e382ecb252aec7f1749461716f8f44`
+* Validation and retained logs:
+  https://github.com/bbuchsbaum/fmrihrf/actions/runs/37151994419
+
+Every platform verified this checksum before checking. Subsequent edits to this
+file do not enter the source archive (`cran-comments.md` is build-ignored).
 
 ## Compatibility and reverse dependencies
 
