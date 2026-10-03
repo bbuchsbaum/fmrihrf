@@ -54,7 +54,9 @@ lag_hrf <- function(hrf, lag) {
 #' @param half_life The half-life of an optional exponential decay applied during the block (default: Inf, meaning no decay).
 #' @param summate Logical; if TRUE (default), responses within the block are
 #'   integrated (summed). If FALSE, the integrated response is divided by the
-#'   total block weight so amplitude does not grow with block width.
+#'   total block weight to obtain a temporal average. This does not fix peak
+#'   height: longer blocks can have smaller peaks. Use `normalize = TRUE` for
+#'   unit-peak scaling.
 #' @param normalize Logical; if TRUE, the resulting blocked HRF is scaled so that its peak value is 1 (default: FALSE).
 #'
 #' @return A new HRF object representing the blocked function.

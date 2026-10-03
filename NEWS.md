@@ -131,6 +131,13 @@ convolution engine.
 
 ## Bug Fixes
 
+* Let the generated Rcpp wrapper translate native exceptions after C++ stack
+  unwinding, removing the remaining direct `Rf_error()` call (issue #42).
+
+* Clarified that `summate = FALSE` computes a temporal average, whose peak
+  can decrease for longer blocks; `normalize = TRUE` controls unit-peak
+  scaling (issue #49).
+
 * Preserved parameter metadata in closed HRF constructors and decorators without
   incorrectly warning that the captured parameters would be ignored.
 
@@ -170,8 +177,9 @@ Addresses the defects reported in issue #45.
   trapezoid quadrature `evaluate.HRF()` uses, so a block response is
   `amplitude * integral h(t - onset - u) du` over the block and converges as
   `precision` decreases. Point events (`duration = 0`) are unaffected.
-  Fitted betas from epoch designs will change scale; model fit and t-statistics
-  will not.
+  Fitted betas from epoch designs will change scale. Because this release also
+  corrects response shapes and event timing, model fits and t-statistics cannot
+  be assumed unchanged; rebuild design matrices and refit existing analyses.
 
 * **Breaking:** `summate = FALSE` now takes effect on every evaluation method.
   It was silently ignored by the `conv` (the default), `fft`, and `Rconv`

@@ -24,7 +24,9 @@ block_hrf(
 
 \item{summate}{Logical; if TRUE (default), responses within the block are
 integrated (summed). If FALSE, the integrated response is divided by the
-total block weight so amplitude does not grow with block width.}
+total block weight to obtain a temporal average. This does not fix peak
+height: longer blocks can have smaller peaks. Use `normalize = TRUE` for
+unit-peak scaling.}
 
 \item{normalize}{Logical; if TRUE, the resulting blocked HRF is scaled so that its peak value is 1 (default: FALSE).}
 }

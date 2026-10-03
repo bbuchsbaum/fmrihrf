@@ -1,4 +1,3 @@
-#define ARMA_DONT_PRINT_FAST_MATH_WARNING
 #define ARMA_DONT_USE_WRAPPER
 #include <RcppArmadillo.h>
 
@@ -210,33 +209,28 @@ SEXP evaluate_regressor_cpp(const arma::vec& grid,
                               double precision,
                               std::string method = "conv",
                               bool summate = true) {
-    try {
-        if (method != "conv") {
-            Rcpp::stop("Invalid method for evaluate_regressor_cpp; only 'conv' is supported.");
-        }
-        // Fine convolution window: back off by the HRF span so events preceding
-        // the grid still contribute, and run past the last block so its tail fits.
-        double start = grid.min() - hrf_span;
-        double max_dur = (durations.n_elem > 0) ? durations.max() : 0.0;
-        double last_onset = (onsets.n_elem > 0) ? onsets.max() : grid.max();
-        double end = std::max(grid.max(), last_onset + max_dur) + hrf_span;
-
-        NumericMatrix result_mat = evaluate_regressor_convolution(
-                                        Rcpp::wrap(grid),
-                                        Rcpp::wrap(onsets),
-                                        Rcpp::wrap(durations),
-                                        Rcpp::wrap(amplitudes),
-                                        Rcpp::wrap(hrf_matrix),
-                                        hrf_span,
-                                        start,
-                                        end,
-                                        precision,
-                                        summate);
-        return Rcpp::wrap(result_mat);
-    } catch (std::exception &ex) {
-        forward_exception_to_r(ex);
-    } catch (...) {
-        ::Rf_error("c++ exception (unknown reason)");
+    // The generated Rcpp export wrapper translates exceptions after C++
+    // stack unwinding; do not longjmp through live C++ objects here.
+    if (method != "conv") {
+        Rcpp::stop("Invalid method for evaluate_regressor_cpp; only 'conv' is supported.");
     }
-    return R_NilValue; // Return NULL if there's an error
+    // Fine convolution window: back off by the HRF span so events preceding
+    // the grid still contribute, and run past the last block so its tail fits.
+    double start = grid.min() - hrf_span;
+    double max_dur = (durations.n_elem > 0) ? durations.max() : 0.0;
+    double last_onset = (onsets.n_elem > 0) ? onsets.max() : grid.max();
+    double end = std::max(grid.max(), last_onset + max_dur) + hrf_span;
+
+    NumericMatrix result_mat = evaluate_regressor_convolution(
+                                    Rcpp::wrap(grid),
+                                    Rcpp::wrap(onsets),
+                                    Rcpp::wrap(durations),
+                                    Rcpp::wrap(amplitudes),
+                                    Rcpp::wrap(hrf_matrix),
+                                    hrf_span,
+                                    start,
+                                    end,
+                                    precision,
+                                    summate);
+    return Rcpp::wrap(result_mat);
 }

@@ -30,20 +30,27 @@ This is an update from version 0.3.0 to version 0.4.0.
 * Improved narrow-screen plot layouts, peak annotations and onset transparency.
   Website figures use Retina resolution; CRAN vignette figures remain compact.
 
-## R CMD check results
+## Validation status
 
-0 errors | 0 warnings | 0 notes
+Release-candidate validation is in progress. The previous September 27 check
+predates the B-spline and weighted-window corrections and is not evidence for
+this candidate. The CRAN candidate workflow builds once on current R release,
+records the source commit and SHA-256, and checks that same tarball with
+`R CMD check --as-cran` on Linux R release/devel and macOS/Windows R release,
+including vignette rebuilds and the PDF manual.
 
-Checked on 2026-09-27. All 776 test expectations passed with no test warnings or
-skips. Examples, vignette rebuilds, and PDF and HTML manual checks passed.
+## Compatibility and reverse dependencies
 
-No checks were disabled. The source tarball is 4.88 MB; incoming feasibility
-passed without a size note.
+The B-spline and tent bases now vanish at both endpoints, and constant weighted
+windows use all weights. Together with the SPMG and block-convolution changes,
+these require rebuilding design matrices and refitting analyses. Old coefficients
+and inferential results must not be assumed interchangeable. README and NEWS
+provide migration guidance. The default 24-second support is retained; users who
+need more of the SPMG undershoot can explicitly choose a longer span.
 
-## Test environment
+CRAN's source package metadata, retrieved October 3, 2026, lists no reverse
+Depends, Imports, LinkingTo, or Suggests dependencies for fmrihrf.
 
-* macOS Sonoma 14.3 (aarch64-apple-darwin20), R 4.5.1
-  (`R CMD check --as-cran` on the source tarball, including the PDF manual;
-  `LANG=en_US.UTF-8`, `LC_ALL=en_US.UTF-8`)
-* HTML Tidy 5.8.0, selected with `R_TIDYCMD` for HTML manual validation.
-* albersdown 2.1.0, installed from CRAN source into an isolated library.
+This preparation also removes a direct `Rf_error()` call from the C++ wrapper
+(issue #42) and clarifies temporal averaging versus peak normalization (issue
+#49). Version 0.4.0 has not been submitted by this release-preparation task.
