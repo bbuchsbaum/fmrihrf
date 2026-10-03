@@ -155,7 +155,8 @@ bind_basis <- function(...) {
 #' @param half_life Half-life decay parameter for exponential decay in seconds (passed to `block_hrf`). Default is Inf (no decay).
 #' @param summate Passed to `block_hrf()` when `width > 0`. If `TRUE` (default),
 #'   block responses are integrated; if `FALSE`, the integrated response is
-#'   scaled by total block weight so amplitude does not grow with block width.
+#'   divided by the block width to obtain a temporal average. Averaging does
+#'   not fix peak height; use `normalize = TRUE` for unit-peak scaling.
 #' @param normalize If TRUE, applies `normalise_hrf` at the end. Default is FALSE.
 #' @param hrf_norm Fixed-scale normalization mode passed to [normalize_hrf()].
 #'   The default `"none"` preserves the raw HRF. `normalize = TRUE` remains a
@@ -509,7 +510,7 @@ hrf_lagged <- gen_hrf_lagged
 #' @param precision A numeric value specifying the sampling resolution in seconds. Default is 0.1.
 #' @param half_life A numeric value specifying the half-life of the exponential decay function, used to model response attenuation. Default is `Inf`, which means no decay.
 #' @param summate Logical; if TRUE (default), integrate responses over the block.
-#'   If FALSE, divide by the total block weight to obtain a temporal average.
+#'   If FALSE, divide by the block width to obtain a temporal average.
 #'   Averaging does not fix the peak height: longer blocks can have smaller peaks.
 #'   Use `normalize = TRUE` for unit-peak scaling.
 #' @param normalize A logical value indicating whether to rescale the output so that the peak of the output is 1. Default is `FALSE`.
@@ -1130,8 +1131,8 @@ getHRF <- function(name = "spmg1", # Default to spmg1
 #'   result converges as `precision` decreases and does not otherwise depend on
 #'   it.
 #' @param summate Logical; if TRUE (default), integrate the HRF over a
-#'   unit-height block. If FALSE, divide by the total block weight (the duration
-#'   when `half_life = Inf`) to obtain a temporal average. The peak still varies
+#'   unit-height block. If FALSE, divide by the duration to obtain a temporal
+#'   average. The peak still varies
 #'   with duration and can decrease for longer blocks. The average approaches
 #'   the impulse response as duration approaches zero. Use `normalize = TRUE`
 #'   for unit-peak scaling on the evaluated grid.

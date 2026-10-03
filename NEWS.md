@@ -2,6 +2,22 @@
 
 ## Breaking changes
 
+* `block_hrf(normalize = TRUE)` now computes each basis's absolute-peak
+  normalization factor once, over the full blocked span, using the fixed
+  reference-grid policy of `normalize_hrf(..., "unit_peak_per_basis")`.
+  Previously each call normalized against its requested times: a scalar
+  evaluation could become 1 even far from the peak, and the convolution and
+  loop methods could disagree. Scalar, vector, and chunked queries now retain
+  the same scale. Negative responses keep their sign and zero bases stay zero.
+  Rebuild designs and refit analyses that used normalized blocked HRFs.
+
+* Every positive `block_hrf()` width is now integrated, including widths below
+  `precision`. Previously a short block returned the unintegrated impulse
+  response, creating a discontinuity when width crossed the numerical step.
+  `width = 0` retains the impulse convention. With `summate = FALSE`, the
+  integral is divided by width; with finite `half_life`, decay attenuates the
+  integrand but does not renormalize the averaging weights.
+
 * `hrf_bspline()`, `hrf_bspline_generator()` and `HRF_BSPLINE` now return a
   basis that is zero at both ends of the span. Previously the last basis
   function equalled 1 at `span` and was cut to 0 beyond it, so any weight on

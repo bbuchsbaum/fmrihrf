@@ -30,7 +30,15 @@ This is an update from version 0.3.0 to version 0.4.0.
 * Improved narrow-screen plot layouts, peak annotations and onset transparency.
   Website figures use Retina resolution; CRAN vignette figures remain compact.
 
-## R CMD check results
+## Release review hold
+
+The candidate and checks recorded below are superseded. Independent review
+identified query-dependent normalization and incorrect impulse substitution for
+positive blocks shorter than the quadrature step. Fixes are in preparation;
+this archive must not be submitted. New exact-artifact checks will replace these
+results before submission.
+
+## Previous R CMD check results
 
 Checked on October 3, 2026, using the same source tarball on every platform:
 

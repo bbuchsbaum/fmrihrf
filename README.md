@@ -25,7 +25,9 @@ remotes::install_github("bbuchsbaum/fmrihrf")
 
 Rebuild design matrices and refit analyses when upgrading. This release corrects
 SPMG response shape and the SPMG3 dispersion derivative, block integration and
-off-grid event timing, B-spline/tent endpoints, and constant weighted windows.
+off-grid event timing, B-spline/tent endpoints, constant weighted windows,
+query-dependent block normalization, and integration of blocks shorter than
+the numerical step.
 Old coefficients are not interchangeable with new ones; neither model fits nor
 t-statistics are guaranteed to remain unchanged. See [NEWS](NEWS.md) for details.
 

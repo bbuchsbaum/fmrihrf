@@ -32,8 +32,8 @@ result converges as `precision` decreases and does not otherwise depend on
 it.}
 
 \item{summate}{Logical; if TRUE (default), integrate the HRF over a
-unit-height block. If FALSE, divide by the total block weight (the duration
-when `half_life = Inf`) to obtain a temporal average. The peak still varies
+unit-height block. If FALSE, divide by the duration to obtain a temporal
+average. The peak still varies
 with duration and can decrease for longer blocks. The average approaches
 the impulse response as duration approaches zero. Use `normalize = TRUE`
 for unit-peak scaling on the evaluated grid.}
