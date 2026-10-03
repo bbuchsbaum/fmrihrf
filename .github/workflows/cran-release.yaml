@@ -79,10 +79,10 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::digest, any::V8
+          extra-packages: any::rcmdcheck, any::digest, any::V8, any::tinytex
       - name: Install the PDF manual's Courier font
-        shell: bash
-        run: tlmgr install courier
+        shell: Rscript {0}
+        run: stopifnot(tinytex::tlmgr_install("courier") == 0L)
       - name: Install HTML manual validator (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -105,6 +105,8 @@ jobs:
           writeLines(c(readLines("candidate/source-sha.txt"), actual),
                      "check-results/identity.txt")
           capture.output(sessionInfo(), file = "check-results/session.txt")
+          Sys.setenv(NOT_CRAN = "false")
+          Sys.unsetenv("_R_CHECK_SYSTEM_CLOCK_")
           result <- rcmdcheck::rcmdcheck(tarball, args = "--as-cran",
                                         check_dir = "check-results",
                                         error_on = "never")
