@@ -80,9 +80,12 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck, any::digest, any::V8, any::tinytex
-      - name: Install the PDF manual's Courier font
+      - name: Install PDF manual fonts and indexer
         shell: Rscript {0}
-        run: stopifnot(tinytex::tlmgr_install("courier") == 0L)
+        run: |
+          stopifnot(tinytex::tlmgr_install(c("courier", "makeindex")) == 0L)
+          print(Sys.which(c("pdflatex", "makeindex", "texi2dvi")))
+          stopifnot(all(nzchar(Sys.which(c("pdflatex", "makeindex")))))
       - name: Install HTML manual validator (Linux)
         if: runner.os == 'Linux'
         shell: bash
