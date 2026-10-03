@@ -80,6 +80,9 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck, any::digest, any::V8
+      - name: Install the PDF manual's Courier font
+        shell: bash
+        run: tlmgr install courier
       - name: Install HTML manual validator (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -106,11 +109,16 @@ jobs:
                                         check_dir = "check-results",
                                         error_on = "never")
           saveRDS(result, "check-results/result.rds")
-          writeLines(c(paste("Errors:", length(result$errors)),
+          check_log <- readLines("check-results/fmrihrf.Rcheck/00check.log")
+          status <- grep("^Status:", check_log, value = TRUE)
+          writeLines(c(status, paste("Parsed errors:", length(result$errors)),
                        paste("Warnings:", length(result$warnings)),
                        paste("Notes:", length(result$notes)), result$notes),
                      "check-results/summary.txt")
-          stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
+          # Some rcmdcheck versions miss a PDF-manual ERROR in $errors.
+          stopifnot(length(status) == 1L,
+                    !grepl("ERROR|WARNING", status),
+                    length(result$errors) == 0L, length(result$warnings) == 0L)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
