@@ -29,6 +29,11 @@ off-grid event timing, B-spline/tent endpoints, and constant weighted windows.
 Old coefficients are not interchangeable with new ones; neither model fits nor
 t-statistics are guaranteed to remain unchanged. See [NEWS](NEWS.md) for details.
 
+Cubic B-spline bases require at least two functions. When a downstream wrapper
+defaults to one, specify a valid basis count explicitly (for example,
+`fmridesign::hrf(condition, basis = "bspline", nbasis = 5)`). Requests for an
+undersized basis now error; older versions could warn and return zero columns.
+
 Record the package version, HRF parameters, `span`, `precision`, and normalization
 policy with each analysis. `summate = FALSE` means a temporal average, not a
 constant peak; use `normalize = TRUE` when unit-peak scaling is intended.

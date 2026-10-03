@@ -79,7 +79,13 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::digest
+          extra-packages: any::rcmdcheck, any::digest, any::V8
+      - name: Install HTML manual validator (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tidy
       - uses: actions/download-artifact@v4
         with:
           name: cran-candidate
