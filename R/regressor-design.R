@@ -21,8 +21,14 @@
 #' @param sparse Logical; if `TRUE` a sparse design matrix is returned.
 #' @param summate Logical; passed to [regressor()].
 #'
-#' @return A numeric matrix (or sparse matrix) with one column per factor level
-#'   and one row per sample defined by `sframe`.
+#' Each block (run) is convolved separately: the rows of a block depend only
+#' on the events of that block, so a response that starts near the end of one
+#' run is truncated at the run boundary rather than carried into the next run.
+#'
+#' @return A numeric matrix (or sparse matrix) with one row per sample defined
+#'   by `sframe` (blocks stacked in order) and `nbasis(hrf)` columns per factor
+#'   level, in the order of `levels(fac)`. Columns are named after the levels;
+#'   when `nbasis(hrf) > 1` they are named `<level>_basis<k>`.
 #' @examples
 #' # Create a sampling frame for 2 blocks, 100 scans each, TR=2
 #' sframe <- sampling_frame(blocklens = c(100, 100), TR = 2)
@@ -60,18 +66,39 @@ regressor_design <- function(onsets, fac, block, sframe,
 
   method <- match.arg(method)
 
-  # Convert block-wise onsets to global timing
-  g_onsets <- global_onsets(sframe, onsets, block)
+  if (!is.numeric(block) || anyNA(block) ||
+      any(block < 1L) || any(block > length(sframe$blocklens))) {
+    stop("`block` values must be valid block indices for `sframe`",
+         call. = FALSE)
+  }
 
-  # Create regressor set using global onsets
-  rs <- regressor_set(g_onsets, fac, hrf = hrf,
-                      duration = duration, amplitude = amplitude,
-                      span = span, summate = summate)
+  onsets    <- as.numeric(onsets)
+  duration  <- recycle_or_error(as.numeric(duration), length(onsets), "duration")
+  amplitude <- recycle_or_error(as.numeric(amplitude), length(onsets), "amplitude")
+  levs      <- levels(fac)
 
-  # Evaluation grid corresponds to all acquisition times
-  grid <- samples(sframe, global = TRUE)
+  # Each run is convolved on its own: a run's regressors depend only on that
+  # run's events, so responses never carry over into the next run's scans.
+  # Onsets are run-relative, and so is the evaluation grid of each run.
+  mats <- lapply(seq_along(sframe$blocklens), function(b) {
+    idx <- which(block == b)
+    rs <- regressor_set(onsets[idx], factor(as.character(fac[idx]), levels = levs),
+                        hrf = hrf, duration = duration[idx],
+                        amplitude = amplitude[idx], span = span,
+                        summate = summate)
+    grid <- samples(sframe, blockids = b, global = FALSE)
+    m <- evaluate(rs, grid = grid, precision = precision,
+                  method = method, sparse = FALSE)
+    if (!is.matrix(m)) {
+      m <- matrix(m, nrow = length(grid), dimnames = list(NULL, names(m)))
+    }
+    m
+  })
 
-  evaluate(rs, grid = grid, precision = precision,
-           method = method, sparse = sparse)
+  out <- do.call(rbind, mats)
+  if (sparse) {
+    Matrix::Matrix(out, sparse = TRUE)
+  } else {
+    out
+  }
 }
-
