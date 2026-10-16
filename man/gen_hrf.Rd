@@ -31,7 +31,8 @@ gen_hrf(
 
 \item{summate}{Passed to `block_hrf()` when `width > 0`. If `TRUE` (default),
 block responses are integrated; if `FALSE`, the integrated response is
-scaled by total block weight so amplitude does not grow with block width.}
+divided by the block width to obtain a temporal average. Averaging does
+not fix peak height; use `normalize = TRUE` for unit-peak scaling.}
 
 \item{normalize}{If TRUE, applies `normalise_hrf` at the end. Default is FALSE.}
 

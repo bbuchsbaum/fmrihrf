@@ -380,8 +380,11 @@ test_that("block_hrf correctly blocks an HRF object", {
 
   expect_equal(blocked_hrf_sum(t), eval_res_sum)
   expect_false(identical(blocked_hrf_sum(t), blocked_hrf_nosum(t)))
-  expect_equal(blocked_hrf_norm(t), eval_res_norm)
-  expect_equal(max(abs(blocked_hrf_norm(t))), 1) # Check normalization worked
+  # evaluate(..., normalize=TRUE) rescales this queried vector, whereas the
+  # constructed HRF now has one fixed scale. Their shapes must still agree.
+  expect_equal(blocked_hrf_norm(t) / max(abs(blocked_hrf_norm(t))), eval_res_norm)
+  fixed_grid <- seq(0, attr(blocked_hrf_norm, "span"), by = 0.02)
+  expect_equal(max(abs(blocked_hrf_norm(fixed_grid))), 1)
 
   # Regression: summate = FALSE returns normalized weighted integration,
   # not a pointwise max across offsets.
@@ -409,9 +412,11 @@ test_that("block_hrf correctly blocks an HRF object", {
   expect_false(identical(blocked_hl(t), blocked_hrf_sum(t)))
   expect_true(max(abs(blocked_hl(t))) < max(abs(blocked_hrf_sum(t)))) # Expect decay to reduce peak
 
-  # Test negligible width
-  blocked_negligible <- block_hrf(base_hrf, width = 0.01, precision = 0.1, half_life = half_life_inf)
-  expect_equal(blocked_negligible(t), base_hrf(t))
+  # A positive width is a block even when smaller than the quadrature step.
+  # With a single trapezoid, its integral is width times the endpoint mean.
+  blocked_negligible <- block_hrf(base_hrf, width = 0.01, precision = 0.1)
+  expect_equal(blocked_negligible(t),
+               0.01 * (base_hrf(t) + base_hrf(t - 0.01)) / 2)
 })
 
 test_that("block_hrf summate = FALSE scales multi-basis responses by block weight", {
