@@ -221,6 +221,10 @@ compiled convolution engine.
 
 ### Bug Fixes
 
+- Let the generated Rcpp wrapper translate native exceptions after C++
+  stack unwinding, removing the remaining direct `Rf_error()` call
+  (issue [\#42](https://github.com/bbuchsbaum/fmrihrf/issues/42)).
+
 - Clarified that `summate = FALSE` computes a temporal average, whose
   peak can decrease for longer blocks; `normalize = TRUE` controls
   unit-peak scaling (issue

@@ -86,7 +86,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-4-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-0"></a></h3>
-<ul><li><p>Clarified that <code>summate = FALSE</code> computes a temporal average, whose peak can decrease for longer blocks; <code>normalize = TRUE</code> controls unit-peak scaling (issue <a href="https://github.com/bbuchsbaum/fmrihrf/issues/49" class="external-link">#49</a>).</p></li>
+<ul><li><p>Let the generated Rcpp wrapper translate native exceptions after C++ stack unwinding, removing the remaining direct <code>Rf_error()</code> call (issue <a href="https://github.com/bbuchsbaum/fmrihrf/issues/42" class="external-link">#42</a>).</p></li>
+<li><p>Clarified that <code>summate = FALSE</code> computes a temporal average, whose peak can decrease for longer blocks; <code>normalize = TRUE</code> controls unit-peak scaling (issue <a href="https://github.com/bbuchsbaum/fmrihrf/issues/49" class="external-link">#49</a>).</p></li>
 <li><p>Preserved parameter metadata in closed HRF constructors and decorators without incorrectly warning that the captured parameters would be ignored.</p></li>
 <li><p>Fixed loop-based block regressors integrating the kernel beyond its declared span, where the convolution engine already truncated it. The restored SPMG undershoot exposed this existing tail discrepancy. Support is now applied before block integration on both paths.</p></li>
 <li><p><strong>Breaking:</strong> corrected the SPMG canonical positive coefficient from <code>0.0833</code> to <code>1/120</code> and used the exact undershoot coefficient <code>1/(6*15!)</code>. <code>HRF_SPMG1</code>, <code>HRF_SPMG2</code>, and <code>HRF_SPMG3</code> now have the SPM double-gamma shape (about 8.9% undershoot relative to peak, previously 0.6%). This changes both raw scale and shape; existing analyses should be refitted.</p></li>

@@ -75,6 +75,13 @@
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bbuchsbaum/fmrihrf"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="upgrading-from-030-to-040">Upgrading from 0.3.0 to 0.4.0<a class="anchor" aria-label="anchor" href="#upgrading-from-030-to-040"></a>
+</h2>
+<p>Rebuild design matrices and refit analyses when upgrading. This release corrects SPMG response shape and the SPMG3 dispersion derivative, block integration and off-grid event timing, B-spline/tent endpoints, constant weighted windows, query-dependent block normalization, and integration of blocks shorter than the numerical step. Old coefficients are not interchangeable with new ones; neither model fits nor t-statistics are guaranteed to remain unchanged. See <a href="NEWS.html">NEWS</a> for details.</p>
+<p>Cubic B-spline bases require at least two functions. When a downstream wrapper defaults to one, specify a valid basis count explicitly (for example, <code>fmridesign::hrf(condition, basis = "bspline", nbasis = 5)</code>). Requests for an undersized basis now error; older versions could warn and return zero columns.</p>
+<p>Record the package version, HRF parameters, <code>span</code>, <code>precision</code>, and normalization policy with each analysis. <code>summate = FALSE</code> means a temporal average, not a constant peak; use <code>normalize = TRUE</code> when unit-peak scaling is intended. The default 24-second SPMG support remains unchanged and truncates some of the undershoot. Choose an explicit longer support when needed, for example <code>gen_hrf(hrf_spmg1, span = 32)</code>. The kernels are continuous and unorthogonalized; matching SPM/Nilearn sampled designs requires matching sampling, support, normalization, and basis processing as well.</p>
+</div>
+<div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -99,7 +106,7 @@
 <code class="sourceCode R"><span><span class="va">HRF_SPMG1</span>                                    <span class="co"># SPM canonical (double gamma)</span></span>
 <span><span class="va">HRF_SPMG3</span>                                    <span class="co"># canonical + temporal &amp; dispersion derivatives</span></span>
 <span><span class="fu"><a href="reference/hrf_bspline.html">hrf_bspline</a></span><span class="op">(</span><span class="va">t</span>, N <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>                        <span class="co"># B-spline basis</span></span>
-<span><span class="fu"><a href="reference/hrf_fourier.html">hrf_fourier</a></span><span class="op">(</span><span class="va">t</span>, N <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>                        <span class="co"># Fourier basis</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/hrf_fourier.html">hrf_fourier</a></span><span class="op">(</span><span class="va">t</span>, nbasis <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>                        <span class="co"># Fourier basis</span></span></code></pre></div>
 <p><strong>Decorators</strong> — Modify any HRF through functional composition.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/lag_hrf.html">lag_hrf</a></span><span class="op">(</span><span class="va">HRF_SPMG1</span>, lag <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>                  <span class="co"># shift peak by 2 s</span></span>
