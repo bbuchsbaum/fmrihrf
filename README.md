@@ -21,6 +21,30 @@ install.packages("fmrihrf")
 remotes::install_github("bbuchsbaum/fmrihrf")
 ```
 
+## Upgrading from 0.3.0 to 0.4.0
+
+Rebuild design matrices and refit analyses when upgrading. This release corrects
+SPMG response shape and the SPMG3 dispersion derivative, block integration and
+off-grid event timing, B-spline/tent endpoints, constant weighted windows,
+query-dependent block normalization, and integration of blocks shorter than
+the numerical step.
+Old coefficients are not interchangeable with new ones; neither model fits nor
+t-statistics are guaranteed to remain unchanged. See [NEWS](NEWS.md) for details.
+
+Cubic B-spline bases require at least two functions. When a downstream wrapper
+defaults to one, specify a valid basis count explicitly (for example,
+`fmridesign::hrf(condition, basis = "bspline", nbasis = 5)`). Requests for an
+undersized basis now error; older versions could warn and return zero columns.
+
+Record the package version, HRF parameters, `span`, `precision`, and normalization
+policy with each analysis. `summate = FALSE` means a temporal average, not a
+constant peak; use `normalize = TRUE` when unit-peak scaling is intended.
+The default 24-second SPMG support remains unchanged and truncates some of the
+undershoot. Choose an explicit longer support when needed, for example
+`gen_hrf(hrf_spmg1, span = 32)`. The kernels are continuous and unorthogonalized;
+matching SPM/Nilearn sampled designs requires matching sampling, support,
+normalization, and basis processing as well.
+
 ## Quick start
 
 ```r
@@ -46,7 +70,7 @@ plot(reg)
 HRF_SPMG1                                    # SPM canonical (double gamma)
 HRF_SPMG3                                    # canonical + temporal & dispersion derivatives
 hrf_bspline(t, N = 6)                        # B-spline basis
-hrf_fourier(t, N = 5)                        # Fourier basis
+hrf_fourier(t, nbasis = 5)                        # Fourier basis
 ```
 
 **Decorators** --- Modify any HRF through functional composition.
