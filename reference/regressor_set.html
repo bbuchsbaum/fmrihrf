@@ -11,7 +11,7 @@ onsets, durations and amplitudes."><link href="../albers.css" rel="stylesheet"><
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,7 +132,12 @@ condition for each onset.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class `RegSet` containing one `Reg` per factor level.</p>
+    <p>`regressor_set()` returns an object of class `RegSet` containing one
+  `Reg` per factor level. `evaluate()` returns a matrix (or sparse matrix)
+  with one row per element of `grid` and one column per factor level and
+  basis function, in the order of the levels. Columns are named after the
+  levels, or `&lt;level&gt;_basis&lt;k&gt;` when the HRF has more than one basis
+  function.</p>
     </div>
 
     <div class="section level2">

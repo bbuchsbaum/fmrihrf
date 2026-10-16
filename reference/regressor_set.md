@@ -85,7 +85,12 @@ evaluate(
 
 ## Value
 
-An object of class \`RegSet\` containing one \`Reg\` per factor level.
+\`regressor_set()\` returns an object of class \`RegSet\` containing one
+\`Reg\` per factor level. \`evaluate()\` returns a matrix (or sparse
+matrix) with one row per element of \`grid\` and one column per factor
+level and basis function, in the order of the levels. Columns are named
+after the levels, or \`\<level\>\_basis\<k\>\` when the HRF has more
+than one basis function.
 
 ## Examples
 

@@ -11,7 +11,7 @@ evaluated design matrix."><link href="../albers.css" rel="stylesheet"><script>wi
 
     <a class="navbar-brand me-2" href="../index.html">fmrihrf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,13 +121,18 @@ experiment.</p></dd>
 
 
 <dt id="arg-summate">summate<a class="anchor" aria-label="anchor" href="#arg-summate"></a></dt>
-<dd><p>Logical; passed to [regressor()].</p></dd>
+<dd><p>Logical; passed to [regressor()].</p>
+<p>Each block (run) is convolved separately: the rows of a block depend only
+on the events of that block, so a response that starts near the end of one
+run is truncated at the run boundary rather than carried into the next run.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric matrix (or sparse matrix) with one column per factor level
-  and one row per sample defined by `sframe`.</p>
+    <p>A numeric matrix (or sparse matrix) with one row per sample defined
+  by `sframe` (blocks stacked in order) and `nbasis(hrf)` columns per factor
+  level, in the order of `levels(fac)`. Columns are named after the levels;
+  when `nbasis(hrf) &gt; 1` they are named `&lt;level&gt;_basis&lt;k&gt;`.</p>
     </div>
 
     <div class="section level2">

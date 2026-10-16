@@ -49,13 +49,12 @@ evaluate(
 
 - summate:
 
-  Logical; whether the HRF response should accumulate over the duration
-  (default: TRUE), giving the integral over a unit-height block, so peak
-  amplitude grows with duration. If FALSE, the result is divided by the
-  block duration, giving the duration-averaged (unit-mass) response: the
-  temporal profile is preserved, peak amplitude does not grow with
-  duration, and the value approaches the impulse response as duration
-  approaches 0.
+  Logical; if TRUE (default), integrate the HRF over a unit-height
+  block. If FALSE, divide by the duration to obtain a temporal average.
+  The peak still varies with duration and can decrease for longer
+  blocks. The average approaches the impulse response as duration
+  approaches zero. Use \`normalize = TRUE\` for unit-peak scaling on the
+  evaluated grid.
 
 - normalize:
 

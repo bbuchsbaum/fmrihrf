@@ -1,8 +1,54 @@
 # Changelog
 
+## fmrihrf 0.4.0.9000
+
+### Bug fixes
+
+- **Correctness fix that changes results.**
+  [`regressor_design()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor_design.md)
+  now convolves each run (block of the sampling frame) separately.
+  Previously it mapped all onsets to session time and convolved once
+  over the whole session, so the response to an event near the end of
+  one run (including its undershoot) spilled into the first scans of the
+  next run. Each run’s rows now depend only on that run’s events and are
+  identical to evaluating that run on its own. Design matrices with
+  events within roughly one HRF span of a run’s end change; rebuild them
+  and refit affected analyses
+  ([\#62](https://github.com/bbuchsbaum/fmrihrf/issues/62)).
+
+- [`regressor_design()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor_design.md)
+  and
+  [`evaluate()`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.md)
+  on a `RegSet` now return named columns: the factor levels, or
+  `<level>_basis<k>` when the HRF has more than one basis function (the
+  same names the `design` CLI command writes)
+  ([\#63](https://github.com/bbuchsbaum/fmrihrf/issues/63)).
+
 ## fmrihrf 0.4.0
 
+CRAN release: 2026-10-04
+
 ### Breaking changes
+
+- `block_hrf(normalize = TRUE)` now computes each basis’s absolute-peak
+  normalization factor once, over the full blocked span, using the fixed
+  reference-grid policy of `normalize_hrf(..., "unit_peak_per_basis")`.
+  Previously each call normalized against its requested times: a scalar
+  evaluation could become 1 even far from the peak, and the convolution
+  and loop methods could disagree. Scalar, vector, and chunked queries
+  now retain the same scale. Negative responses keep their sign and zero
+  bases stay zero. Rebuild designs and refit analyses that used
+  normalized blocked HRFs.
+
+- Every positive
+  [`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md)
+  width is now integrated, including widths below `precision`.
+  Previously a short block returned the unintegrated impulse response,
+  creating a discontinuity when width crossed the numerical step.
+  `width = 0` retains the impulse convention. With `summate = FALSE`,
+  the integral is divided by width; with finite `half_life`, decay
+  attenuates the integrand but does not renormalize the averaging
+  weights.
 
 - [`hrf_bspline()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline.md),
   [`hrf_bspline_generator()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_bspline_generator.md)
@@ -175,6 +221,11 @@ compiled convolution engine.
 
 ### Bug Fixes
 
+- Clarified that `summate = FALSE` computes a temporal average, whose
+  peak can decrease for longer blocks; `normalize = TRUE` controls
+  unit-peak scaling (issue
+  [\#49](https://github.com/bbuchsbaum/fmrihrf/issues/49)).
+
 - Preserved parameter metadata in closed HRF constructors and decorators
   without incorrectly warning that the captured parameters would be
   ignored.
@@ -226,8 +277,10 @@ Addresses the defects reported in issue
   uses, so a block response is
   `amplitude * integral h(t - onset - u) du` over the block and
   converges as `precision` decreases. Point events (`duration = 0`) are
-  unaffected. Fitted betas from epoch designs will change scale; model
-  fit and t-statistics will not.
+  unaffected. Fitted betas from epoch designs will change scale. Because
+  this release also corrects response shapes and event timing, model
+  fits and t-statistics cannot be assumed unchanged; rebuild design
+  matrices and refit existing analyses.
 
 - **Breaking:** `summate = FALSE` now takes effect on every evaluation
   method. It was silently ignored by the `conv` (the default), `fft`,

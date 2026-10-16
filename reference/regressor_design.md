@@ -77,10 +77,18 @@ regressor_design(
 
   Logical; passed to \[regressor()\].
 
+  Each block (run) is convolved separately: the rows of a block depend
+  only on the events of that block, so a response that starts near the
+  end of one run is truncated at the run boundary rather than carried
+  into the next run.
+
 ## Value
 
-A numeric matrix (or sparse matrix) with one column per factor level and
-one row per sample defined by \`sframe\`.
+A numeric matrix (or sparse matrix) with one row per sample defined by
+\`sframe\` (blocks stacked in order) and \`nbasis(hrf)\` columns per
+factor level, in the order of \`levels(fac)\`. Columns are named after
+the levels; when \`nbasis(hrf) \> 1\` they are named
+\`\<level\>\_basis\<k\>\`.
 
 ## Examples
 

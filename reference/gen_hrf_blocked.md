@@ -53,9 +53,10 @@ hrf_blocked(
 
 - summate:
 
-  Logical; if TRUE (default), responses accumulate (peak grows with
-  duration). If FALSE, the convolution is averaged so the temporal
-  profile is preserved but peak amplitude does not grow with duration.
+  Logical; if TRUE (default), integrate responses over the block. If
+  FALSE, divide by the block width to obtain a temporal average.
+  Averaging does not fix the peak height: longer blocks can have smaller
+  peaks. Use \`normalize = TRUE\` for unit-peak scaling.
 
 - normalize:
 

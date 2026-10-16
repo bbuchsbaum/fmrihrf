@@ -49,8 +49,9 @@ gen_hrf(
 
   Passed to \`block_hrf()\` when \`width \> 0\`. If \`TRUE\` (default),
   block responses are integrated; if \`FALSE\`, the integrated response
-  is scaled by total block weight so amplitude does not grow with block
-  width.
+  is divided by the block width to obtain a temporal average. Averaging
+  does not fix peak height; use \`normalize = TRUE\` for unit-peak
+  scaling.
 
 - normalize:
 

@@ -977,7 +977,7 @@ n_components <- 3
 variance_explained <- summary(pca_res)$importance[2, 1:n_components]
 cat("Variance explained by top", n_components, "components:",
     paste0(round(variance_explained * 100, 1), "%"), "\n")
-#> Variance explained by top 3 components: 66.3% 30.9% 2.6%
+#> Variance explained by top 3 components: 67.3% 30% 2.5%
 
 # Extract the top principal components
 pc_vectors <- pca_res$rotation[, 1:n_components]

@@ -25,7 +25,9 @@ block_hrf(
 
 - width:
 
-  The width of the block in seconds.
+  The width of the block in seconds. Every positive width is integrated,
+  including widths smaller than \`precision\`. Zero retains the original
+  impulse response.
 
 - precision:
 
@@ -40,13 +42,21 @@ block_hrf(
 - summate:
 
   Logical; if TRUE (default), responses within the block are integrated
-  (summed). If FALSE, the integrated response is divided by the total
-  block weight so amplitude does not grow with block width.
+  (summed). If FALSE, the integrated response is divided by the block
+  width to obtain a temporal average. With finite \`half_life\`, decay
+  attenuates the integrand but does not change this divisor. This does
+  not fix peak height: longer blocks can have smaller peaks. Use
+  \`normalize = TRUE\` for unit-peak scaling.
 
 - normalize:
 
-  Logical; if TRUE, the resulting blocked HRF is scaled so that its peak
-  value is 1 (default: FALSE).
+  Logical; if TRUE, scale each basis independently by its peak absolute
+  value on a fixed reference grid over the full blocked span (the
+  original span plus \`width\`). Uses the same approximately 0.02-second
+  reference spacing as \[normalize_hrf()\] with
+  \`"unit_peak_per_basis"\`. The factors are computed once at
+  construction, so scalar, vector, and chunked queries have the same
+  scale. Signs are preserved and zero bases remain zero. Default: FALSE.
 
 ## Value
 
