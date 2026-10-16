@@ -13,7 +13,12 @@
 #' @param span Numeric scalar giving the HRF span in seconds.
 #' @param summate Logical; passed to [regressor()].
 #'
-#' @return An object of class `RegSet` containing one `Reg` per factor level.
+#' @return `regressor_set()` returns an object of class `RegSet` containing one
+#'   `Reg` per factor level. `evaluate()` returns a matrix (or sparse matrix)
+#'   with one row per element of `grid` and one column per factor level and
+#'   basis function, in the order of the levels. Columns are named after the
+#'   levels, or `<level>_basis<k>` when the HRF has more than one basis
+#'   function.
 #' @examples
 #' # Create events for 3 conditions
 #' onsets <- c(10, 20, 30, 40, 50, 60)
@@ -72,10 +77,22 @@ evaluate.RegSet <- function(x, grid, precision = .33,
   method <- match.arg(method)
   mats <- lapply(x$regs, evaluate, grid = grid, precision = precision,
                  method = method, sparse = FALSE, ...)
+  mats <- lapply(mats, function(m) {
+    if (is.matrix(m)) m else matrix(m, nrow = length(grid))
+  })
   out <- do.call(cbind, mats)
+  colnames(out) <- regset_column_names(x$levels, vapply(mats, ncol, integer(1)))
   if (sparse) {
     return(Matrix::Matrix(out, sparse = TRUE))
   } else {
     return(out)
   }
+}
+
+# Column names for a RegSet design: one name per level, or
+# `<level>_basis<k>` for multi-basis HRFs (matching the CLI output).
+regset_column_names <- function(levels, ncols) {
+  unlist(Map(function(lv, k) {
+    if (k == 1L) lv else paste0(lv, "_basis", seq_len(k))
+  }, levels, ncols), use.names = FALSE)
 }

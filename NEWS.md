@@ -1,3 +1,20 @@
+# fmrihrf 0.4.0.9000
+
+## Bug fixes
+
+* **Correctness fix that changes results.** `regressor_design()` now convolves
+  each run (block of the sampling frame) separately. Previously it mapped all
+  onsets to session time and convolved once over the whole session, so the
+  response to an event near the end of one run (including its undershoot)
+  spilled into the first scans of the next run. Each run's rows now depend only
+  on that run's events and are identical to evaluating that run on its own.
+  Design matrices with events within roughly one HRF span of a run's end
+  change; rebuild them and refit affected analyses (#62).
+
+* `regressor_design()` and `evaluate()` on a `RegSet` now return named
+  columns: the factor levels, or `<level>_basis<k>` when the HRF has more than
+  one basis function (the same names the `design` CLI command writes) (#63).
+
 # fmrihrf 0.4.0
 
 ## Breaking changes
