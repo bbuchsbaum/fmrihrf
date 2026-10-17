@@ -340,13 +340,12 @@ install_cli <- function(dest_dir = "~/.local/bin",
       key <- token
     }
 
-    negated <- startsWith(key, "no-")
-    flag <- if (negated) substring(key, 4L) else key
-    if (if (negated) flag %in% false_flags else key %in% flags) {
+    negated <- startsWith(key, "no-") && substring(key, 4L) %in% false_flags
+    if (negated || key %in% flags) {
       if (!is.null(value)) {
         .cli_usage_error("Boolean option does not take a value: --", key)
       }
-      out[[flag]] <- !negated
+      out[[if (negated) substring(key, 4L) else key]] <- !negated
     } else if (key %in% values) {
       if (is.null(value)) {
         i <- i + 1L
