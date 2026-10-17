@@ -844,7 +844,7 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
 hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   assertthat::assert_that(is.numeric(theta0) && length(theta0) == 3,
                         msg = "`theta0` must be a numeric vector of length 3: c(tau, sigma, rho).")
-  names(theta0) <- c("tau", "sigma", "rho") # Ensure names for numDeriv::grad
+  names(theta0) <- c("tau", "sigma", "rho")
   assertthat::assert_that(is.numeric(t), msg = "`t` must be numeric.")
   assertthat::assert_that(normalize_primary %in% c("none", "height"),
                         msg = "`normalize_primary` must be one of 'none' or 'height'.")
@@ -853,12 +853,6 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   assertthat::assert_that(theta0["sigma"] > 0.05, msg = "sigma in `theta0` must be > 0.05.")
   assertthat::assert_that(theta0["rho"] >= 0 && theta0["rho"] <= 1.5,
                         msg = "rho in `theta0` must be between 0 and 1.5.")
-
-  # Function to pass to numDeriv::grad - parameters must be the first argument
-  # and it must return a scalar or vector (hrf_lwu returns a vector of length(t_val))
-  target_func_for_grad <- function(params_vec, t_val) {
-    hrf_lwu(t = t_val, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
-  }
 
   # Calculate h0 (the HRF at theta0)
   h0 <- hrf_lwu(t = t, tau = theta0["tau"], sigma = theta0["sigma"], rho = theta0["rho"], normalize = "none")
@@ -870,26 +864,17 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
     }
   }
 
-  # Calculate partial derivatives using numDeriv::grad
-  # grad() will iterate over each element of `t` if `target_func_for_grad` is vectorized over t,
-  # which it is. We want the gradient for each time point.
-  # However, numDeriv::grad expects the function to return a single scalar for jacobian calculation.
-  # So, we must loop over t points for numDeriv.
-
-  deriv_matrix <- matrix(NA, nrow = length(t), ncol = 3)
-  colnames(deriv_matrix) <- c("d_tau", "d_sigma", "d_rho")
-
-  for (i in seq_along(t)) {
-    # numDeriv::grad needs a function that takes params and returns a SINGLE value
-    # So we create a wrapper for each time point t[i]
-    current_t_func <- function(params_vec) {
-      hrf_lwu(t = t[i], tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
-    }
-    # Calculate gradient (vector of 3 partial derivatives) at t[i] w.r.t theta0
-    grad_at_t_i <- numDeriv::grad(func = current_t_func, x = theta0)
-    deriv_matrix[i, ] <- grad_at_t_i
+  # Partial derivatives w.r.t. (tau, sigma, rho) at every time point. hrf_lwu()
+  # is elementwise in t, so a single Jacobian gives the same values as calling
+  # numDeriv::grad() once per time point. The per-point grad() stopped on an NA
+  # response; keep rejecting NA times rather than returning NA derivatives.
+  assertthat::assert_that(!anyNA(t), msg = "`t` must not contain NA values.")
+  lwu_at <- function(params_vec) {
+    hrf_lwu(t = t, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
   }
+  deriv_matrix <- matrix(numDeriv::jacobian(func = lwu_at, x = theta0),
+                         nrow = length(t), ncol = 3,
+                         dimnames = list(NULL, c("d_tau", "d_sigma", "d_rho")))
 
-  basis_mat <- cbind(h0 = h0, deriv_matrix)
-  return(basis_mat)
+  cbind(h0 = h0, deriv_matrix)
 }

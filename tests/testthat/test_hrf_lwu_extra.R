@@ -31,3 +31,16 @@ test_that("hrf_basis_lwu returns derivatives", {
   idx <- which(t == t0)
   expect_equal(as.numeric(basis[idx, "d_tau"]), as.numeric(fd_tau), tolerance = 1e-3)
 })
+
+test_that("hrf_basis_lwu derivatives match per-point numDeriv::grad", {
+  theta <- c(6, 1.5, 0.35)
+  t <- c(-1, 0, 2.5, 6, 9.75, 25)
+  basis <- hrf_basis_lwu(theta, t)
+  expect_identical(colnames(basis), c("h0", "d_tau", "d_sigma", "d_rho"))
+  for (i in seq_along(t)) {
+    g <- numDeriv::grad(function(p) hrf_lwu(t[i], p[1], p[2], p[3]), theta)
+    expect_equal(unname(basis[i, -1]), g, tolerance = 1e-10)
+  }
+  expect_equal(dim(hrf_basis_lwu(theta, numeric(0))), c(0L, 4L))
+  expect_error(hrf_basis_lwu(theta, c(1, NA)), "NA")
+})
