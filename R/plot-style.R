@@ -85,7 +85,13 @@ scale_colour_hrf <- function(type = c("categorical", "ordered"), ...,
     stop("scale_colour_hrf() requires the 'ggplot2' package")
   }
   type <- match.arg(type)
-  ggplot2::discrete_scale(aesthetics, palette = function(n) hrf_palette(n, type), ...)
+  palette <- function(n) hrf_palette(n, type)
+  # ggplot2 < 3.5.0 requires `scale_name`; later versions deprecate it.
+  if (utils::packageVersion("ggplot2") < "3.5.0") {
+    return(ggplot2::discrete_scale(aesthetics, scale_name = "hrf",
+                                   palette = palette, ...))
+  }
+  ggplot2::discrete_scale(aesthetics, palette = palette, ...)
 }
 
 #' @md
