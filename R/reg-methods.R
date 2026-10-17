@@ -48,7 +48,6 @@
 #' @export
 #' @method evaluate Reg
 #' @importFrom Matrix Matrix
-#' @importFrom Rcpp evalCpp
 evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft", "Rconv"),
                          sparse = FALSE, normalize = FALSE, ...) {
 
