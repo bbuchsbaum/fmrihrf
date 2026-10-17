@@ -12,7 +12,8 @@ new_sampling_frame <- function(blocklens, TR, start_time, precision) {
 #'
 #' A \code{sampling_frame} describes the block structure and temporal sampling of an fMRI paradigm.
 #'
-#' @param blocklens A numeric vector representing the number of scans in each block.
+#' @param blocklens A numeric vector representing the number of scans in each block
+#'   (positive whole numbers).
 #' @param TR A numeric value or vector representing the repetition time in seconds
 #'   (i.e., the spacing between consecutive image acquisitions). When a vector is
 #'   provided, its length must be 1 or equal to the number of blocks.
@@ -63,6 +64,9 @@ sampling_frame <- function(blocklens, TR, start_time = TR / 2, precision = .1)
   }
   if (!all(blocklens > 0)) {
     stop("Block lengths must be positive")
+  }
+  if (!all(is.finite(blocklens)) || any(blocklens != round(blocklens))) {
+    stop("Block lengths must be whole numbers of scans")
   }
   if (!all(TR > 0)) {
     stop("TR values must be positive")

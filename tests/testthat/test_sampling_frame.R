@@ -32,6 +32,14 @@ test_that("sampling_frame constructor works correctly", {
                               start_time = c(0, NA)),
                "non-NA")
 
+  # Fractional block lengths used to be accepted and then silently truncated
+  # by samples() and blockids(), while print() failed on them.
+  expect_error(sampling_frame(blocklens = c(100, 10.5), TR = 2), "whole numbers")
+  expect_error(sampling_frame(blocklens = Inf, TR = 2), "whole numbers")
+  expect_silent(sf_int <- sampling_frame(blocklens = c(10, 20L), TR = 2))
+  expect_equal(sf_int$blocklens, c(10, 20))
+  expect_length(samples(sf_int), 30)
+
   expect_error(sampling_frame(blocklens = c(100, 100), TR = c(2, 2, 2)),
               "TR must have length 1 or match the number of blocks")
   expect_error(sampling_frame(blocklens = c(100, 100), TR = 2, start_time = c(0, 0, 0)),
