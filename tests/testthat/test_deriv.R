@@ -111,3 +111,24 @@ test_that("deriv handles edge cases", {
   # Derivative should be 0 for negative times
   expect_equal(deriv_neg[1:2], c(0, 0))
 })
+
+test_that("HRF_SPMG1 dispatches to the analytic derivative", {
+  expect_identical(class(HRF_SPMG1), c("SPMG1_HRF", "HRF", "function"))
+  t <- c(-1, 0, 2.5, 6, 15)
+  expect_identical(deriv(HRF_SPMG1, t), fmrihrf:::hrf_spmg1_deriv(t))
+  expect_identical(deriv(getHRF("spmg1"), t), fmrihrf:::hrf_spmg1_deriv(t))
+  expect_identical(deriv(HRF_SPMG1, numeric(0)), numeric(0))
+
+  # Decorated objects are plain HRFs and keep the numerical fallback
+  lagged <- lag_hrf(HRF_SPMG1, 2)
+  expect_false(inherits(lagged, "SPMG1_HRF"))
+  expect_equal(deriv(lagged, t), fmrihrf:::hrf_spmg1_deriv(t - 2), tolerance = 1e-7)
+
+  # Other generics still treat it as an ordinary single-basis HRF
+  expect_equal(penalty_matrix(HRF_SPMG1), diag(1))
+  expect_equal(reconstruction_matrix(HRF_SPMG1, t), matrix(HRF_SPMG1(t), ncol = 1))
+  expect_equal(nbasis(HRF_SPMG1), 1L)
+  info <- list_available_hrfs()
+  expect_equal(info$type[info$name == "spmg1"], "object")
+  expect_output(print(HRF_SPMG1), "HRF: SPMG1")
+})
