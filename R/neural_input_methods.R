@@ -1,9 +1,10 @@
 #' @rdname neural_input
 #' @export
 neural_input.Reg <- function(x, start = 0, end = NULL, resolution = 0.33, ...) {
-  # Determine end time if not provided
+  # Determine end time if not provided: a 10 s buffer past the last event,
+  # or past `start` when there are no events.
   if (is.null(end)) {
-    end <- max(x$onsets + x$duration) + 10  # Add 10 seconds buffer
+    end <- if (length(x$onsets) > 0) max(x$onsets + x$duration) + 10 else start + 10
   }
   
   # Create time vector

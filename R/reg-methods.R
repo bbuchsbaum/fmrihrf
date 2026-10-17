@@ -48,8 +48,6 @@
 #' @export
 #' @method evaluate Reg
 #' @importFrom Matrix Matrix
-#' @importFrom memoise memoise
-#' @importFrom stats approx median convolve
 #' @importFrom Rcpp evalCpp
 evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft", "Rconv"),
                          sparse = FALSE, normalize = FALSE, ...) {
@@ -78,104 +76,63 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft",
     stop("`normalize` must be a single logical value.", call. = FALSE)
   }
 
-  # Prepare inputs using the helper function
-  prep_data <- prep_reg_inputs(x, grid, precision)
-  
-  # Check if prep_reg_inputs indicated no relevant events
-  if (length(prep_data$valid_ons) == 0) {
-    zero_res <- if (prep_data$nb == 1) {
-      rep(0, length(grid))
-    } else {
-      matrix(0, nrow = length(grid), ncol = prep_data$nb)
-    }
-    if (sparse) {
-      zero_res <- Matrix::Matrix(zero_res, sparse = TRUE)
-    }
-    return(zero_res)
-  }
-  
-  # --- Method Dispatch to Internal Engines ---
-  eng_fun <- switch(method,
-     conv  = eval_conv,   # Default: C++ direct convolution
-     loop  = eval_loop,   # Pure R reference; also the list-HRF fallback
-     stop("Invalid evaluation method: ", method) # Should not happen due to match.arg
-  )
-  
-  # Call the selected engine function with prepared data
-  # Pass ... through to the engine, which might pass it to evaluate.HRF in loop
-  result <- eng_fun(prep_data, ...) 
-  
-  # --- Final Formatting ---
-  nb <- prep_data$nb
-  final_result <- if (nb == 1 && is.matrix(result)) {
-    as.vector(result)
-  } else if (nb > 1 && !is.matrix(result)) {
-    matrix(result, nrow=length(grid), ncol=nb)
+  p <- prep_reg_inputs(x, grid, precision)
+
+  result <- if (length(p$valid_ons) == 0) {
+    # No event reaches the grid
+    matrix(0, nrow = length(grid), ncol = p$nb)
+  } else if (method == "loop" || p$hrf_is_list) {
+    # Pure R reference; also the only engine for per-event HRF lists.
+    # Pass ... through to evaluate.HRF.
+    eval_loop(p, ...)
   } else {
-      result
+    eval_conv(p)
   }
 
-  if (normalize) {
-    if (is.matrix(final_result)) {
-      peaks <- apply(final_result, 2, function(col) max(abs(col), na.rm = TRUE))
-      peaks[is.na(peaks) | peaks == 0] <- 1
-      final_result <- sweep(final_result, 2, peaks, "/")
-    } else {
-      peak <- max(abs(final_result), na.rm = TRUE)
-      if (!is.na(peak) && peak != 0) {
-        final_result <- final_result / peak
-      }
-    }
-  }
-  
-  # Convert to sparse matrix if requested
-  if (sparse) {
-    return(Matrix::Matrix(final_result, sparse = TRUE))
-  } else {
-    return(final_result)
-  }
+  if (p$nb == 1) result <- as.vector(result)
+  if (normalize) result <- .normalise_result(result)
+
+  if (sparse) Matrix::Matrix(result, sparse = TRUE) else result
 }
 
 
 #' @method shift Reg
 #' @rdname shift
 #' @export
-#' @importFrom assertthat assert_that
 shift.Reg <- function(x, shift_amount, ...) {
-  dots <- list(...)
+  shift_amount <- resolve_shift_amount(shift_amount, list(...))
 
-  if (missing(shift_amount) && "offset" %in% names(dots)) {
-    shift_amount <- dots$offset
-  }
-
-  assert_that(inherits(x, "Reg"),
-              msg = "Input 'x' must inherit from class 'Reg'")
-
-  if (missing(shift_amount)) {
-    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
-  }
-
-  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
-              msg = "`shift_amount` must be a single numeric value")
-
-  # Handle empty regressor case
-  if (length(x$onsets) == 0 || (length(x$onsets) == 1 && is.na(x$onsets[1]))) {
-    # Returning the original empty object is appropriate for a shift
+  # Returning the original empty object is appropriate for a shift
+  if (length(x$onsets) == 0) {
     return(x)
   }
 
-  # Shift the valid onsets
-  shifted_onsets <- x$onsets + shift_amount
+  # Reconstruct the object using the core Reg constructor, which validates the
+  # shifted onsets. Zero amplitudes were already dropped (or deliberately
+  # kept) when `x` was built.
+  Reg(onsets = x$onsets + shift_amount,
+      hrf = x$hrf,
+      duration = x$duration,
+      amplitude = x$amplitude,
+      span = x$span,
+      summate = x$summate,
+      drop_zero_amplitude = FALSE)
+}
 
-  # Reconstruct the object using the core Reg constructor 
-  out <- Reg(onsets = shifted_onsets,
-             hrf = x$hrf,
-             duration = x$duration,
-             amplitude = x$amplitude,
-             span = x$span,
-             summate = x$summate)
-             
-  return(out)
+# `shift_amount` for the shift() methods, which also accept it as `offset`.
+#' @importFrom assertthat assert_that
+#' @keywords internal
+#' @noRd
+resolve_shift_amount <- function(shift_amount, dots) {
+  if (missing(shift_amount) && "offset" %in% names(dots)) {
+    shift_amount <- dots$offset
+  }
+  if (missing(shift_amount)) {
+    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
+  }
+  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
+              msg = "`shift_amount` must be a single numeric value")
+  shift_amount
 }
 
 #' Print method for Reg objects
@@ -197,21 +154,13 @@ shift.Reg <- function(x, shift_amount, ...) {
 print.Reg <- function(x, ...) {
 
   n_ons <- length(x$onsets)
-  hrf_is_list <- isTRUE(attr(x, "hrf_is_list"))
-
-  # Get HRF info - handle list vs single HRF
-
-  if (hrf_is_list) {
-    if (length(x$hrf) > 0) {
-      hrf_name <- paste0("trial-varying (", length(x$hrf), " HRFs)")
-      nb <- nbasis(x$hrf[[1]])
-    } else {
-      hrf_name <- "trial-varying (empty)"
-      nb <- 1L
-    }
+  nb <- nbasis(x)
+  hrf_name <- if (!isTRUE(attr(x, "hrf_is_list"))) {
+    attr(x$hrf, "name") %||% "custom function"
+  } else if (length(x$hrf) > 0) {
+    paste0("trial-varying (", length(x$hrf), " HRFs)")
   } else {
-    hrf_name <- attr(x$hrf, "name") %||% "custom function"
-    nb <- nbasis(x$hrf)
+    "trial-varying (empty)"
   }
   hrf_span <- x$span
 
@@ -219,7 +168,7 @@ print.Reg <- function(x, ...) {
 
   # Use cli_div for potentially better alignment than cli_ul
   cli::cli_div(theme = list(ul = list("margin-left" = 2), li = list("margin-bottom" = 0.5)))
-  cli::cli_li("Type: {.cls {class(x)[1]}}{if(inherits(x, 'regressor')) ' (Legacy compatible)'}")
+  cli::cli_li("Type: {.cls {class(x)[1]}}")
   if (n_ons == 0) {
     cli::cli_li("Events: 0 (Empty Regressor)")
   } else {

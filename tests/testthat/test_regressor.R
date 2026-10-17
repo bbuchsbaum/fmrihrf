@@ -85,6 +85,14 @@ test_that("shift.Reg accepts offset argument", {
   expect_equal(shifted$onsets, c(3, 5))
 })
 
+test_that("shift.Reg keeps zero-amplitude events kept by drop_zero_amplitude = FALSE", {
+  reg <- regressor(c(1, 5, 9), amplitude = c(1, 0, 2), drop_zero_amplitude = FALSE)
+  shifted <- shift(reg, 2)
+  expect_equal(shifted$onsets, c(3, 7, 11))
+  expect_equal(shifted$amplitude, c(1, 0, 2))
+  expect_equal(evaluate(shifted, 0:30), evaluate(reg, 0:30 - 2))
+})
+
 test_that("shift.Reg errors without shift specification", {
   reg <- regressor(0, hrf = HRF_SPMG1)
   expect_error(shift(reg), "shift_amount")
@@ -153,4 +161,69 @@ test_that("evaluate.Reg validates normalize argument", {
   reg <- regressor(onsets = 0, hrf = BOX_HRF, span = 1)
   expect_error(evaluate(reg, 0:1, normalize = NA), "normalize")
   expect_error(evaluate(reg, 0:1, normalize = 1), "normalize")
+})
+
+test_that("conv matches a full convolution of the fine-grid impulse train", {
+  # Reference: unit-mass impulses split linearly over the two bracketing
+  # fine-grid bins, convolved with the sampled kernel over the whole fine
+  # grid, then linearly interpolated onto the evaluation grid.
+  conv_reference <- function(grid, onsets, amp, hrf, dt) {
+    span <- attr(hrf, "span")
+    hmat <- as.matrix(evaluate(hrf, seq(0, span, by = dt)))
+    start <- min(grid) - span
+    end <- max(grid, onsets) + span
+    n <- floor((end - start) / dt) + 1
+    neural <- numeric(n + 1)
+    pos <- (onsets - start) / dt
+    a <- floor(pos)
+    for (i in which(pos >= 0)) {  # earlier events end before the grid's reach
+      neural[a[i] + 1:2] <- neural[a[i] + 1:2] + amp[i] * c(1 - (pos[i] - a[i]), pos[i] - a[i])
+    }
+    neural <- neural[seq_len(n)]
+    fine <- start + (seq_len(n) - 1) * dt
+    out <- vapply(seq_len(ncol(hmat)), function(b) {
+      h <- hmat[, b]
+      full <- vapply(seq_len(n), function(k) {
+        lags <- seq_len(min(k, length(h)))
+        sum(h[lags] * neural[k - lags + 1])
+      }, numeric(1))
+      stats::approx(fine, full, grid, rule = 2)$y
+    }, numeric(length(grid)))
+    matrix(out, nrow = length(grid))
+  }
+
+  onsets <- c(3.17, 20, 41.9, 42.4, 75)
+  amp <- c(1, -0.5, 2, 1.25, 0.8)
+  grids <- list(
+    scans = seq(1, by = 2, length.out = 45),
+    denser_than_fine = seq(0, 30, by = 0.1),
+    irregular = c(0.5, 0.52, 7, 7, 33.3, 61, 88.8, 120),
+    single = 44.4
+  )
+  for (hrf in list(HRF_SPMG1, HRF_SPMG3)) {
+    reg <- regressor(onsets, hrf, amplitude = amp)
+    for (dt in c(0.1, 0.33, 1)) {
+      for (g in names(grids)) {
+        expected <- conv_reference(grids[[g]], onsets, amp, hrf, dt)
+        if (nbasis(hrf) == 1) expected <- as.vector(expected)
+        expect_equal(evaluate(reg, grids[[g]], precision = dt), expected,
+                     tolerance = 1e-10,
+                     info = paste(attr(hrf, "name"), dt, g))
+      }
+    }
+  }
+})
+
+test_that("neural_input samples block events and handles empty regressors", {
+  reg <- regressor(onsets = c(2, 6), duration = c(2, 1), amplitude = c(1, 3))
+  ni <- neural_input(reg, start = 0, end = 10, resolution = 1)
+  expect_equal(ni$time, 0:10)
+  expect_equal(ni$neural_input, c(0, 0, 1, 1, 0, 0, 3, 0, 0, 0, 0))
+  expect_equal(range(neural_input(reg, resolution = 0.5)$time), c(0, 17))
+
+  # An empty regressor used to fail on max(numeric(0)) when `end` was not given.
+  empty <- regressor(onsets = c(1, 2), amplitude = 0)
+  expect_no_warning(ni0 <- neural_input(empty, start = 5, resolution = 1))
+  expect_equal(ni0$time, 5:15)
+  expect_equal(ni0$neural_input, numeric(11))
 })
