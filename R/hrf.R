@@ -179,14 +179,7 @@ bind_basis <- function(...) {
 gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
                     summate=TRUE, normalize=FALSE, name=NULL, span=NULL,
                     hrf_norm="none", ...) {
-
-  hrf_norm <- match.arg(hrf_norm, c(
-    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
-  ))
-  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
-    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
-         call. = FALSE)
-  }
+  hrf_norm <- .match_hrf_norm(hrf_norm, normalize)
 
   # 1. Ensure we start with an HRF object
   if (is.function(hrf) && !inherits(hrf, "HRF")) {
@@ -216,29 +209,10 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
     stop("'hrf' must be a function or an HRF object.")
   }
 
-  # Apply decorators conditionally
-  decorated_hrf <- base_hrf
-
-  # Apply width decorator first if needed
-  if (width != 0) {
-    # Check positivity *before* applying
-    stopifnot(width > 0)
-    # Note: block_hrf handles normalize=FALSE internally by default
-    decorated_hrf <- block_hrf(decorated_hrf, width=width, precision=precision,
-                               half_life=half_life, summate=summate, normalize=FALSE)
-  }
-
-  # Apply lag decorator if needed
-  if (lag != 0) {
-    decorated_hrf <- lag_hrf(decorated_hrf, lag=lag)
-  }
-
-  # Apply normalization decorator last if needed
-  if (normalize) {
-    decorated_hrf <- normalise_hrf(decorated_hrf)
-  } else if (!identical(hrf_norm, "none")) {
-    decorated_hrf <- normalize_hrf(decorated_hrf, hrf_norm)
-  }
+  decorated_hrf <- .decorate_hrf(base_hrf, lag = lag, width = width,
+                                 precision = precision, half_life = half_life,
+                                 summate = summate, normalize = normalize,
+                                 hrf_norm = hrf_norm)
 
   # Override name and span if provided by user
   if (!is.null(name)) {
@@ -247,9 +221,43 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   if (!is.null(span)) {
     attr(decorated_hrf, "span") <- span
   }
+  decorated_hrf
+}
 
-  # Return the final (potentially decorated) HRF object
-  return(decorated_hrf)
+
+# Validate `hrf_norm` for gen_hrf()/getHRF() and reject combining it with the
+# legacy `normalize = TRUE` shortcut.
+.match_hrf_norm <- function(hrf_norm, normalize) {
+  hrf_norm <- match.arg(hrf_norm, c(
+    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
+  ))
+  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
+    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
+         call. = FALSE)
+  }
+  hrf_norm
+}
+
+# Decorator pipeline shared by gen_hrf() and getHRF(): block (width), then
+# lag, then normalisation.
+.decorate_hrf <- function(hrf, lag = 0, width = 0, precision = 0.1,
+                          half_life = Inf, summate = TRUE, normalize = FALSE,
+                          hrf_norm = "none") {
+  if (width != 0) {
+    stopifnot(width > 0)
+    hrf <- block_hrf(hrf, width = width, precision = precision,
+                     half_life = half_life, summate = summate)
+  }
+  if (lag != 0) {
+    hrf <- lag_hrf(hrf, lag = lag)
+  }
+  if (normalize) {
+    normalise_hrf(hrf)
+  } else if (!identical(hrf_norm, "none")) {
+    normalize_hrf(hrf, hrf_norm)
+  } else {
+    hrf
+  }
 }
 
 
@@ -1037,41 +1045,22 @@ getHRF <- function(name = "spmg1", # Default to spmg1
                    lag=0, width=0,
                    summate=TRUE, normalize=FALSE, hrf_norm="none", ...) {
 
-  hrf_norm <- match.arg(hrf_norm, c(
-    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
-  ))
-  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
-    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
-         call. = FALSE)
-  }
+  hrf_norm <- .match_hrf_norm(hrf_norm, normalize)
 
   key   <- match.arg(tolower(name), names(HRF_REGISTRY))
   entry <- HRF_REGISTRY[[key]]
 
   base <- if (inherits(entry, "HRF")) {
-            entry # Use pre-defined object
-      } else {
-            # Call generator, passing nbasis, span, and any relevant ... args
-            gen_args <- c(list(nbasis=as.integer(nbasis), span=span), list(...))
-            # Only pass args the generator actually accepts
-            valid_args <- gen_args[names(gen_args) %in% names(formals(entry))]
-            do.call(entry, valid_args)
-          }
-
-  # Apply decorators
-  if (width != 0) {
-      stopifnot(width > 0)
-      base <- block_hrf(base, width = width, summate = summate)
-  }
-  if (lag != 0) {
-      base <- lag_hrf(base, lag = lag)
-  }
-  if (normalize) {
-      base <- normalise_hrf(base)
-  } else if (!identical(hrf_norm, "none")) {
-      base <- normalize_hrf(base, hrf_norm)
+    entry # Use pre-defined object
+  } else {
+    # Call generator, passing nbasis, span, and any relevant ... args
+    gen_args <- c(list(nbasis = as.integer(nbasis), span = span), list(...))
+    # Only pass args the generator actually accepts
+    do.call(entry, gen_args[names(gen_args) %in% names(formals(entry))])
   }
 
+  base <- .decorate_hrf(base, lag = lag, width = width, summate = summate,
+                        normalize = normalize, hrf_norm = hrf_norm)
   attr(base, "name") <- key # Set name attribute to the matched registry key
   base
 }
