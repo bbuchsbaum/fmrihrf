@@ -30,9 +30,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// neural_input_cpp
+Rcpp::NumericVector neural_input_cpp(const arma::vec& onsets, const arma::vec& durations, const arma::vec& amplitudes, double start, double dt, int n, bool summate);
+RcppExport SEXP _fmrihrf_neural_input_cpp(SEXP onsetsSEXP, SEXP durationsSEXP, SEXP amplitudesSEXP, SEXP startSEXP, SEXP dtSEXP, SEXP nSEXP, SEXP summateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type onsets(onsetsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type durations(durationsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type amplitudes(amplitudesSEXP);
+    Rcpp::traits::input_parameter< double >::type start(startSEXP);
+    Rcpp::traits::input_parameter< double >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type summate(summateSEXP);
+    rcpp_result_gen = Rcpp::wrap(neural_input_cpp(onsets, durations, amplitudes, start, dt, n, summate));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fmrihrf_evaluate_regressor_cpp", (DL_FUNC) &_fmrihrf_evaluate_regressor_cpp, 9},
+    {"_fmrihrf_neural_input_cpp", (DL_FUNC) &_fmrihrf_neural_input_cpp, 7},
     {NULL, NULL, 0}
 };
 

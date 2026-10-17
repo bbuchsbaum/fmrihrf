@@ -15,17 +15,30 @@ using arma::uword;
  *  placed at their exact sub-bin positions. Both properties matter: bin-aligned
  *  trapezoid weights quantised the block edges, and exact edges with plain
  *  rectangle weights dropped the quadrature to first order.
+ *
+ *  The hats of bins 0 and nBins - 1 reach one bin beyond the window, so a
+ *  position within one bin before the window still covers part of bin 0's
+ *  hat, and a position past bin nBins covers every hat in the window.
+ *  `diff` needs nBins + 3 slots.
  */
 static inline void addHatStep(arma::vec& diff, double pos, double coef,
                               double dt, uword nBins)
 {
-    if (pos <= 0.0) return;                        // nothing accumulated yet
-    const double maxPos = (double) (nBins - 1);
+    if (pos <= -1.0) return;                       // left of every hat
+    const double v = coef * dt;
+
+    if (pos < 0.0) {
+        // Only the left tail of bin 0's hat lies before pos.
+        const double w = v * 0.5 * (1.0 + pos) * (1.0 + pos);
+        diff[0] += w;  diff[1] -= w;
+        return;
+    }
+
+    const double maxPos = (double) nBins;
     if (pos > maxPos) pos = maxPos;
 
     const uword a = (uword) std::floor(pos);
     const double f = pos - (double) a;
-    const double v = coef * dt;
 
     // Full weight on every bin strictly left of a.
     if (a > 0) { diff[0] += v; diff[a] -= v; }
@@ -57,31 +70,37 @@ static inline void addHatStep(arma::vec& diff, double pos, double coef,
   With `summate = false` each block is divided by its total mass
   (`duration`), giving the duration-averaged response rather than the
   accumulated one.
+
+  Returns the mass in each of the `nBins` bins t0 + j * dt; callers check
+  dt > 0.
 ──────────────────────────────────────────────────────────────────────*/
 static arma::vec buildImpulseTrain(const arma::vec& on,
                                    const arma::vec& dur,
                                    const arma::vec& amp,
-                                   double t0, double t1,
-                                   double dt,
+                                   double t0, double dt,
+                                   uword nBins,
                                    bool summate)
 {
-    if (dt <= 0.0) Rcpp::stop("dt must be > 0 in buildImpulseTrain");
-
-    const uword nBins = (uword) std::floor((t1 - t0) / dt) + 1;
-    arma::vec diff(nBins + 2, arma::fill::zeros);      // 2 guard slots
-    const double maxPos = (double) (nBins - 1);
+    arma::vec diff(nBins + 3, arma::fill::zeros);      // 3 guard slots
+    const double endPos = (double) nBins;              // no bin's hat reaches past this
 
     for (uword i = 0; i < on.n_elem; ++i) {
         const double d = dur[i];
-        double pos_s = (on[i] - t0) / dt;
-        if (pos_s > maxPos) continue;                  // starts past the window
+        const double pos_s = (on[i] - t0) / dt;
+        if (pos_s >= endPos) continue;                 // starts past the window
 
         if (!(d > 0.0)) {
             // Impulse of unit mass, split linearly across the two bracketing
             // bins. Snapping it to the nearest bin instead cost up to dt/2 of
             // onset error, which at the default precision of 0.33 s was ~12%
-            // of peak for an onset that fell between bins.
-            if (pos_s < 0.0) pos_s = 0.0;
+            // of peak for an onset that fell between bins. Within one bin
+            // before the window only the share of bin 0 is kept.
+            if (pos_s <= -1.0) continue;
+            if (pos_s < 0.0) {
+                const double w = amp[i] * (1.0 + pos_s);
+                diff[0] += w;  diff[1] -= w;
+                continue;
+            }
             const uword a = (uword) std::floor(pos_s);
             const double f = pos_s - (double) a;
             const double w0 = amp[i] * (1.0 - f);
@@ -92,7 +111,7 @@ static arma::vec buildImpulseTrain(const arma::vec& on,
         }
 
         const double pos_e = (on[i] + d - t0) / dt;
-        if (pos_e <= 0.0) continue;                    // ends before the window
+        if (pos_e <= -1.0) continue;                   // ends before the window
 
         // Block weights are the difference of the two running hat integrals,
         // so the block carries mass amp * duration for any sub-bin alignment.
@@ -135,14 +154,17 @@ Rcpp::NumericMatrix evaluate_regressor_cpp(const arma::vec& grid,
     if (hrf_matrix.n_rows == 0) {
         Rcpp::stop("hrf_matrix must have at least one row.");
     }
+    if (!(precision > 0.0)) {
+        Rcpp::stop("precision must be > 0.");
+    }
     const double start = grid.min() - hrf_span;
     const double max_dur = (durations.n_elem > 0) ? durations.max() : 0.0;
     const double last_onset = (onsets.n_elem > 0) ? onsets.max() : grid.max();
     const double end = std::max(grid.max(), last_onset + max_dur) + hrf_span;
 
+    const uword nfine = (uword) std::floor((end - start) / precision) + 1;
     const arma::vec neural = buildImpulseTrain(onsets, durations, amplitudes,
-                                               start, end, precision, summate);
-    const uword nfine = neural.n_elem;
+                                               start, precision, nfine, summate);
     const uword ntaps = hrf_matrix.n_rows;
     const uword ngrid = grid.n_elem;
     const uword nbasis = hrf_matrix.n_cols;
@@ -193,4 +215,29 @@ Rcpp::NumericMatrix evaluate_regressor_cpp(const arma::vec& grid,
         }
     }
     return out;
+}
+
+
+/*──────────────────────────────────────────────────────────────────────
+  The neural input exactly as evaluate_regressor_cpp() builds it: the mass
+  in each of the `n` bins start + j * dt (neural_input.Reg() turns it into
+  a density).
+──────────────────────────────────────────────────────────────────────*/
+// [[Rcpp::export]]
+Rcpp::NumericVector neural_input_cpp(const arma::vec& onsets,
+                                     const arma::vec& durations,
+                                     const arma::vec& amplitudes,
+                                     double start,
+                                     double dt,
+                                     int n,
+                                     bool summate = true) {
+    if (!(dt > 0.0)) {
+        Rcpp::stop("resolution must be > 0.");
+    }
+    if (n < 1) {
+        Rcpp::stop("n must be >= 1.");
+    }
+    const arma::vec mass = buildImpulseTrain(onsets, durations, amplitudes,
+                                             start, dt, (uword) n, summate);
+    return Rcpp::NumericVector(mass.begin(), mass.end());
 }

@@ -7,7 +7,8 @@
 sampling_frame(blocklens, TR, start_time = TR/2, precision = 0.1)
 }
 \arguments{
-\item{blocklens}{A numeric vector representing the number of scans in each block.}
+\item{blocklens}{A numeric vector representing the number of scans in each block
+(positive whole numbers).}
 
 \item{TR}{A numeric value or vector representing the repetition time in seconds
 (i.e., the spacing between consecutive image acquisitions). When a vector is
