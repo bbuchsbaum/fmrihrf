@@ -5,3 +5,7 @@ evaluate_regressor_cpp <- function(grid, onsets, durations, amplitudes, hrf_matr
     .Call(`_fmrihrf_evaluate_regressor_cpp`, grid, onsets, durations, amplitudes, hrf_matrix, hrf_span, precision, method, summate)
 }
 
+neural_input_cpp <- function(onsets, durations, amplitudes, start, dt, n, summate = TRUE) {
+    .Call(`_fmrihrf_neural_input_cpp`, onsets, durations, amplitudes, start, dt, n, summate)
+}
+

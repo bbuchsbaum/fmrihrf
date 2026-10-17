@@ -70,17 +70,17 @@ static inline void addHatStep(arma::vec& diff, double pos, double coef,
   With `summate = false` each block is divided by its total mass
   (`duration`), giving the duration-averaged response rather than the
   accumulated one.
+
+  Returns the mass in each of the `nBins` bins t0 + j * dt; callers check
+  dt > 0.
 ──────────────────────────────────────────────────────────────────────*/
 static arma::vec buildImpulseTrain(const arma::vec& on,
                                    const arma::vec& dur,
                                    const arma::vec& amp,
-                                   double t0, double t1,
-                                   double dt,
+                                   double t0, double dt,
+                                   uword nBins,
                                    bool summate)
 {
-    if (dt <= 0.0) Rcpp::stop("dt must be > 0 in buildImpulseTrain");
-
-    const uword nBins = (uword) std::floor((t1 - t0) / dt) + 1;
     arma::vec diff(nBins + 3, arma::fill::zeros);      // 3 guard slots
     const double endPos = (double) nBins;              // no bin's hat reaches past this
 
@@ -154,14 +154,17 @@ Rcpp::NumericMatrix evaluate_regressor_cpp(const arma::vec& grid,
     if (hrf_matrix.n_rows == 0) {
         Rcpp::stop("hrf_matrix must have at least one row.");
     }
+    if (!(precision > 0.0)) {
+        Rcpp::stop("precision must be > 0.");
+    }
     const double start = grid.min() - hrf_span;
     const double max_dur = (durations.n_elem > 0) ? durations.max() : 0.0;
     const double last_onset = (onsets.n_elem > 0) ? onsets.max() : grid.max();
     const double end = std::max(grid.max(), last_onset + max_dur) + hrf_span;
 
+    const uword nfine = (uword) std::floor((end - start) / precision) + 1;
     const arma::vec neural = buildImpulseTrain(onsets, durations, amplitudes,
-                                               start, end, precision, summate);
-    const uword nfine = neural.n_elem;
+                                               start, precision, nfine, summate);
     const uword ntaps = hrf_matrix.n_rows;
     const uword ngrid = grid.n_elem;
     const uword nbasis = hrf_matrix.n_cols;
@@ -212,4 +215,29 @@ Rcpp::NumericMatrix evaluate_regressor_cpp(const arma::vec& grid,
         }
     }
     return out;
+}
+
+
+/*──────────────────────────────────────────────────────────────────────
+  The neural input exactly as evaluate_regressor_cpp() builds it: the mass
+  in each of the `n` bins start + j * dt (neural_input.Reg() turns it into
+  a density).
+──────────────────────────────────────────────────────────────────────*/
+// [[Rcpp::export]]
+Rcpp::NumericVector neural_input_cpp(const arma::vec& onsets,
+                                     const arma::vec& durations,
+                                     const arma::vec& amplitudes,
+                                     double start,
+                                     double dt,
+                                     int n,
+                                     bool summate = true) {
+    if (!(dt > 0.0)) {
+        Rcpp::stop("resolution must be > 0.");
+    }
+    if (n < 1) {
+        Rcpp::stop("n must be >= 1.");
+    }
+    const arma::vec mass = buildImpulseTrain(onsets, durations, amplitudes,
+                                             start, dt, (uword) n, summate);
+    return Rcpp::NumericVector(mass.begin(), mass.end());
 }

@@ -233,11 +233,12 @@ test_that("a block at the start of the convolution window keeps its mass", {
   expect_equal(at_edge, inside, tolerance = 1e-10)
 })
 
-test_that("neural_input samples block events and handles empty regressors", {
+test_that("neural_input projects blocks onto the sample grid and handles empty regressors", {
   reg <- regressor(onsets = c(2, 6), duration = c(2, 1), amplitude = c(1, 3))
   ni <- neural_input(reg, start = 0, end = 10, resolution = 1)
   expect_equal(ni$time, 0:10)
-  expect_equal(ni$neural_input, c(0, 0, 1, 1, 0, 0, 3, 0, 0, 0, 0))
+  # Block edges on a sample carry half weight (hat projection)
+  expect_equal(ni$neural_input, c(0, 0, 0.5, 1, 0.5, 0, 1.5, 1.5, 0, 0, 0))
   expect_equal(range(neural_input(reg, resolution = 0.5)$time), c(0, 17))
 
   # An empty regressor used to fail on max(numeric(0)) when `end` was not given.
@@ -245,4 +246,63 @@ test_that("neural_input samples block events and handles empty regressors", {
   expect_no_warning(ni0 <- neural_input(empty, start = 5, resolution = 1))
   expect_equal(ni0$time, 5:15)
   expect_equal(ni0$neural_input, numeric(11))
+})
+
+test_that("neural_input shows point events and conserves each event's mass", {
+  res <- 0.25
+  # Point events used to vanish: only samples inside [onset, onset + duration)
+  # were set, and a zero-length interval contains none.
+  pts <- regressor(onsets = c(3, 7.1, 12.62), amplitude = c(1, -2, 0.5))
+  ni <- neural_input(pts, start = 0, end = 20, resolution = res)
+  expect_gt(sum(ni$neural_input != 0), 0)
+  expect_equal(sum(ni$neural_input) * res, sum(pts$amplitude), tolerance = 1e-12)
+  # An onset on a sample is a single spike of area `amplitude`
+  expect_equal(ni$neural_input[ni$time == 3], 1 / res)
+
+  # Blocks shorter than the resolution keep mass amplitude * duration
+  short <- regressor(onsets = c(2.05, 5.6), duration = c(0.1, 0.07),
+                     amplitude = c(2, 3))
+  ni <- neural_input(short, start = 0, end = 10, resolution = 0.5)
+  expect_equal(sum(ni$neural_input) * 0.5, sum(c(2 * 0.1, 3 * 0.07)), tolerance = 1e-12)
+
+  # summate = FALSE scales each block to unit mass
+  avg <- regressor(onsets = 2, duration = 4, amplitude = 1.5, summate = FALSE)
+  expect_equal(sum(neural_input(avg, start = 0, end = 10, resolution = res)$neural_input) * res,
+               1.5, tolerance = 1e-12)
+
+  # Only the part of an event the window's samples cover is kept. The first
+  # sample's hat reaches half a bin before `start`, as every sample's does.
+  ni <- neural_input(regressor(onsets = 1, duration = 4), start = 3, end = 10, resolution = res)
+  expect_equal(sum(ni$neural_input) * res, 2 + res / 2, tolerance = 1e-12)
+  expect_equal(ni$neural_input[ni$time > 3 & ni$time < 5], rep(1, 7))
+})
+
+test_that("convolving neural_input reproduces evaluate() on its time grid", {
+  res <- 0.25
+  onsets <- c(1.1, 7.3, 20, 33.37, 50.9)
+  durations <- c(0, 2.6, 0.1, 0, 4.05)
+  amplitudes <- c(1, -0.5, 2, 1.5, 0.7)
+  for (summate in c(TRUE, FALSE)) {
+    for (hrf in list(HRF_SPMG1, HRF_SPMG3)) {
+      reg <- regressor(onsets, hrf, duration = durations, amplitude = amplitudes,
+                       summate = summate)
+      span <- reg$span
+      # evaluate()'s fine window starts at grid[1] - span; align it with start = 0
+      grid <- seq(span, span + 60, by = 2)
+      ni <- neural_input(reg, start = 0, end = max(grid), resolution = res)
+      mass <- ni$neural_input * res
+      h <- as.matrix(evaluate(hrf, seq(0, span, by = res)))
+      idx <- match(grid, ni$time)
+      expected <- vapply(seq_len(ncol(h)), function(b) {
+        vapply(idx, function(n) {
+          k <- seq_len(min(n, nrow(h)))
+          sum(h[k, b] * mass[n - k + 1])
+        }, numeric(1))
+      }, numeric(length(idx)))
+      if (ncol(h) == 1) expected <- as.vector(expected)
+      expect_equal(evaluate(reg, grid, precision = res), expected,
+                   tolerance = 1e-12,
+                   info = paste(attr(hrf, "name"), "summate =", summate))
+    }
+  }
 })
