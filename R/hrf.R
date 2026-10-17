@@ -546,7 +546,12 @@ list_available_hrfs <- function(details = FALSE) {
   is_object <- vapply(HRF_REGISTRY, inherits, logical(1), "HRF", USE.NAMES = FALSE)
   # Objects report their basis count; generators their `nbasis` default, if any.
   nbasis_default <- vapply(HRF_REGISTRY, function(entry) {
-    nb <- if (inherits(entry, "HRF")) nbasis(entry) else formals(entry)[["nbasis"]]
+    nb <- if (inherits(entry, "HRF")) {
+      nbasis(entry)
+    } else {
+      # Generators without an `nbasis` argument have a fixed basis count
+      formals(entry)[["nbasis"]] %||% nbasis(entry())
+    }
     if (is.numeric(nb)) as.character(nb) else "variable"
   }, character(1), USE.NAMES = FALSE)
 
@@ -917,6 +922,15 @@ hrf_fir_generator <- function(nbasis = 12, span = 24) {
                  subclass = "FIR_HRF")
 }
 
+# Registry generator for "lwu": hrf_lwu() is a shape function of `t`, so wrap
+# it as a single-basis HRF with the shape parameters captured. The parameters
+# are validated here rather than at first evaluation.
+.hrf_lwu_generator <- function(tau = 6, sigma = 2.5, rho = 0.35, span = 24) {
+  hrf_lwu(0, tau = tau, sigma = sigma, rho = rho)
+  as_hrf(hrf_lwu, name = "lwu", nbasis = 1L, span = span,
+         params = list(tau = tau, sigma = sigma, rho = rho))
+}
+
 # Define HRF Registry -----
 
 #' @keywords internal
@@ -931,7 +945,7 @@ HRF_REGISTRY <- list(
   fourier  = hrf_fourier_generator,
   daguerre = hrf_daguerre_generator,
   fir      = hrf_fir_generator,
-  lwu      = hrf_lwu,
+  lwu      = .hrf_lwu_generator,
   # Aliases
   gam      = HRF_GAMMA,
   bs       = hrf_bspline_generator
@@ -954,6 +968,8 @@ HRF_REGISTRY <- list(
 #'     \item \code{"fourier"} - Fourier basis
 #'     \item \code{"daguerre"} - Daguerre spherical basis
 #'     \item \code{"tent"} - Tent (linear spline) basis
+#'     \item \code{"lwu"} - Lag-Width-Undershoot HRF (see \code{\link{hrf_lwu}});
+#'       shape parameters \code{tau}, \code{sigma}, \code{rho} are passed via \code{...}
 #'   }
 #' @param nbasis Number of basis functions (for basis set types)
 #' @param span Temporal window in seconds (default: 24)
@@ -964,7 +980,8 @@ HRF_REGISTRY <- list(
 #' @param hrf_norm Fixed-scale normalization mode passed to [normalize_hrf()].
 #'   The default `"none"` leaves the HRF unchanged. `normalize = TRUE` is the
 #'   legacy per-basis unit-peak shortcut; do not supply both.
-#' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre)
+#' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre,
+#'   \code{tau}, \code{sigma}, \code{rho} for lwu)
 #' @return An HRF object
 #' @details
 #' For single HRF types (spmg1, gamma, gaussian), the function returns

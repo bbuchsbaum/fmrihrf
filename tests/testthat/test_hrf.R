@@ -1246,5 +1246,5 @@ test_that("list_available_hrfs flags registry aliases of objects and generators"
   expect_equal(info$name[info$is_alias], c("gam", "bs"))
   expect_equal(info$description[info$name == "gam"], "gam HRF (object) (alias)")
   expect_equal(info$nbasis_default[info$name == "fir"], "12")
-  expect_equal(info$nbasis_default[info$name == "lwu"], "variable")
+  expect_equal(info$nbasis_default[info$name == "daguerre"], "3")
 })

@@ -44,3 +44,22 @@ test_that("hrf_basis_lwu derivatives match per-point numDeriv::grad", {
   expect_equal(dim(hrf_basis_lwu(theta, numeric(0))), c(0L, 4L))
   expect_error(hrf_basis_lwu(theta, c(1, NA)), "NA")
 })
+
+test_that("getHRF('lwu') builds an LWU HRF with its parameters passed through", {
+  t <- seq(-2, 30, by = 0.5)
+  h <- getHRF("lwu")
+  expect_s3_class(h, "HRF")
+  expect_equal(nbasis(h), 1L)
+  expect_equal(attr(h, "name"), "lwu")
+  expect_equal(h(t), hrf_lwu(t))
+
+  h2 <- getHRF("lwu", tau = 5, sigma = 1.5, rho = 0.2)
+  expect_equal(h2(t), hrf_lwu(t, tau = 5, sigma = 1.5, rho = 0.2))
+  expect_equal(attr(h2, "params"), list(tau = 5, sigma = 1.5, rho = 0.2))
+  expect_equal(getHRF("lwu", tau = 5, lag = 2)(t), hrf_lwu(t - 2, tau = 5))
+  expect_error(getHRF("lwu", sigma = 0.01), "sigma")
+
+  info <- list_available_hrfs()
+  expect_equal(info$type[info$name == "lwu"], "generator")
+  expect_equal(info$nbasis_default[info$name == "lwu"], "1")
+})

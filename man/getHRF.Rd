@@ -26,6 +26,8 @@ getHRF(
   \item \code{"fourier"} - Fourier basis
   \item \code{"daguerre"} - Daguerre spherical basis
   \item \code{"tent"} - Tent (linear spline) basis
+  \item \code{"lwu"} - Lag-Width-Undershoot HRF (see \code{\link{hrf_lwu}});
+    shape parameters \code{tau}, \code{sigma}, \code{rho} are passed via \code{...}
 }}
 
 \item{nbasis}{Number of basis functions (for basis set types)}
@@ -44,7 +46,8 @@ getHRF(
 The default `"none"` leaves the HRF unchanged. `normalize = TRUE` is the
 legacy per-basis unit-peak shortcut; do not supply both.}
 
-\item{...}{Additional arguments passed to generator functions (e.g., \code{scale} for daguerre)}
+\item{...}{Additional arguments passed to generator functions (e.g., \code{scale} for daguerre,
+\code{tau}, \code{sigma}, \code{rho} for lwu)}
 }
 \value{
 An HRF object
