@@ -62,5 +62,5 @@ penalty_matrix.Fourier_HRF <- function(x, order = 2, ...) {
 #' @export
 penalty_matrix.Daguerre_HRF <- function(x, order = 2, ...) {
   nb <- nbasis(x)
-  diag((seq_len(nb) - 1)^2)
+  diag((seq_len(nb) - 1)^2, nrow = nb)
 }
