@@ -1287,3 +1287,12 @@ test_that("as_hrf and gen_hrf accept function literals that deparse to several l
   expect_equal(g(3), exp(-2 / 5))
   expect_equal(attr(as_hrf(hrf_gamma), "name"), "hrf_gamma")
 })
+
+test_that("B-spline and tent bases evaluate on an empty grid", {
+  expect_no_warning(B <- hrf_bspline(numeric(0), N = 5))
+  expect_equal(dim(B), c(0L, 5L))
+  expect_identical(colnames(B), colnames(hrf_bspline(1, N = 5)))
+  expect_equal(dim(hrf_tent_generator(nbasis = 4)(numeric(0))), c(0L, 4L))
+  expect_no_warning(E <- HRF_BSPLINE(numeric(0)))
+  expect_equal(dim(E), c(0L, nbasis(HRF_BSPLINE)))
+})
