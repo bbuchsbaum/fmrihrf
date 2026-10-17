@@ -36,36 +36,24 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 
   # If params are provided, create a closure that captures them
   if (length(params) > 0) {
-    # Validate that f accepts the provided parameters
-    f_formals <- names(formals(f))
-    param_names <- names(params)
-
-    # Params starting with '.' are metadata (e.g., .lag, .width from decorators)
-    # and should not be validated as function arguments
-    metadata_params <- param_names[startsWith(param_names, ".")]
-    callable_params <- param_names[!startsWith(param_names, ".")]
-
-    # Check if callable param names are valid arguments to f (excluding 't')
-    # 't' is special and should not be in params
-    invalid_params <- setdiff(callable_params, f_formals)
-    if (length(invalid_params) > 0) {
+    # Params starting with '.' are metadata (e.g., .lag, .width from decorators):
+    # they are stored but neither validated against nor passed to `f`.
+    is_meta <- startsWith(names(params), ".")
+    invalid <- !is_meta & !(names(params) %in% names(formals(f)))
+    if (any(invalid)) {
       warning(sprintf("Parameters %s are not arguments to function %s and will be ignored",
-                      paste(invalid_params, collapse = ", "), name),
+                      paste(unique(names(params)[invalid]), collapse = ", "), name),
               call. = FALSE)
-      # Keep metadata params, filter out invalid callable params
-      params <- params[param_names %in% c(f_formals, metadata_params)]
+      params <- params[!invalid]
+      is_meta <- is_meta[!invalid]
     }
 
-    # Separate callable params (to be passed to function) from metadata (just stored)
-    callable_params_list <- params[!startsWith(names(params), ".")]
-
-    # Create closure that captures parameters if any callable params remain
-    if (length(callable_params_list) > 0) {
-      # Capture the original function in a local variable to avoid recursion issues
+    callable_params <- params[!is_meta]
+    if (length(callable_params) > 0) {
+      # Keep the original function under its own name to avoid recursion
       orig_f <- f
-      # Create a closure that calls the original function with captured callable parameters only
       f <- function(t) {
-        do.call(orig_f, c(list(t = t), callable_params_list))
+        do.call(orig_f, c(list(t = t), callable_params))
       }
     }
   }
