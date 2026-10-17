@@ -275,9 +275,11 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
 }
 
 # Shared base-graphics body for plot.Reg() and plot.FeatureReg(): evaluate `x`
-# (by default on .reg_plot_grid()) and draw it.
+# (by default on .reg_plot_grid()) and draw it. A `main` passed through the
+# methods' `...` replaces the default title.
 .plot_reg_base <- function(x, grid, precision, title, show_onsets,
-                           onset_color, onset_alpha, layout, ...) {
+                           onset_color, onset_alpha, layout, main = NULL, ...) {
+  title <- main %||% title
   if (is.null(grid)) {
     grid <- .reg_plot_grid(list(x))
   }
