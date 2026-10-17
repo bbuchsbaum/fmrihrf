@@ -17,6 +17,22 @@ test_that("parser rejects unknown options and missing values", {
   expect_equal(suppressMessages(fmrihrf_cli(c("eval", "--hrf"))), 2L)
 })
 
+test_that("parser handles boolean flags, negation and required options", {
+  expect_equal(suppressMessages(fmrihrf_cli(c("list", "--json=1"))), 2L)
+  expect_equal(suppressMessages(fmrihrf_cli(c("list", "--no-json"))), 2L)
+  expect_equal(suppressMessages(fmrihrf_cli(c("eval", "--no-summate=1"))), 2L)
+  out <- capture.output(
+    status <- fmrihrf_cli(c("eval", "--no-summate", "--width", "2", "--times", "0,1"))
+  )
+  expect_equal(status, 0L)
+  expect_message(status <- fmrihrf_cli(c("design", "--events", "events.csv")),
+                 "Missing required option(s): --blocklens, --tr", fixed = TRUE)
+  expect_equal(status, 2L)
+  expect_message(status <- fmrihrf_cli(c("regressor", "--events", tempfile())),
+                 "File does not exist")
+  expect_equal(status, 1L)
+})
+
 test_that("parser supports equals values and negative numeric values", {
   out <- capture.output(
     status <- fmrihrf_cli(c("eval", "--hrf=spmg1", "--times", "-0.5,0,0.5"))
@@ -74,6 +90,21 @@ test_that("design command creates condition columns from an events table", {
   out <- utils::read.csv(path, check.names = FALSE)
   expect_equal(names(out), c("time", "A", "B"))
   expect_equal(nrow(out), 6L)
+})
+
+test_that("design command names basis columns after each condition", {
+  events <- tempfile(fileext = ".tsv")
+  writeLines(c("onset\tcond\trun", "0\tA\t1", "4\tB\t1", "1\tA\t2"), events)
+  path <- tempfile(fileext = ".csv")
+  status <- fmrihrf_cli(c(
+    "design", "--events", events, "--condition", "cond", "--block", "run",
+    "--blocklens", "6,5", "--tr", "1", "--hrf", "spmg2", "--sparse",
+    "--output", path
+  ))
+  expect_equal(status, 0L)
+  out <- utils::read.csv(path, check.names = FALSE)
+  expect_equal(names(out), c("time", "A_basis1", "A_basis2", "B_basis1", "B_basis2"))
+  expect_equal(nrow(out), 11L)
 })
 
 test_that("install_cli copies the wrapper and refuses accidental overwrite", {

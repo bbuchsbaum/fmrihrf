@@ -45,14 +45,7 @@ resolve_cli <- function() {
     suppressPackageStartupMessages(suppressWarnings(
       pkgload::load_all(root, export_all = FALSE, helpers = FALSE, quiet = TRUE)
     ))
-    package_env <- if ("package:fmrihrf" %in% search()) {
-      as.environment("package:fmrihrf")
-    } else {
-      asNamespace("fmrihrf")
-    }
-    if (exists("fmrihrf_cli", envir = package_env, inherits = FALSE)) {
-      return(get("fmrihrf_cli", envir = package_env, inherits = FALSE))
-    }
+    return(get("fmrihrf_cli", envir = asNamespace("fmrihrf"), inherits = FALSE))
   }
 
   stop("could not load fmrihrf; install the package or run from a source checkout with pkgload available")
