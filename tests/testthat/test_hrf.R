@@ -1240,3 +1240,11 @@ test_that("getHRF and make_hrf apply the same decorators as gen_hrf", {
   expect_equal(nbasis(make_hrf(function(t) cbind(t, t), lag = 1, nbasis = 2)), 2L)
   expect_error(make_hrf(3, lag = 1), "invalid basis function")
 })
+
+test_that("list_available_hrfs flags registry aliases of objects and generators", {
+  info <- list_available_hrfs(details = TRUE)
+  expect_equal(info$name[info$is_alias], c("gam", "bs"))
+  expect_equal(info$description[info$name == "gam"], "gam HRF (object) (alias)")
+  expect_equal(info$nbasis_default[info$name == "fir"], "12")
+  expect_equal(info$nbasis_default[info$name == "lwu"], "variable")
+})

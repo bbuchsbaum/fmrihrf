@@ -564,7 +564,8 @@ list_available_hrfs <- function(details = FALSE) {
     name = hrf_names,
     type = ifelse(is_object, "object", "generator"),
     nbasis_default = nbasis_default,
-    is_alias = !is_object & hrf_names %in% c("gam", "bs"),
+    # An alias repeats an earlier registry entry (e.g. "gam", "bs")
+    is_alias = duplicated(HRF_REGISTRY),
     stringsAsFactors = FALSE
   )
 
