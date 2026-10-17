@@ -126,13 +126,15 @@ shift.Reg <- function(x, shift_amount, ...) {
   # Shift the valid onsets
   shifted_onsets <- x$onsets + shift_amount
 
-  # Reconstruct the object using the core Reg constructor 
+  # Reconstruct the object using the core Reg constructor. Zero amplitudes
+  # were already dropped (or deliberately kept) when `x` was built.
   out <- Reg(onsets = shifted_onsets,
              hrf = x$hrf,
              duration = x$duration,
              amplitude = x$amplitude,
              span = x$span,
-             summate = x$summate)
+             summate = x$summate,
+             drop_zero_amplitude = FALSE)
              
   return(out)
 }

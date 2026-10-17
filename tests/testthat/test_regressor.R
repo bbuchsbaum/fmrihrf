@@ -85,6 +85,14 @@ test_that("shift.Reg accepts offset argument", {
   expect_equal(shifted$onsets, c(3, 5))
 })
 
+test_that("shift.Reg keeps zero-amplitude events kept by drop_zero_amplitude = FALSE", {
+  reg <- regressor(c(1, 5, 9), amplitude = c(1, 0, 2), drop_zero_amplitude = FALSE)
+  shifted <- shift(reg, 2)
+  expect_equal(shifted$onsets, c(3, 7, 11))
+  expect_equal(shifted$amplitude, c(1, 0, 2))
+  expect_equal(evaluate(shifted, 0:30), evaluate(reg, 0:30 - 2))
+})
+
 test_that("shift.Reg errors without shift specification", {
   reg <- regressor(0, hrf = HRF_SPMG1)
   expect_error(shift(reg), "shift_amount")
