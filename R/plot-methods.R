@@ -50,8 +50,6 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
     do.call(.base_series_panel, c(list(time = time, Y = y, colours = cols,
                                        labels = paste0("B", seq_len(nb)),
                                        main = main, ylab = ylab), args))
-    df <- data.frame(time = time, y)
-    colnames(df)[-1] <- paste0("basis_", seq_len(nb))
   } else {
     if (show_peak && length(y) > 0 && is.null(args$ylim)) {
       limits <- range(y, 0, finite = TRUE)
@@ -69,10 +67,9 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
                      sprintf("Peak: %.1f s", time[peak_idx]),
                      pos = 3, offset = 0.5, cex = 0.85, col = .hrf_neutral)
     }
-    df <- data.frame(time = time, response = y)
   }
 
-  invisible(df)
+  invisible(.wide_frame(time, y))
 }
 
 #' Compare Multiple HRF Functions
@@ -264,12 +261,6 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
                      onset_color = NULL, onset_alpha = 0.5,
                      precision = NULL, layout = c("stack", "overlay"), ...) {
   layout <- match.arg(layout)
-  if (is.null(grid)) {
-    max_time <- max(x$onsets, na.rm = TRUE) + x$span
-    grid <- seq(0, max_time, by = 0.25)
-  }
-  response <- evaluate(x, grid, precision = .plot_precision(precision, grid))
-
   hrf_is_list <- isTRUE(attr(x, "hrf_is_list"))
   hrf_name <- if (hrf_is_list) {
     "trial-varying HRF"
@@ -279,16 +270,22 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
   n_events <- length(x$onsets)
   title <- sprintf("%s regressor, %d event%s", hrf_name, n_events,
                    if (n_events == 1) "" else "s")
-  .plot_reg_base(response, grid, x$onsets, title, show_onsets, onset_color,
+  .plot_reg_base(x, grid, precision, title, show_onsets, onset_color,
                  onset_alpha, layout, ...)
 }
 
-# Shared base-graphics body for plot.Reg() and plot.FeatureReg().
-.plot_reg_base <- function(response, grid, onsets, title, show_onsets,
+# Shared base-graphics body for plot.Reg() and plot.FeatureReg(): evaluate `x`
+# (by default from 0 to the last onset + span) and draw it.
+.plot_reg_base <- function(x, grid, precision, title, show_onsets,
                            onset_color, onset_alpha, layout, ...) {
+  if (is.null(grid)) {
+    max_time <- max(x$onsets, na.rm = TRUE) + x$span
+    grid <- seq(0, max_time, by = 0.25)
+  }
+  response <- evaluate(x, grid, precision = .plot_precision(precision, grid))
   onset_col <- grDevices::adjustcolor(onset_color %||% .hrf_neutral,
                                       alpha.f = onset_alpha)
-  marks <- if (show_onsets) onsets else NULL
+  marks <- if (show_onsets) x$onsets else NULL
 
   if (is.matrix(response)) {
     nb <- ncol(response)
@@ -311,14 +308,22 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
       .base_series_panel(grid, response, cols, labels = paste0("B", seq_len(nb)),
                          main = title, onsets = marks, onset_col = onset_col, ...)
     }
-    df <- data.frame(time = grid, response)
-    colnames(df)[-1] <- paste0("basis_", seq_len(nb))
   } else {
     .base_series_panel(grid, response, hrf_palette(1), main = title,
                        onsets = marks, onset_col = onset_col, ...)
-    df <- data.frame(time = grid, response = response)
   }
-  invisible(df)
+  invisible(.wide_frame(grid, response))
+}
+
+# Data returned by the base plot() methods: time plus `response`, or one
+# `basis_<k>` column per basis function.
+.wide_frame <- function(time, y) {
+  if (!is.matrix(y)) {
+    return(data.frame(time = time, response = y))
+  }
+  df <- data.frame(time = time, y)
+  colnames(df)[-1] <- paste0("basis_", seq_len(ncol(y)))
+  df
 }
 
 #' Compare Multiple Regressor Objects
@@ -520,14 +525,9 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
                             onset_color = NULL, onset_alpha = 0.5,
                             precision = NULL, layout = c("stack", "overlay"), ...) {
   layout <- match.arg(layout)
-  if (is.null(grid)) {
-    max_time <- max(x$onsets, na.rm = TRUE) + x$span
-    grid <- seq(0, max_time, by = 0.25)
-  }
-  response <- evaluate(x, grid, precision = .plot_precision(precision, grid))
   hrf_name <- attr(x$hrf, "name") %||% "custom HRF"
   title <- sprintf("Feature regressor (%s), %d samples", hrf_name, length(x$onsets))
-  .plot_reg_base(response, grid, x$onsets, title, show_onsets, onset_color,
+  .plot_reg_base(x, grid, precision, title, show_onsets, onset_color,
                  onset_alpha, layout, ...)
 }
 
