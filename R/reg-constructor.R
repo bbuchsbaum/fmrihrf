@@ -102,10 +102,10 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
     hrf_is_list <- FALSE
   }
 
-  # Process single HRF case (non-list)
+  # Process single HRF case (non-list); make_hrf() errors on anything that
+  # cannot be made into an HRF.
   if (!hrf_is_list) {
     hrf <- make_hrf(hrf, lag = 0)
-    assert_that(inherits(hrf, "HRF"), msg = "Invalid 'hrf' provided or generated.")
   }
 
   # Determine final span
