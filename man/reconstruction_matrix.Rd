@@ -4,7 +4,7 @@
 \name{reconstruction_matrix}
 \alias{reconstruction_matrix}
 \alias{reconstruction_matrix.HRF}
-\title{Combine HRF Basis with Coefficients}
+\title{Reconstruction matrix for an HRF basis}
 \usage{
 reconstruction_matrix(hrf, sframe, ...)
 
@@ -25,20 +25,13 @@ A numeric matrix with one column per basis function.
 A numeric matrix of dimension `length(times) x nbasis(hrf)`.
 }
 \description{
-Create a new HRF by linearly weighting the basis functions of an existing HRF.
-This is useful for turning estimated basis coefficients into a single
-functional HRF.
+Returns a matrix \eqn{\Phi} that converts basis coefficients into a
+sampled HRF shape.
 
 S3 method for `HRF` objects that returns a matrix mapping basis coefficients
 to sampled HRF values at the provided time grid. For single-basis HRFs, this
 returns a one-column matrix. For multi-basis HRFs (e.g., SPMG2/SPMG3, FIR,
 B-spline), this returns a matrix with one column per basis function.
-}
-\details{
-Reconstruction matrix for an HRF basis
-
-Returns a matrix \eqn{\Phi} that converts basis coefficients into a
-sampled HRF shape.
 }
 \examples{
 # Create reconstruction matrix for basis functions

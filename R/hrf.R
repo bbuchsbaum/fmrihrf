@@ -349,7 +349,7 @@ gen_hrf_set <- function(...) {
 #'   function(lag) gen_hrf(HRF_SPMG1, lag = lag),
 #'   param_grid2
 #' )
-#' @importFrom purrr pmap partial
+#' @importFrom purrr pmap
 #' @export
 hrf_library <- function(fun, pgrid, ...) {
   extras <- list(...)
@@ -444,19 +444,6 @@ HRF <- function(fun, name, nbasis=1, span=24, param_names=NULL) {
 nbasis.HRF <- function(x,...) attr(x, "nbasis")
 
 
-
-#' @keywords internal
-#' @noRd
-makeDeriv <- function(HRF, n=1) {
-  #with_package("numDeriv")
-  if (n == 1) {
-    function(t) numDeriv::grad(HRF, t)
-  } else {
-    Recall(function(t) numDeriv::grad(HRF,t), n-1)
-  }
-}
-
-
 #' Generate a Lagged HRF Function
 #'
 #' @description
@@ -520,7 +507,6 @@ hrf_lagged <- gen_hrf_lagged
 #' @return A \code{function} representing the blocked HRF.
 #' @examples
 #' # Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
-#' @importFrom purrr partial
 #' @export
 gen_hrf_blocked <- function(hrf=hrf_gaussian, width=5, precision=.1, 
                             half_life=Inf, summate=TRUE, normalize=FALSE, ...) {
@@ -535,31 +521,6 @@ gen_hrf_blocked <- function(hrf=hrf_gaussian, width=5, precision=.1,
 #' @describeIn gen_hrf_blocked alias for gen_hrf_blocked
 #' @return A \code{function} representing the blocked HRF.
 hrf_blocked <- gen_hrf_blocked
-
-
-
-
-
-#' Soft-threshold function
-#'
-#' This function applies soft-thresholding to the input values, setting values below the threshold to zero
-#' and shrinking the remaining values by the threshold amount.
-#'
-#' @param x A numeric vector of input values
-#' @param threshold A non-negative threshold value for the soft-thresholding operation
-#'
-#' @return A numeric vector with the soft-thresholded values
-#'
-#' @noRd
-#' @keywords internal
-soft_threshold <- function(x, threshold) {
-  if (threshold < 0) {
-    stop("Threshold value should be non-negative.")
-  }
-
-  sign(x) * pmax(0, abs(x) - threshold)
-}
-
 
 
 #' List all available hemodynamic response functions (HRFs)

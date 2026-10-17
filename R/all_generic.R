@@ -178,14 +178,6 @@ nbasis <- function(x, ...) UseMethod("nbasis")
 penalty_matrix <- function(x, ...) UseMethod("penalty_matrix")
 
 
-#' Combine HRF Basis with Coefficients
-#'
-#' Create a new HRF by linearly weighting the basis functions of an existing HRF.
-#' This is useful for turning estimated basis coefficients into a single
-#' functional HRF.
-#'
-
-
 #' Reconstruction matrix for an HRF basis
 #'
 #' Returns a matrix \eqn{\Phi} that converts basis coefficients into a
