@@ -285,19 +285,21 @@ knit_print.fmrihrf_plot <- function(x, ...) {
 }
 
 # Build the shared ggplot for long-form series data.
-#   df:        data.frame(time, series (factor), response)
+#   df:        data.frame(time, <series factor>, response), from .long_frame()
+#   pal:       palette from .series_palette()
 #   onsets:    NULL or data.frame(onset, duration, series (factor or NA))
 #   samples:   NULL or data.frame(time, series, response)
-.gg_series <- function(df, colours, title = NULL, subtitle = NULL,
+.gg_series <- function(df, pal, title = NULL, subtitle = NULL,
                        xlab = "Time (s)", ylab = "Response",
                        layout = c("overlay", "stack"), onsets = NULL,
                        samples = NULL, direct_labels = FALSE,
-                       linetypes = FALSE, reference = NULL,
-                       scales = "free_y") {
+                       reference = NULL, scales = "free_y") {
   layout <- match.arg(layout)
-  gg <- asNamespace("ggplot2")
+  names(df)[2] <- "series"
   n <- nlevels(df$series)
-  names(colours) <- levels(df$series)
+  colours <- stats::setNames(pal$colours, levels(df$series))
+  # Many categorical overlays also vary the line type.
+  linetypes <- pal$type == "categorical" && n > 4 && layout == "overlay"
 
   yr <- range(df$response, reference$response, 0, finite = TRUE)
   span_y <- diff(yr)
@@ -357,7 +359,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
                                 colour = .hrf_neutral, linewidth = 0.7, linetype = "22")
   }
 
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::geom_line(ggplot2::aes(linetype = .data$series), linewidth = 0.9)
   } else {
     p <- p + ggplot2::geom_line(linewidth = 0.9)
@@ -369,7 +371,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   }
 
   p <- p + ggplot2::scale_colour_manual(values = colours, name = NULL)
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::scale_linetype_discrete(name = NULL)
   }
 

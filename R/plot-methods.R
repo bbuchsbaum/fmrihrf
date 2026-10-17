@@ -165,67 +165,29 @@ plot_hrfs <- function(..., time = NULL, normalize = FALSE, labels = NULL,
   if (!is.null(reference) && !inherits(reference, "HRF")) {
     stop("'reference' must be an HRF object")
   }
-  hrfs <- list(...)
-
-  # Handle case where a single list is passed
-  if (length(hrfs) == 1 && is.list(hrfs[[1]]) && !inherits(hrfs[[1]], "HRF")) {
-    hrfs <- hrfs[[1]]
-  }
-
+  hrfs <- .plot_inputs(list(...), "HRF", "an HRF")
   n_hrfs <- length(hrfs)
-  if (n_hrfs == 0) {
-    stop("At least one HRF object must be provided")
-  }
-  for (i in seq_along(hrfs)) {
-    if (!inherits(hrfs[[i]], "HRF")) {
-      stop("All arguments must be HRF objects. Argument ", i, " is not an HRF.")
-    }
-  }
 
   if (is.null(time)) {
     spans <- vapply(hrfs, function(h) as.numeric(attr(h, "span") %||% 24), numeric(1))
     time <- seq(0, max(spans), by = 0.1)
   }
 
-  # Evaluate, expanding multi-basis HRFs into columns.
-  mats <- lapply(hrfs, function(h) {
-    y <- as.matrix(evaluate(h, time, normalize = normalize))
-    if (basis == "first") y[, 1, drop = FALSE] else y
-  })
-  nb <- vapply(mats, ncol, integer(1))
+  curves <- .eval_curves(hrfs, basis, time, normalize = normalize)
+  resp <- curves$resp
+  nb <- curves$nb
   n_series <- sum(nb)
   single_set <- n_hrfs == 1 && nb[1] > 1
 
   hrf_names <- vapply(hrfs, function(h) as.character(attr(h, "name") %||% "HRF")[1],
                       character(1))
-  if (is.null(labels)) {
-    base <- hrf_names
-    if (any(duplicated(base))) base <- paste0(base, "_", seq_along(base))
-  } else if (length(labels) == n_series) {
-    base <- NULL
-  } else if (length(labels) == n_hrfs) {
-    base <- labels
+  default_labels <- if (any(duplicated(hrf_names))) {
+    paste0(hrf_names, "_", seq_along(hrf_names))
   } else {
-    stop("Length of 'labels' must match number of HRFs")
+    hrf_names
   }
-  if (is.null(base)) {
-    series_labels <- as.character(labels)
-  } else {
-    series_labels <- unlist(lapply(seq_len(n_hrfs), function(i) {
-      if (nb[i] == 1) return(base[i])
-      if (single_set) paste0("B", seq_len(nb[i])) else paste0(base[i], " B", seq_len(nb[i]))
-    }))
-  }
-  if (any(duplicated(series_labels))) {
-    series_labels <- make.unique(series_labels, sep = " ")
-  }
-
-  resp <- do.call(cbind, mats)
-  df <- data.frame(
-    time = rep(time, n_series),
-    HRF = factor(rep(series_labels, each = length(time)), levels = series_labels),
-    response = as.vector(resp)
-  )
+  series_labels <- .series_labels(nb, labels, default_labels, "HRFs")
+  df <- .long_frame(time, resp, series_labels, "HRF")
 
   if (is.null(title)) {
     title <- if (n_hrfs == 1) hrf_names[1] else "HRF comparison"
@@ -240,12 +202,9 @@ plot_hrfs <- function(..., time = NULL, normalize = FALSE, labels = NULL,
   }
 
   if (use_ggplot && requireNamespace("ggplot2", quietly = TRUE)) {
-    gdf <- df
-    names(gdf)[2] <- "series"
     direct <- single_set && is.null(labels) && layout == "overlay"
-    p <- .gg_series(gdf, pal$colours, title = title, subtitle = subtitle,
+    p <- .gg_series(df, pal, title = title, subtitle = subtitle,
                     ylab = ylab, layout = layout, direct_labels = direct,
-                    linetypes = pal$type == "categorical" && n_series > 4,
                     reference = ref_df, scales = scales)
     if (!is.null(ref_df)) {
       p <- p + ggplot2::labs(caption = paste("Dashed grey:", reference_label)) +
@@ -451,23 +410,11 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
   layout <- match.arg(layout)
   palette <- match.arg(palette)
   regs <- list(...)
-
   if (length(regs) == 1 && inherits(regs[[1]], "RegSet")) {
-    set <- regs[[1]]
-    regs <- stats::setNames(set$regs, set$levels)
-  } else if (length(regs) == 1 && is.list(regs[[1]]) && !inherits(regs[[1]], "Reg")) {
-    regs <- regs[[1]]
+    regs <- stats::setNames(regs[[1]]$regs, regs[[1]]$levels)
   }
-
+  regs <- .plot_inputs(regs, "Reg", "a Reg")
   n_regs <- length(regs)
-  if (n_regs == 0) {
-    stop("At least one Reg object must be provided")
-  }
-  for (i in seq_along(regs)) {
-    if (!inherits(regs[[i]], "Reg")) {
-      stop("All arguments must be Reg objects. Argument ", i, " is not a Reg.")
-    }
-  }
 
   if (is.null(grid)) {
     max_time <- max(vapply(regs, function(r) {
@@ -481,51 +428,28 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
     show_onsets <- if (layout == "stack") TRUE else "first"
   }
   precision <- .plot_precision(precision, grid)
-  eval_reg <- function(r, t) {
-    y <- as.matrix(evaluate(r, t, precision = precision))
-    if (basis == "first") y[, 1, drop = FALSE] else y
-  }
-  mats <- lapply(regs, eval_reg, t = grid)
-  nb <- vapply(mats, ncol, integer(1))
+  curves <- .eval_curves(regs, basis, grid, precision = precision)
+  resp <- curves$resp
+  nb <- curves$nb
   n_series <- sum(nb)
   single_set <- n_regs == 1 && nb[1] > 1
 
-  if (is.null(labels)) {
-    base <- names(regs)
-    if (is.null(base) || any(!nzchar(base))) base <- paste0("Regressor_", seq_len(n_regs))
-  } else if (length(labels) == n_series) {
-    base <- NULL
-  } else if (length(labels) == n_regs) {
-    base <- labels
-  } else {
-    stop("Length of 'labels' must match number of regressors")
+  default_labels <- names(regs)
+  if (is.null(default_labels) || any(!nzchar(default_labels))) {
+    default_labels <- paste0("Regressor_", seq_len(n_regs))
   }
-  series_labels <- if (is.null(base)) {
-    as.character(labels)
-  } else {
-    unlist(lapply(seq_len(n_regs), function(i) {
-      if (nb[i] == 1) return(base[i])
-      if (single_set) paste0("B", seq_len(nb[i])) else paste0(base[i], " B", seq_len(nb[i]))
-    }))
-  }
-  if (any(duplicated(series_labels))) {
-    series_labels <- make.unique(series_labels, sep = " ")
-  }
+  series_labels <- .series_labels(nb, labels, default_labels, "regressors")
   owner <- rep(seq_len(n_regs), nb)
+  df <- .long_frame(grid, resp, series_labels, "Regressor")
 
-  resp <- do.call(cbind, mats)
-  df <- data.frame(
-    time = rep(grid, n_series),
-    Regressor = factor(rep(series_labels, each = length(grid)), levels = series_labels),
-    response = as.vector(resp)
-  )
-
-  # Event marks, one row per event and curve.
+  # Event marks, one row per event and curve: every curve gets its own
+  # regressor's events, or with "first" only the first regressor's curve(s).
   onset_data <- NULL
   if (!isFALSE(show_onsets)) {
     first_only <- identical(show_onsets, "first")
-    rows <- lapply(seq_len(n_series), function(s) {
-      r <- regs[[if (first_only) 1 else owner[s]]]
+    marked <- if (first_only) which(owner == 1) else seq_len(n_series)
+    rows <- lapply(marked, function(s) {
+      r <- regs[[owner[s]]]
       if (length(r$onsets) == 0) return(NULL)
       dur <- r$duration %||% 0
       data.frame(onset = r$onsets, duration = rep_len(dur, length(r$onsets)),
@@ -536,10 +460,6 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
       # Only mark events that fall inside the plotted window.
       onset_data <- onset_data[onset_data$onset >= min(grid) &
                                  onset_data$onset <= max(grid), , drop = FALSE]
-      if (first_only) {
-        # Only the first regressor's curve(s) get its event marks.
-        onset_data <- onset_data[onset_data$series %in% series_labels[owner == 1], , drop = FALSE]
-      }
       attr(onset_data, "by_series") <- !first_only
       attr(onset_data, "alpha") <- onset_alpha
     }
@@ -547,12 +467,8 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
 
   sample_data <- NULL
   if (!is.null(samples)) {
-    smat <- do.call(cbind, lapply(regs, eval_reg, t = samples))
-    sample_data <- data.frame(
-      time = rep(samples, n_series),
-      series = factor(rep(series_labels, each = length(samples)), levels = series_labels),
-      response = as.vector(smat)
-    )
+    smat <- .eval_curves(regs, basis, samples, precision = precision)$resp
+    sample_data <- .long_frame(samples, smat, series_labels)
   }
 
   if (is.null(title)) {
@@ -561,18 +477,14 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
   pal <- .series_palette(n_series, palette, ordered_hint = single_set && nb[1] > 3)
 
   if (use_ggplot && requireNamespace("ggplot2", quietly = TRUE)) {
-    gdf <- df
-    names(gdf)[2] <- "series"
-    p <- .gg_series(gdf, pal$colours, title = title, subtitle = subtitle,
+    p <- .gg_series(df, pal, title = title, subtitle = subtitle,
                     layout = layout, onsets = onset_data, samples = sample_data,
-                    linetypes = pal$type == "categorical" && n_series > 4,
                     scales = scales)
     return(.finish_gg(df, p, draw))
   }
   if (draw) {
-    marks <- if (!is.null(onset_data)) unique(onset_data$onset) else NULL
     .base_series_panel(grid, resp, pal$colours, labels = series_labels,
-                       main = title, onsets = marks,
+                       main = title, onsets = unique(onset_data$onset),
                        onset_col = grDevices::adjustcolor(.hrf_neutral, alpha.f = onset_alpha))
     if (!is.null(sample_data)) {
       graphics::points(sample_data$time, sample_data$response, pch = 19, cex = 0.6,
@@ -617,6 +529,68 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
   title <- sprintf("Feature regressor (%s), %d samples", hrf_name, length(x$onsets))
   .plot_reg_base(response, grid, x$onsets, title, show_onsets, onset_color,
                  onset_alpha, layout, ...)
+}
+
+# Collect the objects given to plot_hrfs() / plot_regressors(), either as
+# separate arguments or as one list, and check that each inherits from `cls`.
+.plot_inputs <- function(objs, cls, noun) {
+  if (length(objs) == 1 && is.list(objs[[1]]) && !inherits(objs[[1]], cls)) {
+    objs <- objs[[1]]
+  }
+  if (length(objs) == 0) {
+    stop("At least one ", cls, " object must be provided", call. = FALSE)
+  }
+  bad <- which(!vapply(objs, inherits, logical(1), what = cls))
+  if (length(bad) > 0) {
+    stop("All arguments must be ", cls, " objects. Argument ", bad[1],
+         " is not ", noun, ".", call. = FALSE)
+  }
+  objs
+}
+
+# Evaluate HRFs or regressors (`...` goes to evaluate()) and bind their curves
+# column-wise: all basis columns, or only the first with basis = "first".
+# `nb` is the number of curves contributed by each object.
+.eval_curves <- function(objs, basis, ...) {
+  mats <- lapply(objs, function(obj) {
+    y <- as.matrix(evaluate(obj, ...))
+    if (basis == "first") y[, 1, drop = FALSE] else y
+  })
+  list(resp = do.call(cbind, mats), nb = vapply(mats, ncol, integer(1)))
+}
+
+# One label per curve. `labels` may name every curve or every object;
+# otherwise `defaults` name the objects. The basis columns of an object are
+# labelled "<object> B<k>", or just "B<k>" when a single basis set is shown.
+.series_labels <- function(nb, labels, defaults, what) {
+  if (!is.null(labels) && length(labels) == sum(nb)) {
+    out <- as.character(labels)
+  } else {
+    if (!is.null(labels) && length(labels) != length(nb)) {
+      stop("Length of 'labels' must match number of ", what, call. = FALSE)
+    }
+    base <- labels %||% defaults
+    single_set <- length(nb) == 1 && nb[1] > 1
+    out <- unlist(lapply(seq_along(nb), function(i) {
+      if (nb[i] == 1) return(base[i])
+      if (single_set) paste0("B", seq_len(nb[i])) else paste0(base[i], " B", seq_len(nb[i]))
+    }))
+  }
+  if (any(duplicated(out))) {
+    out <- make.unique(out, sep = " ")
+  }
+  out
+}
+
+# Long-form curve data: columns time, <name> (factor of curve labels), response.
+.long_frame <- function(time, resp, labels, name = "series") {
+  df <- data.frame(
+    time = rep(time, length(labels)),
+    series = factor(rep(labels, each = length(time)), levels = labels),
+    response = as.vector(resp)
+  )
+  names(df)[2] <- name
+  df
 }
 
 # Evaluation precision for plotting: the grid spacing, capped at 0.33 s (the
