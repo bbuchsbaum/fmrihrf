@@ -435,11 +435,7 @@ daguerre_basis <- function(t, n_basis = 3, scale = 1, span = 24) {
   norms <- apply(abs(ref), 2, max)
   norms[!is.finite(norms) | norms <= 1e-10] <- 1
 
-  basis <- raw(t)
-  for (i in seq_len(n_basis)) {
-    basis[, i] <- basis[, i] / norms[i]
-  }
-  basis
+  sweep(raw(t), 2L, norms, "/")
 }
 
 #' Lag-Width-Undershoot (LWU) HRF
@@ -854,15 +850,9 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   assertthat::assert_that(theta0["rho"] >= 0 && theta0["rho"] <= 1.5,
                         msg = "rho in `theta0` must be between 0 and 1.5.")
 
-  # Calculate h0 (the HRF at theta0)
-  h0 <- hrf_lwu(t = t, tau = theta0["tau"], sigma = theta0["sigma"], rho = theta0["rho"], normalize = "none")
-
-  if (normalize_primary == "height") {
-    max_abs_h0 <- max(abs(h0), na.rm = TRUE)
-    if (max_abs_h0 > 1e-10) {
-      h0 <- h0 / max_abs_h0
-    }
-  }
+  # Calculate h0 (the HRF at theta0), optionally height-normalised
+  h0 <- hrf_lwu(t = t, tau = theta0["tau"], sigma = theta0["sigma"], rho = theta0["rho"],
+                normalize = normalize_primary)
 
   # Partial derivatives w.r.t. (tau, sigma, rho) at every time point. hrf_lwu()
   # is elementwise in t, so a single Jacobian gives the same values as calling
