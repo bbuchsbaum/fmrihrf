@@ -48,8 +48,6 @@
 #' @export
 #' @method evaluate Reg
 #' @importFrom Matrix Matrix
-#' @importFrom memoise memoise
-#' @importFrom stats approx median convolve
 #' @importFrom Rcpp evalCpp
 evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft", "Rconv"),
                          sparse = FALSE, normalize = FALSE, ...) {
@@ -78,62 +76,23 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft",
     stop("`normalize` must be a single logical value.", call. = FALSE)
   }
 
-  # Prepare inputs using the helper function
-  prep_data <- prep_reg_inputs(x, grid, precision)
-  
-  # Check if prep_reg_inputs indicated no relevant events
-  if (length(prep_data$valid_ons) == 0) {
-    zero_res <- if (prep_data$nb == 1) {
-      rep(0, length(grid))
-    } else {
-      matrix(0, nrow = length(grid), ncol = prep_data$nb)
-    }
-    if (sparse) {
-      zero_res <- Matrix::Matrix(zero_res, sparse = TRUE)
-    }
-    return(zero_res)
-  }
-  
-  # --- Method Dispatch to Internal Engines ---
-  eng_fun <- switch(method,
-     conv  = eval_conv,   # Default: C++ direct convolution
-     loop  = eval_loop,   # Pure R reference; also the list-HRF fallback
-     stop("Invalid evaluation method: ", method) # Should not happen due to match.arg
-  )
-  
-  # Call the selected engine function with prepared data
-  # Pass ... through to the engine, which might pass it to evaluate.HRF in loop
-  result <- eng_fun(prep_data, ...) 
-  
-  # --- Final Formatting ---
-  nb <- prep_data$nb
-  final_result <- if (nb == 1 && is.matrix(result)) {
-    as.vector(result)
-  } else if (nb > 1 && !is.matrix(result)) {
-    matrix(result, nrow=length(grid), ncol=nb)
+  p <- prep_reg_inputs(x, grid, precision)
+
+  result <- if (length(p$valid_ons) == 0) {
+    # No event reaches the grid
+    matrix(0, nrow = length(grid), ncol = p$nb)
+  } else if (method == "loop" || p$hrf_is_list) {
+    # Pure R reference; also the only engine for per-event HRF lists.
+    # Pass ... through to evaluate.HRF.
+    eval_loop(p, ...)
   } else {
-      result
+    eval_conv(p)
   }
 
-  if (normalize) {
-    if (is.matrix(final_result)) {
-      peaks <- apply(final_result, 2, function(col) max(abs(col), na.rm = TRUE))
-      peaks[is.na(peaks) | peaks == 0] <- 1
-      final_result <- sweep(final_result, 2, peaks, "/")
-    } else {
-      peak <- max(abs(final_result), na.rm = TRUE)
-      if (!is.na(peak) && peak != 0) {
-        final_result <- final_result / peak
-      }
-    }
-  }
-  
-  # Convert to sparse matrix if requested
-  if (sparse) {
-    return(Matrix::Matrix(final_result, sparse = TRUE))
-  } else {
-    return(final_result)
-  }
+  if (p$nb == 1) result <- as.vector(result)
+  if (normalize) result <- .normalise_result(result)
+
+  if (sparse) Matrix::Matrix(result, sparse = TRUE) else result
 }
 
 
