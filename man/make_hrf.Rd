@@ -4,7 +4,7 @@
 \alias{make_hrf}
 \title{Create an HRF from a basis specification}
 \usage{
-make_hrf(basis, lag, nbasis = 1)
+make_hrf(basis, lag, nbasis = NULL)
 }
 \arguments{
 \item{basis}{Character name of a built-in HRF, a function that
@@ -13,8 +13,10 @@ generates HRF values, or an object of class `HRF`.}
 \item{lag}{Numeric scalar giving the shift in seconds applied to the
 HRF.}
 
-\item{nbasis}{Integer specifying the number of basis functions when
-`basis` is provided as a name.}
+\item{nbasis}{Number of basis functions. `NULL` (the default) gives a
+basis-set name such as `"bspline"` or `"fir"` the default size used by
+[getHRF()], and a plain function as many basis functions as the columns it
+returns. Ignored for fixed HRFs such as `"spmg1"` or an `HRF` object.}
 }
 \value{
 An object of class `HRF` representing the lagged basis.

@@ -10,8 +10,10 @@
 #'   generates HRF values, or an object of class `HRF`.
 #' @param lag Numeric scalar giving the shift in seconds applied to the
 #'   HRF.
-#' @param nbasis Integer specifying the number of basis functions when
-#'   `basis` is provided as a name.
+#' @param nbasis Number of basis functions. `NULL` (the default) gives a
+#'   basis-set name such as `"bspline"` or `"fir"` the default size used by
+#'   [getHRF()], and a plain function as many basis functions as the columns it
+#'   returns. Ignored for fixed HRFs such as `"spmg1"` or an `HRF` object.
 #'
 #' @return An object of class `HRF` representing the lagged basis.
 #'
@@ -21,24 +23,26 @@
 #' h(0:5)
 #'
 #' @export
-make_hrf <- function(basis, lag, nbasis = 1) {
+make_hrf <- function(basis, lag, nbasis = NULL) {
   if (!is.numeric(lag) || length(lag) != 1 || !is.finite(lag)) {
     stop("`lag` must be a single finite numeric value.")
   }
-  if (!is.numeric(nbasis) || length(nbasis) != 1 || !is.finite(nbasis) ||
-      nbasis < 1 || nbasis %% 1 != 0) {
-    stop("`nbasis` must be a single positive integer.")
+  if (!is.null(nbasis)) {
+    if (!is.numeric(nbasis) || length(nbasis) != 1 || !is.finite(nbasis) ||
+        nbasis < 1 || nbasis %% 1 != 0) {
+      stop("`nbasis` must be a single positive integer.")
+    }
+    nbasis <- as.integer(nbasis)
   }
-  nbasis <- as.integer(nbasis)
 
   base <- if (is.character(basis)) {
-    getHRF(basis, nbasis = nbasis, lag = 0)
+    if (is.null(nbasis)) getHRF(basis, lag = 0) else getHRF(basis, nbasis = nbasis, lag = 0)
   } else if (inherits(basis, "HRF")) {
     basis
   } else if (is.function(basis)) {
     # Convert a plain function explicitly so that the number of basis
     # functions is set correctly before applying any decorators.
-    as_hrf(basis, nbasis = nbasis)
+    as_hrf(basis, nbasis = nbasis %||% .detect_nbasis(basis, "basis"))
   } else {
     stop(sprintf(
       "invalid basis function '%s' of class %s: must be 1) character string indicating hrf type, e.g. 'gamma', 2) a function or 3) an object of class 'HRF'",

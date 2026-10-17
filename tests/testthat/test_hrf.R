@@ -1330,3 +1330,16 @@ test_that("hrf_mexhat uses the unit-L2-norm Ricker normaliser", {
   expect_equal(hrf_mexhat(t, mean = 6, sd = 2),
                2 / (sqrt(6) * pi^(1/4)) * (1 - ((t - 6) / 2)^2) * exp(-(t - 6)^2 / 8))
 })
+
+test_that("make_hrf() without nbasis gives basis sets their default size", {
+  # Previously nbasis defaulted to 1: "bspline" failed and "fir" gave one
+  # 24 s bin, also for regressor(hrf = "<name>"), which calls make_hrf().
+  expect_equal(nbasis(make_hrf("bspline", lag = 0)), nbasis(getHRF("bspline")))
+  expect_equal(nbasis(make_hrf("fir", lag = 1)), nbasis(getHRF("fir")))
+  expect_equal(nbasis(make_hrf("spmg3", lag = 0)), 3L)
+  expect_equal(nbasis(make_hrf(function(t) cbind(dnorm(t, 5), dnorm(t, 7)), lag = 0)), 2L)
+  expect_equal(nbasis(make_hrf("fir", lag = 0, nbasis = 3)), 3L)
+  reg <- regressor(c(2, 20), hrf = "bspline")
+  expect_equal(ncol(evaluate(reg, seq(0, 40, by = 2))), nbasis(getHRF("bspline")))
+  expect_error(make_hrf("fir", lag = 0, nbasis = 0), "positive integer")
+})

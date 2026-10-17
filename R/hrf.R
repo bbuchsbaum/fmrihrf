@@ -181,20 +181,10 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   if (is.function(hrf) && !inherits(hrf, "HRF")) {
     # If it's a plain function, convert it using as_hrf
     hrf_label <- paste(trimws(deparse(substitute(hrf))), collapse = " ")
-    # Determine nbasis by evaluating the function
-    test_t <- 1:10 # A small sample range
-    test_val <- try(hrf(test_t, ...), silent = TRUE)
-    determined_nbasis <- if (!inherits(test_val, "try-error") && !is.null(test_val)) {
-      if (is.matrix(test_val)) ncol(test_val) else 1L
-    } else {
-      warning(paste("Could not determine nbasis for function", hrf_label, "- defaulting to 1. Evaluation failed."))
-      1L
-    }
-    
     # Pass extra args (...) here if they are meant for the base function construction
     base_hrf <- as_hrf(f = function(t) hrf(t, ...),
                        name = hrf_label,
-                       nbasis = determined_nbasis) # Pass determined nbasis
+                       nbasis = .detect_nbasis(hrf, hrf_label, ...))
                        # Let as_hrf determine default span, params
   } else if (inherits(hrf, "HRF")) {
     # If already an HRF object, use it directly
@@ -221,6 +211,18 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   decorated_hrf
 }
 
+
+# Number of basis functions of a plain function, from the columns it returns
+# on a small time grid; 1 (with a warning) if it cannot be evaluated there.
+.detect_nbasis <- function(f, label, ...) {
+  val <- try(f(1:10, ...), silent = TRUE)
+  if (inherits(val, "try-error") || is.null(val)) {
+    warning(paste("Could not determine nbasis for function", label,
+                  "- defaulting to 1. Evaluation failed."))
+    return(1L)
+  }
+  if (is.matrix(val)) ncol(val) else 1L
+}
 
 # Validate `hrf_norm` for gen_hrf()/getHRF() and reject combining it with the
 # legacy `normalize = TRUE` shortcut.
