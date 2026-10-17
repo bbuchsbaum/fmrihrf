@@ -1144,12 +1144,12 @@ print.HRF <- function(x, ...) {
 
   # Show parameters if they exist
   if (!is.null(params) && length(params) > 0) {
-    param_str <- paste(
-      names(params),
-      sapply(params, function(p) format(p, digits = 4)),
-      sep = " = ",
-      collapse = ", "
-    )
+    # Vector-valued parameters (e.g. hrf_weighted() times) print as [a, b, ...]
+    values <- vapply(params, function(p) {
+      txt <- format(p, digits = 4, trim = TRUE)
+      if (length(txt) == 1L) txt else paste0("[", paste(txt, collapse = ", "), "]")
+    }, character(1))
+    param_str <- paste(names(params), values, sep = " = ", collapse = ", ")
     cat("   Parameters:", param_str, "\n")
   } else if (!is.null(param_names) && length(param_names) > 0) {
     cat("   Parameter names:", paste(param_names, collapse = ", "), "\n")

@@ -1306,3 +1306,13 @@ test_that("hrf_bspline_generator rejects a one-function cubic basis", {
   expect_equal(unname(b2), unname(hrf_bspline(seq(0, 24, by = 1), N = 2)))
   expect_gt(max(b2), 0)
 })
+
+test_that("print.HRF shows vector-valued parameters readably", {
+  h <- hrf_weighted(c(1, 2, 3), width = 2)
+  out <- paste(capture.output(print(h)), collapse = "\n")
+  expect_match(out, "weights = [1, 2, 3]", fixed = TRUE)
+  expect_match(out, "times = [0.0000, 0.6667, 1.3333]", fixed = TRUE)
+  expect_false(grepl('c("', out, fixed = TRUE))
+  # scalar parameters print as before
+  expect_output(print(HRF_SPMG1), "Parameters: P1 = 5, P2 = 15, A1 = 0.008333", fixed = TRUE)
+})
