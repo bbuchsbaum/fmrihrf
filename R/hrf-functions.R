@@ -131,6 +131,13 @@ hrf_gaussian <- function(t, mean=6, sd=2) {
 #' @param mean A numeric value representing the mean of the Mexican hat wavelet. Default value is 6.
 #' @param sd A numeric value representing the standard deviation of the Mexican hat wavelet. Default value is 2.
 #' @return A numeric vector representing the Mexican hat wavelet-based HRF at the given time points `t`.
+#' @details The response is the Ricker (Mexican hat) wavelet centred at
+#'   \code{mean} with width \code{sd}, set to zero before onset (\code{t < 0}):
+#'   \deqn{h(t) = \frac{2}{\sqrt{3\,sd}\,\pi^{1/4}}
+#'     \left(1 - \left(\frac{t - mean}{sd}\right)^2\right)
+#'     \exp\left(-\frac{(t - mean)^2}{2\,sd^2}\right).}{h(t) = 2 / (sqrt(3 * sd) * pi^(1/4)) *
+#'     (1 - ((t - mean) / sd)^2) * exp(-(t - mean)^2 / (2 * sd^2)).}
+#'   The normalising constant gives the un-truncated wavelet unit L2 norm.
 #' @family hrf_functions
 #' @examples
 #' # Compute the Mexican hat HRF representation for time points from 0 to 20 with 0.5 increments
@@ -139,7 +146,7 @@ hrf_gaussian <- function(t, mean=6, sd=2) {
 hrf_mexhat <- function(t, mean = 6, sd = 2) {
   t0 <- t - mean
   a <- (1 - (t0 / sd)^2) * exp(-t0^2 / (2 * sd^2))
-  scale <- sqrt(2 / (3 * sd * pi^(1/4)))
+  scale <- 2 / (sqrt(3 * sd) * pi^(1/4))
   return(.causal(t, scale * a))
 }
 
