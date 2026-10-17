@@ -214,6 +214,25 @@ test_that("conv matches a full convolution of the fine-grid impulse train", {
   }
 })
 
+test_that("a block at the start of the convolution window keeps its mass", {
+  # conv's fine window starts one span before the first grid point. A block
+  # starting within one fine bin of that edge used to gain up to half a bin
+  # of mass, so a grid point's value depended on which other points were
+  # requested. Both grids below share the fine-grid alignment.
+  box <- as_hrf(function(t) ifelse(t >= 0 & t <= 1, 1, 0), name = "box", span = 1)
+  reg <- regressor(0, box, duration = 0.5)
+
+  at_edge <- evaluate(reg, c(1, 2, 3), precision = 0.1)
+  inside <- evaluate(reg, c(0.5, 1, 2, 3), precision = 0.1)[-1]
+  expect_equal(at_edge, inside, tolerance = 1e-10)
+  expect_equal(at_edge[1], 0.5, tolerance = 1e-10)
+
+  # Block starting half a fine bin before the window
+  at_edge <- evaluate(reg, c(1.05, 2.05), precision = 0.1)
+  inside <- evaluate(reg, c(0.55, 1.05, 2.05), precision = 0.1)[-1]
+  expect_equal(at_edge, inside, tolerance = 1e-10)
+})
+
 test_that("neural_input samples block events and handles empty regressors", {
   reg <- regressor(onsets = c(2, 6), duration = c(2, 1), amplitude = c(1, 3))
   ni <- neural_input(reg, start = 0, end = 10, resolution = 1)
