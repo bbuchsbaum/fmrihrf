@@ -529,7 +529,9 @@ hrf_blocked <- gen_hrf_blocked
 #' Reads the internal HRF registry to list available HRF types.
 #'
 #' @param details Logical; if TRUE, attempt to add descriptions (basic for now).
-#' @return A data frame with columns: name, type (object/generator), nbasis_default.
+#' @return A data frame with columns \code{name}, \code{type}
+#'   (\code{"object"} or \code{"generator"}), \code{nbasis_default} and
+#'   \code{is_alias}, plus \code{description} when \code{details = TRUE}.
 #' @examples
 #' # List all available HRFs
 #' hrfs <- list_available_hrfs()
