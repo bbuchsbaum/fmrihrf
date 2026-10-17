@@ -150,3 +150,31 @@ test_that("onset transparency is respected by event and feature plots", {
     expect_false(identical(transparent, opaque))
   }
 })
+
+test_that("base plot methods let ... override their default arguments", {
+  png_type <- .working_png_type()
+  skip_if(is.null(png_type), "no working PNG device")
+  render <- function(...) {
+    path <- tempfile(fileext = ".png")
+    on.exit(unlink(path), add = TRUE)
+    grDevices::png(path, width = 500, height = 500, type = png_type)
+    tryCatch(plot(...), finally = grDevices::dev.off())
+    readBin(path, "raw", n = file.info(path)$size)
+  }
+  for (x in list(regressor(c(2, 8), HRF_SPMG3),
+                 feature_regressor(c(1, 2, 1), dt = 2, hrf = HRF_SPMG3))) {
+    # Stacked panels: xlab labels the shared time axis, ylab the panels
+    stacked <- render(x)
+    expect_identical(render(x, xlab = "Time (s)", ylab = c("B1", "B2", "B3")), stacked)
+    expect_false(identical(render(x, xlab = "Seconds"), stacked))
+    expect_false(identical(render(x, ylab = "BOLD"), stacked))
+    expect_false(identical(render(x, xaxt = "n"), stacked))
+    overlay <- render(x, layout = "overlay")
+    expect_identical(render(x, layout = "overlay", ylab = "Response"), overlay)
+    expect_false(identical(render(x, layout = "overlay", labels = c("a", "b", "c")),
+                           overlay))
+  }
+  expect_identical(render(HRF_SPMG1, ylab = "Response", type = "n"), render(HRF_SPMG1))
+  expect_false(identical(render(HRF_SPMG1, ylab = "BOLD"), render(HRF_SPMG1)))
+  expect_false(identical(render(HRF_SPMG3, labels = c("a", "b", "c")), render(HRF_SPMG3)))
+})

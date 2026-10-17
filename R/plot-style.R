@@ -206,10 +206,9 @@ print.fmrihrf_plot <- function(x, ...) {
   p <- attr(x, "plot")
   if (inherits(p, "ggplot")) {
     print(p)
-    return(invisible(x))
+  } else {
+    print(.plain_df(x), ...)
   }
-  class(x) <- setdiff(class(x), "fmrihrf_plot")
-  print(x, ...)
   invisible(x)
 }
 
@@ -437,6 +436,13 @@ knit_print.fmrihrf_plot <- function(x, ...) {
     ggplot2::theme(plot.title.position = "plot")
 }
 
+# Default arguments `defaults`, except those also given in `args` (a user's
+# `...`), which take the user's value instead; unnamed arguments are kept.
+.override <- function(defaults, args) {
+  nm <- names(defaults) %||% character(length(defaults))
+  c(defaults[!nzchar(nm) | !nm %in% names(args)], args)
+}
+
 # Base-graphics counterpart: draw one panel of series with the shared palette.
 .base_series_panel <- function(time, Y, colours, labels = NULL, main = NULL,
                                xlab = "Time (s)", ylab = "Response",
@@ -446,8 +452,9 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   args <- list(...)
   ylim <- args$ylim %||% range(Y, 0, finite = TRUE)
   args$ylim <- NULL
-  do.call(graphics::plot, c(list(x = range(time), y = ylim, type = "n",
-                                 xlab = xlab, ylab = ylab, main = ""), args))
+  do.call(graphics::plot, .override(list(x = range(time), y = ylim, type = "n",
+                                         xlab = xlab, ylab = ylab, main = ""),
+                                    args))
   graphics::abline(h = 0, col = .hrf_rule, lwd = 0.8)
   if (!is.null(onsets) && length(onsets) > 0) {
     graphics::rug(onsets, ticksize = 0.035, side = 1, col = onset_col, lwd = 1.5)

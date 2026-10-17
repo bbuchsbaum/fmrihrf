@@ -114,6 +114,13 @@ test_that("reference curves follow normalize", {
   expect_equal(max(d$response), 1)
 })
 
+test_that("print.fmrihrf_plot returns its argument unchanged", {
+  x <- structure(data.frame(a = 1:2), class = c("fmrihrf_plot", "data.frame"))
+  out <- capture.output(res <- print(x))
+  expect_identical(res, x)
+  expect_identical(out, capture.output(print(data.frame(a = 1:2))))
+})
+
 test_that("modifying a knitr result returns a plain data frame", {
   skip_if_not_installed("ggplot2")
   old <- options(knitr.in.progress = TRUE)
