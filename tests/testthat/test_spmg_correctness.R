@@ -56,3 +56,21 @@ test_that("loop block support agrees with an independent finite-kernel integral"
     expect_lt(max(abs(actual - expected)), 0.002)
   }
 })
+
+test_that("hrf_spmg1 scales the undershoot by P2, not a fixed 15!", {
+  t <- seq(0, 40, by = 0.25)
+  # Defaults are unchanged: A1 * t^5 e^-t - t^15 e^-t / (6 * 15!)
+  expect_identical(hrf_spmg1(t), exp(-t) * (1 / 120 * t^5 - t^15 / (6 * factorial(15))))
+  for (P2 in c(12, 15, 16.5)) {
+    # Gamma-density form: positive lobe minus 1/6 of a Gamma(P2 + 1, 1) density
+    expected <- 120 / factorial(5) * dgamma(t, shape = 6, rate = 1) -
+      dgamma(t, shape = P2 + 1, rate = 1) / 6
+    expect_equal(hrf_spmg1(t, P2 = P2), expected, tolerance = 1e-12)
+    d1 <- vapply(t[-1], function(ti) numDeriv::grad(function(x) hrf_spmg1(x, P2 = P2), ti), 0)
+    expect_equal(fmrihrf:::hrf_spmg1_deriv(t[-1], P2 = P2), d1, tolerance = 1e-7)
+    d2 <- vapply(t[-1], function(ti) {
+      numDeriv::grad(function(x) fmrihrf:::hrf_spmg1_deriv(x, P2 = P2), ti)
+    }, 0)
+    expect_equal(fmrihrf:::hrf_spmg1_second_deriv(t[-1], P2 = P2), d2, tolerance = 1e-7)
+  }
+})

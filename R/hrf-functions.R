@@ -149,7 +149,9 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #'
 #' @param t A vector of time points.
 #' @param P1 The first exponent parameter (default: 5).
-#' @param P2 The second exponent parameter (default: 15).
+#' @param P2 The second exponent parameter (default: 15). The undershoot is
+#'   \code{t^P2 * exp(-t) / (6 * factorial(P2))}, one sixth of a gamma density
+#'   with shape \code{P2 + 1} and unit rate.
 #' @param A1 Amplitude scaling factor for the positive gamma function component; normally fixed at 1/120
 #' @return A vector of HRF values at the given time points.
 #' @family hrf_functions
@@ -162,7 +164,7 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #' # Plot the HRF values
 #' plot(time_points, hrf_values, type='l', main='SPM Canonical Double Gamma HRF')
 hrf_spmg1 <- function(t, P1=5, P2=15,A1=1/120) {
-  ifelse(t < 0, 0, exp(-t) * (A1 * t^P1 - t^P2 / (6 * factorial(15))))
+  ifelse(t < 0, 0, exp(-t) * (A1 * t^P1 - t^P2 / (6 * factorial(P2))))
 	
 }
 
@@ -171,7 +173,7 @@ hrf_spmg1 <- function(t, P1=5, P2=15,A1=1/120) {
 #' @keywords internal
 #' @noRd
 hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
-  C <- (1 / (6 * factorial(15)))
+  C <- (1 / (6 * factorial(P2)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
@@ -186,7 +188,7 @@ hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
 #' @keywords internal
 #' @noRd
 hrf_spmg1_second_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
-  C <- (1 / (6 * factorial(15)))
+  C <- (1 / (6 * factorial(P2)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
