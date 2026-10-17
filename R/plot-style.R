@@ -206,10 +206,9 @@ print.fmrihrf_plot <- function(x, ...) {
   p <- attr(x, "plot")
   if (inherits(p, "ggplot")) {
     print(p)
-    return(invisible(x))
+  } else {
+    print(.plain_df(x), ...)
   }
-  class(x) <- setdiff(class(x), "fmrihrf_plot")
-  print(x, ...)
   invisible(x)
 }
 
