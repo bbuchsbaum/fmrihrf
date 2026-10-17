@@ -118,6 +118,17 @@ test_that("--key=value keeps every \"=\" after the first in the value", {
   expect_equal(status, 2L)
 })
 
+test_that("JSON output keeps the precision of the CSV output", {
+  args <- c("eval", "--hrf", "spmg2", "--times", "0.5,1,7.25")
+  csv <- capture.output(fmrihrf_cli(args) -> status)
+  json <- capture.output(fmrihrf_cli(c(args, "--json")) -> status)
+  csv <- utils::read.csv(text = csv)
+  json <- jsonlite::fromJSON(paste(json, collapse = "\n"))
+  expect_equal(json, csv, tolerance = 1e-14)
+  expect_equal(json$basis1, evaluate(HRF_SPMG2, c(0.5, 1, 7.25))[, 1],
+               tolerance = 1e-12)
+})
+
 test_that("eval command emits expected columns", {
   path <- tempfile(fileext = ".csv")
   status <- fmrihrf_cli(c(

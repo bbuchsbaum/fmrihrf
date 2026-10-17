@@ -500,7 +500,7 @@ install_cli <- function(dest_dir = "~/.local/bin",
 .cli_write <- function(data, opts) {
   text <- if (isTRUE(opts$json)) {
     jsonlite::toJSON(data, dataframe = "rows", auto_unbox = TRUE,
-                     pretty = TRUE, na = "null")
+                     pretty = TRUE, na = "null", digits = NA)
   } else {
     paste(utils::capture.output(utils::write.csv(data, row.names = FALSE, na = "")),
           collapse = "\n")
