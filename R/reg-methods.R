@@ -99,44 +99,40 @@ evaluate.Reg <- function(x, grid, precision=.33, method=c("conv", "loop", "fft",
 #' @method shift Reg
 #' @rdname shift
 #' @export
-#' @importFrom assertthat assert_that
 shift.Reg <- function(x, shift_amount, ...) {
-  dots <- list(...)
+  shift_amount <- resolve_shift_amount(shift_amount, list(...))
 
-  if (missing(shift_amount) && "offset" %in% names(dots)) {
-    shift_amount <- dots$offset
-  }
-
-  assert_that(inherits(x, "Reg"),
-              msg = "Input 'x' must inherit from class 'Reg'")
-
-  if (missing(shift_amount)) {
-    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
-  }
-
-  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
-              msg = "`shift_amount` must be a single numeric value")
-
-  # Handle empty regressor case
-  if (length(x$onsets) == 0 || (length(x$onsets) == 1 && is.na(x$onsets[1]))) {
-    # Returning the original empty object is appropriate for a shift
+  # Returning the original empty object is appropriate for a shift
+  if (length(x$onsets) == 0) {
     return(x)
   }
 
-  # Shift the valid onsets
-  shifted_onsets <- x$onsets + shift_amount
+  # Reconstruct the object using the core Reg constructor, which validates the
+  # shifted onsets. Zero amplitudes were already dropped (or deliberately
+  # kept) when `x` was built.
+  Reg(onsets = x$onsets + shift_amount,
+      hrf = x$hrf,
+      duration = x$duration,
+      amplitude = x$amplitude,
+      span = x$span,
+      summate = x$summate,
+      drop_zero_amplitude = FALSE)
+}
 
-  # Reconstruct the object using the core Reg constructor. Zero amplitudes
-  # were already dropped (or deliberately kept) when `x` was built.
-  out <- Reg(onsets = shifted_onsets,
-             hrf = x$hrf,
-             duration = x$duration,
-             amplitude = x$amplitude,
-             span = x$span,
-             summate = x$summate,
-             drop_zero_amplitude = FALSE)
-             
-  return(out)
+# `shift_amount` for the shift() methods, which also accept it as `offset`.
+#' @importFrom assertthat assert_that
+#' @keywords internal
+#' @noRd
+resolve_shift_amount <- function(shift_amount, dots) {
+  if (missing(shift_amount) && "offset" %in% names(dots)) {
+    shift_amount <- dots$offset
+  }
+  if (missing(shift_amount)) {
+    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
+  }
+  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
+              msg = "`shift_amount` must be a single numeric value")
+  shift_amount
 }
 
 #' Print method for Reg objects
@@ -158,21 +154,13 @@ shift.Reg <- function(x, shift_amount, ...) {
 print.Reg <- function(x, ...) {
 
   n_ons <- length(x$onsets)
-  hrf_is_list <- isTRUE(attr(x, "hrf_is_list"))
-
-  # Get HRF info - handle list vs single HRF
-
-  if (hrf_is_list) {
-    if (length(x$hrf) > 0) {
-      hrf_name <- paste0("trial-varying (", length(x$hrf), " HRFs)")
-      nb <- nbasis(x$hrf[[1]])
-    } else {
-      hrf_name <- "trial-varying (empty)"
-      nb <- 1L
-    }
+  nb <- nbasis(x)
+  hrf_name <- if (!isTRUE(attr(x, "hrf_is_list"))) {
+    attr(x$hrf, "name") %||% "custom function"
+  } else if (length(x$hrf) > 0) {
+    paste0("trial-varying (", length(x$hrf), " HRFs)")
   } else {
-    hrf_name <- attr(x$hrf, "name") %||% "custom function"
-    nb <- nbasis(x$hrf)
+    "trial-varying (empty)"
   }
   hrf_span <- x$span
 
@@ -180,7 +168,7 @@ print.Reg <- function(x, ...) {
 
   # Use cli_div for potentially better alignment than cli_ul
   cli::cli_div(theme = list(ul = list("margin-left" = 2), li = list("margin-bottom" = 0.5)))
-  cli::cli_li("Type: {.cls {class(x)[1]}}{if(inherits(x, 'regressor')) ' (Legacy compatible)'}")
+  cli::cli_li("Type: {.cls {class(x)[1]}}")
   if (n_ons == 0) {
     cli::cli_li("Events: 0 (Empty Regressor)")
   } else {
