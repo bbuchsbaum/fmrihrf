@@ -79,6 +79,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
         stop("Element ", i, " of `hrf` list is not a valid HRF object.", call. = FALSE)
       }
     }
+    first_hrf <- if (length(hrf) > 0) hrf[[1]]
     # Recycle if length 1
     if (length(hrf) == 1) {
       hrf <- rep(hrf, n_onsets)
@@ -111,6 +112,14 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
       filtered_all <- TRUE # If input was empty, effectively all are filtered
   }
 
+  # With no events left there is nothing to vary per trial. Keep the first
+  # supplied HRF, so that the span and number of basis functions survive
+  # (an empty per-event list has neither).
+  if (hrf_is_list && length(hrf) == 0 && !is.null(first_hrf)) {
+    hrf <- first_hrf
+    hrf_is_list <- FALSE
+  }
+
   # Process single HRF case (non-list)
   if (!hrf_is_list) {
     hrf <- make_hrf(hrf, lag = 0)
@@ -121,7 +130,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
   if (hrf_is_list) {
     # For list of HRFs, use max span across all HRFs
     all_spans <- vapply(hrf, function(h) attr(h, "span") %||% span_arg, numeric(1))
-    final_span <- max(all_spans)
+    final_span <- if (length(all_spans) > 0) max(all_spans) else span_arg
   } else {
     final_span <- attr(hrf, "span") %||% span_arg
   }

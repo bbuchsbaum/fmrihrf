@@ -19,6 +19,25 @@ test_that("Reg rejects a missing summate flag", {
   expect_error(regressor(onsets = 1, summate = "yes"), "summate")
 })
 
+test_that("a list-HRF regressor without events keeps its basis and span", {
+  # All events dropped: this used to warn, store span = -Inf and report a
+  # single basis, so evaluate() returned a vector for a 3-basis HRF.
+  expect_no_warning(
+    reg <- regressor(c(1, 2), hrf = list(HRF_SPMG3), amplitude = 0)
+  )
+  single <- regressor(c(1, 2), hrf = HRF_SPMG3, amplitude = 0)
+  expect_equal(reg$span, single$span)
+  expect_equal(nbasis(reg), 3L)
+  expect_true(attr(reg, "filtered_all"))
+  expect_identical(evaluate(reg, 0:5), matrix(0, 6, 3))
+  expect_identical(evaluate(reg, 0:5, method = "loop"), evaluate(single, 0:5))
+
+  expect_no_warning(none <- regressor(numeric(0), hrf = list(HRF_SPMG2)))
+  expect_equal(nbasis(none), 2L)
+  expect_no_warning(bare <- regressor(numeric(0), hrf = list(), span = 30))
+  expect_equal(bare$span, 30)
+})
+
 # Verify single_trial_regressor construction and errors
 
 test_that("single_trial_regressor constructs single event", {
