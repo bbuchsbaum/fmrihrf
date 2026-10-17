@@ -21,6 +21,25 @@ test_that("plot.Reg returns the evaluated grid data", {
   expect_equal(plotted$response, evaluate(reg, grid))
 })
 
+test_that("plot.Reg draws a regressor without events", {
+  reg <- regressor(numeric(0), HRF_SPMG1)
+  plotted <- expect_no_warning(.with_pdf_device(plot(reg)))
+  expect_equal(plotted$time, seq(0, reg$span, by = 0.25))
+  expect_true(all(plotted$response == 0))
+})
+
+test_that("plot.Reg and plot.FeatureReg accept a custom main title", {
+  reg <- regressor(c(2, 8), HRF_SPMG1)
+  reg3 <- regressor(c(2, 8), HRF_SPMG3)
+  feat <- feature_regressor(c(1, 2, 1), dt = 2)
+  .with_pdf_device({
+    expect_equal(plot(reg, main = "Custom"), plot(reg))
+    expect_equal(plot(reg3, main = "Custom"), plot(reg3))
+    expect_no_error(plot(reg3, main = "Custom", layout = "overlay"))
+    expect_equal(plot(feat, main = "Custom"), plot(feat))
+  })
+})
+
 test_that("plot_regressors returns labelled long-form data", {
   reg1 <- regressor(onsets = c(2, 8), hrf = HRF_SPMG1)
   reg2 <- regressor(onsets = c(4, 10), hrf = HRF_GAMMA)

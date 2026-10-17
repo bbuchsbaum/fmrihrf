@@ -85,7 +85,13 @@ scale_colour_hrf <- function(type = c("categorical", "ordered"), ...,
     stop("scale_colour_hrf() requires the 'ggplot2' package")
   }
   type <- match.arg(type)
-  ggplot2::discrete_scale(aesthetics, palette = function(n) hrf_palette(n, type), ...)
+  palette <- function(n) hrf_palette(n, type)
+  # ggplot2 < 3.5.0 requires `scale_name`; later versions deprecate it.
+  if (utils::packageVersion("ggplot2") < "3.5.0") {
+    return(ggplot2::discrete_scale(aesthetics, scale_name = "hrf",
+                                   palette = palette, ...))
+  }
+  ggplot2::discrete_scale(aesthetics, palette = palette, ...)
 }
 
 #' @md
@@ -285,19 +291,21 @@ knit_print.fmrihrf_plot <- function(x, ...) {
 }
 
 # Build the shared ggplot for long-form series data.
-#   df:        data.frame(time, series (factor), response)
+#   df:        data.frame(time, <series factor>, response), from .long_frame()
+#   pal:       palette from .series_palette()
 #   onsets:    NULL or data.frame(onset, duration, series (factor or NA))
 #   samples:   NULL or data.frame(time, series, response)
-.gg_series <- function(df, colours, title = NULL, subtitle = NULL,
+.gg_series <- function(df, pal, title = NULL, subtitle = NULL,
                        xlab = "Time (s)", ylab = "Response",
                        layout = c("overlay", "stack"), onsets = NULL,
                        samples = NULL, direct_labels = FALSE,
-                       linetypes = FALSE, reference = NULL,
-                       scales = "free_y") {
+                       reference = NULL, scales = "free_y") {
   layout <- match.arg(layout)
-  gg <- asNamespace("ggplot2")
+  names(df)[2] <- "series"
   n <- nlevels(df$series)
-  names(colours) <- levels(df$series)
+  colours <- stats::setNames(pal$colours, levels(df$series))
+  # Many categorical overlays also vary the line type.
+  linetypes <- pal$type == "categorical" && n > 4 && layout == "overlay"
 
   yr <- range(df$response, reference$response, 0, finite = TRUE)
   span_y <- diff(yr)
@@ -310,30 +318,29 @@ knit_print.fmrihrf_plot <- function(x, ...) {
 
   # Event marks: a bar from onset to onset + duration, drawn just below the
   # lowest point of the curve(s) it belongs to (per panel when stacked).
-  if (!is.null(onsets) && nrow(onsets) > 0) {
+  has_marks <- !is.null(onsets) && nrow(onsets) > 0
+  if (has_marks) {
     # One set of marks per panel when stacked, so colour is not needed there.
     by_series <- !isFALSE(attr(onsets, "by_series")) && layout == "overlay"
     onsets$series <- factor(onsets$series, levels = levels(df$series))
     width <- pmax(onsets$duration, diff(xr) * 0.004)
     onsets$xend <- onsets$onset + width
-    if (layout == "stack" && scales == "fixed") {
-      # Shared y axis: place every panel's marks from the shared range so the
-      # label floor below holds for all panels.
-      onsets$y0 <- yr[1] - 0.22 * span_y
-      onsets$y1 <- yr[1] - 0.06 * span_y
-    } else if (layout == "stack") {
-      lo <- tapply(df$response, df$series, function(v) min(v, 0, na.rm = TRUE))
+    # Bottom and range of the data the marks hang from: per panel for free
+    # stacked panels; otherwise the shared range, so the label floor below
+    # holds for every panel.
+    if (layout == "stack" && scales != "fixed") {
+      key <- as.character(onsets$series)
+      lo <- tapply(df$response, df$series, function(v) min(v, 0, na.rm = TRUE))[key]
       rg <- tapply(df$response, df$series, function(v) {
         r <- diff(range(v, 0, na.rm = TRUE))
         if (!is.finite(r) || r == 0) 1 else r
-      })
-      key <- as.character(onsets$series)
-      onsets$y0 <- lo[key] - 0.22 * rg[key]
-      onsets$y1 <- lo[key] - 0.06 * rg[key]
+      })[key]
     } else {
-      onsets$y0 <- yr[1] - 0.16 * span_y
-      onsets$y1 <- yr[1] - 0.06 * span_y
+      lo <- yr[1]
+      rg <- span_y
     }
+    onsets$y0 <- lo - (if (layout == "stack") 0.22 else 0.16) * rg
+    onsets$y1 <- lo - 0.06 * rg
     if (by_series) {
       p <- p + ggplot2::geom_rect(
         data = onsets, inherit.aes = FALSE,
@@ -357,7 +364,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
                                 colour = .hrf_neutral, linewidth = 0.7, linetype = "22")
   }
 
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::geom_line(ggplot2::aes(linetype = .data$series), linewidth = 0.9)
   } else {
     p <- p + ggplot2::geom_line(linewidth = 0.9)
@@ -369,7 +376,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   }
 
   p <- p + ggplot2::scale_colour_manual(values = colours, name = NULL)
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::scale_linetype_discrete(name = NULL)
   }
 
@@ -394,7 +401,6 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   #   stacked: (0.08 * 1.22 + 0.16) / (1.22 * 1.16) = 0.182
   #   overlay: (0.05 * 1.16 + 0.10) / (1.16 * 1.10) = 0.124
   # (with direct labels the overlay top expansion is larger, lowering it).
-  has_marks <- !is.null(onsets) && nrow(onsets) > 0
   mark_floor <- if (has_marks) 0.13 else 0
   stack_floor <- if (has_marks) 0.19 else 0
   if (layout == "overlay") {
