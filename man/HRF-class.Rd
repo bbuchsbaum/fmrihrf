@@ -36,7 +36,7 @@ The package provides several pre-defined HRF types that can be used in modeling 
 **Flexible basis sets:**
 * `"bspline"` or `"bs"` or `HRF_BSPLINE`: B-spline basis for flexible HRF modeling
 * `"tent"`: Tent (triangular) basis functions for flexible HRF modeling
-* `"daguerre"` or `HRF_DAGUERRE`: Daguerre basis functions
+* `"daguerre"`: Daguerre basis functions
 
 To see a complete list of available HRF types with details, use the `list_available_hrfs()` function.
 }

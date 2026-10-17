@@ -16,8 +16,8 @@ An HRF object of class \code{c("Tent_HRF", "HRF", "function")}
 }
 \description{
 Generates an HRF object using tent (piecewise linear) basis functions with
-custom parameters. This generator mirrors \code{HRF_TENT} but allows callers
-to control the number of basis elements and temporal span.
+custom parameters. Unlike the fixed \code{HRF_*} objects, it lets callers
+control the number of basis elements and temporal span.
 }
 \examples{
 # Create a tent basis with 6 functions over a 20 second window

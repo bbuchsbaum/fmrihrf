@@ -396,7 +396,7 @@ gen_hrf_library <- function(...) {
 #' **Flexible basis sets:**
 #' * `"bspline"` or `"bs"` or `HRF_BSPLINE`: B-spline basis for flexible HRF modeling
 #' * `"tent"`: Tent (triangular) basis functions for flexible HRF modeling
-#' * `"daguerre"` or `HRF_DAGUERRE`: Daguerre basis functions
+#' * `"daguerre"`: Daguerre basis functions
 #'
 #' To see a complete list of available HRF types with details, use the `list_available_hrfs()` function.
 #'
@@ -769,8 +769,8 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
 #' Create Tent HRF Basis Set
 #'
 #' Generates an HRF object using tent (piecewise linear) basis functions with
-#' custom parameters. This generator mirrors \code{HRF_TENT} but allows callers
-#' to control the number of basis elements and temporal span.
+#' custom parameters. Unlike the fixed \code{HRF_*} objects, it lets callers
+#' control the number of basis elements and temporal span.
 #'
 #' @param nbasis Number of tent basis functions (default: 5)
 #' @param span Temporal window in seconds (default: 24)
