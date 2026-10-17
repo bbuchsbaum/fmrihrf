@@ -1215,3 +1215,36 @@ test_that("B-spline basis is zero at both ends of the span", {
   y <- evaluate(reg, g, precision = 0.1)
   expect_lt(max(abs(diff(y))), 0.05)
 })
+
+test_that("getHRF and make_hrf apply the same decorators as gen_hrf", {
+  t <- seq(-2, 40, by = 0.5)
+  h <- getHRF("gaussian", lag = 2, width = 3, summate = FALSE)
+  ref <- gen_hrf(HRF_GAUSSIAN, lag = 2, width = 3, summate = FALSE)
+  expect_equal(h(t), ref(t))
+  expect_equal(attr(h, "name"), "gaussian")
+  expect_equal(attr(h, "span"), attr(ref, "span"))
+  expect_equal(attr(h, "params"), attr(ref, "params"))
+
+  bs7 <- getHRF("bs", nbasis = 7, span = 30)
+  expect_s3_class(bs7, "BSpline_HRF")
+  expect_equal(nbasis(bs7), 7L)
+  expect_equal(attr(bs7, "name"), "bs")
+  expect_equal(getHRF("spmg2", normalize = TRUE)(t), normalise_hrf(HRF_SPMG2)(t))
+  expect_error(getHRF("spmg1", width = -1), "width > 0")
+  expect_error(gen_hrf(HRF_SPMG1, hrf_norm = "bogus"), "should be one of")
+
+  m <- make_hrf("fir", lag = 2, nbasis = 4)
+  expect_equal(nbasis(m), 4L)
+  expect_equal(m(t), lag_hrf(hrf_fir_generator(nbasis = 4), 2)(t))
+  expect_equal(make_hrf(HRF_SPMG1, lag = 0)(t), HRF_SPMG1(t))
+  expect_equal(nbasis(make_hrf(function(t) cbind(t, t), lag = 1, nbasis = 2)), 2L)
+  expect_error(make_hrf(3, lag = 1), "invalid basis function")
+})
+
+test_that("list_available_hrfs flags registry aliases of objects and generators", {
+  info <- list_available_hrfs(details = TRUE)
+  expect_equal(info$name[info$is_alias], c("gam", "bs"))
+  expect_equal(info$description[info$name == "gam"], "gam HRF (object) (alias)")
+  expect_equal(info$nbasis_default[info$name == "fir"], "12")
+  expect_equal(info$nbasis_default[info$name == "lwu"], "variable")
+})

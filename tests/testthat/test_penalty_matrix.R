@@ -25,3 +25,11 @@ test_that("default HRF penalty is identity", {
   R <- penalty_matrix(HRF_GAUSSIAN)
   expect_equal(R, diag(nbasis(HRF_GAUSSIAN)))
 })
+
+test_that("daguerre penalty is nbasis x nbasis, including a single basis", {
+  for (nb in 1:4) {
+    R <- penalty_matrix(hrf_daguerre_generator(nbasis = nb))
+    expect_equal(dim(R), c(nb, nb))
+    expect_equal(diag(R), (seq_len(nb) - 1)^2)
+  }
+})

@@ -10,7 +10,9 @@ list_available_hrfs(details = FALSE)
 \item{details}{Logical; if TRUE, attempt to add descriptions (basic for now).}
 }
 \value{
-A data frame with columns: name, type (object/generator), nbasis_default.
+A data frame with columns \code{name}, \code{type}
+  (\code{"object"} or \code{"generator"}), \code{nbasis_default} and
+  \code{is_alias}, plus \code{description} when \code{details = TRUE}.
 }
 \description{
 Reads the internal HRF registry to list available HRF types.

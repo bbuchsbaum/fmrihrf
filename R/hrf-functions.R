@@ -21,14 +21,6 @@ hrf_time <- function(t, maxt=22) {
   ifelse(t > 0 & t < maxt, t, 0)
 }
 
-# hrf_ident
-# 
-# @param t time in seconds
-# @export
-hrf_ident <- function(t) {
-  ifelse( t == 0, 1, 0)
-}
-
 #' B-spline HRF (hemodynamic response function)
 #'
 #' The `hrf_bspline` function computes a B-spline basis for an HRF at time
@@ -285,66 +277,6 @@ hrf_inv_logit <- function(t, mu1 = 6, s1 = 1, mu2 = 16, s2 = 1, lag = 0) {
 }
 
 
-#' Hemodynamic Response Function with Half-Cosine Basis
-#'
-#' This function models a hemodynamic response function (HRF) using four half-period cosine basis functions.
-#' The HRF consists of an initial dip, a rise to peak, a fall and undershoot, and a recovery to the baseline.
-#'
-#' @param t A vector of time values.
-#' @param h1 Duration of the initial dip in seconds.
-#' @param h2 Duration of the rise to peak in seconds.
-#' @param h3 Duration of the fall and undershoot in seconds.
-#' @param h4 Duration of the recovery to baseline in seconds.
-#' @param f1 Height of the starting point.
-#' @param f2 Height of the end point.
-#' @return A vector of HRF values corresponding to the input time values.
-#' @references Woolrich, M. W., Behrens, T. E., & Smith, S. M. (2004). Constrained linear basis sets for HRF modelling using Variational Bayes. NeuroImage, 21(4), 1748-1761.
-#'
-#' Half-cosine HRF
-#'
-#' Creates a hemodynamic response function using half-cosine segments.
-#' The function consists of four phases controlled by h1-h4 parameters,
-#' with transitions between baseline (f1) and peak (1) and final (f2) levels.
-#'
-#' @param t Time points at which to evaluate the HRF
-#' @param h1 Duration of initial fall from f1 to 0 (default: 1)
-#' @param h2 Duration of rise from 0 to 1 (default: 5)
-#' @param h3 Duration of fall from 1 to 0 (default: 7)
-#' @param h4 Duration of final rise from 0 to f2 (default: 7)
-#' @param f1 Initial baseline level (default: 0)
-#' @param f2 Final baseline level (default: 0)
-#' @return Numeric vector of HRF values at time points t
-#' @examples
-#' # Standard half-cosine HRF
-#' t <- seq(0, 30, by = 0.1)
-#' hrf <- hrf_half_cosine(t)
-#' plot(t, hrf, type = "l", main = "Half-cosine HRF")
-#' 
-#' # Modified shape with undershoot
-#' hrf_under <- hrf_half_cosine(t, h1 = 1, h2 = 4, h3 = 6, h4 = 8, f2 = -0.2)
-#' lines(t, hrf_under, col = "red")
-#' @keywords internal
-#' @noRd
-.hrf_half_cosine <- function(t, h1=1, h2=5, h3=7,h4=7, f1=0, f2=0) {
-  rising_half_cosine <- function(t, f1, t0, w) {
-    return(f1/2 * (1 - cos(pi * (t - t0) / w)))
-  }
-  
-  falling_half_cosine <- function(t, f1, t0, w) {
-    return(f1/2 * (1 + cos(pi * (t - t0) / w)))
-  }
-  
-  ret = dplyr::case_when(
-    t < 0 ~ 0,
-    t <= h1 ~ falling_half_cosine(t, f1, 0, h1),
-    (t > h1) & t <= (h1+h2) ~ rising_half_cosine(t, 1, h1, h2),
-    (t > (h1+h2)) & t <= (h1+h2+h3) ~ falling_half_cosine(t,1,(h1+h2), h3),
-    (t > (h1+h2+h3)) & t <= (h1+h2+h3+h4) ~ rising_half_cosine(t,f2,(h1+h2+h3), h4),
-    (t > h1+h2+h3+h4) ~ f2,
-  )
-  return(ret)
-}
-
 #' Half-cosine HRF 
 #'
 #' Segments: 0->f1 (h1), f1->1 (h2), 1->f2 (h3), f2->0 (h4).
@@ -503,11 +435,7 @@ daguerre_basis <- function(t, n_basis = 3, scale = 1, span = 24) {
   norms <- apply(abs(ref), 2, max)
   norms[!is.finite(norms) | norms <= 1e-10] <- 1
 
-  basis <- raw(t)
-  for (i in seq_len(n_basis)) {
-    basis[, i] <- basis[, i] / norms[i]
-  }
-  basis
+  sweep(raw(t), 2L, norms, "/")
 }
 
 #' Lag-Width-Undershoot (LWU) HRF
@@ -912,7 +840,7 @@ hrf_weighted <- function(weights, width = NULL, times = NULL,
 hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   assertthat::assert_that(is.numeric(theta0) && length(theta0) == 3,
                         msg = "`theta0` must be a numeric vector of length 3: c(tau, sigma, rho).")
-  names(theta0) <- c("tau", "sigma", "rho") # Ensure names for numDeriv::grad
+  names(theta0) <- c("tau", "sigma", "rho")
   assertthat::assert_that(is.numeric(t), msg = "`t` must be numeric.")
   assertthat::assert_that(normalize_primary %in% c("none", "height"),
                         msg = "`normalize_primary` must be one of 'none' or 'height'.")
@@ -922,42 +850,21 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   assertthat::assert_that(theta0["rho"] >= 0 && theta0["rho"] <= 1.5,
                         msg = "rho in `theta0` must be between 0 and 1.5.")
 
-  # Function to pass to numDeriv::grad - parameters must be the first argument
-  # and it must return a scalar or vector (hrf_lwu returns a vector of length(t_val))
-  target_func_for_grad <- function(params_vec, t_val) {
-    hrf_lwu(t = t_val, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
+  # Calculate h0 (the HRF at theta0), optionally height-normalised
+  h0 <- hrf_lwu(t = t, tau = theta0["tau"], sigma = theta0["sigma"], rho = theta0["rho"],
+                normalize = normalize_primary)
+
+  # Partial derivatives w.r.t. (tau, sigma, rho) at every time point. hrf_lwu()
+  # is elementwise in t, so a single Jacobian gives the same values as calling
+  # numDeriv::grad() once per time point. The per-point grad() stopped on an NA
+  # response; keep rejecting NA times rather than returning NA derivatives.
+  assertthat::assert_that(!anyNA(t), msg = "`t` must not contain NA values.")
+  lwu_at <- function(params_vec) {
+    hrf_lwu(t = t, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
   }
+  deriv_matrix <- matrix(numDeriv::jacobian(func = lwu_at, x = theta0),
+                         nrow = length(t), ncol = 3,
+                         dimnames = list(NULL, c("d_tau", "d_sigma", "d_rho")))
 
-  # Calculate h0 (the HRF at theta0)
-  h0 <- hrf_lwu(t = t, tau = theta0["tau"], sigma = theta0["sigma"], rho = theta0["rho"], normalize = "none")
-
-  if (normalize_primary == "height") {
-    max_abs_h0 <- max(abs(h0), na.rm = TRUE)
-    if (max_abs_h0 > 1e-10) {
-      h0 <- h0 / max_abs_h0
-    }
-  }
-
-  # Calculate partial derivatives using numDeriv::grad
-  # grad() will iterate over each element of `t` if `target_func_for_grad` is vectorized over t,
-  # which it is. We want the gradient for each time point.
-  # However, numDeriv::grad expects the function to return a single scalar for jacobian calculation.
-  # So, we must loop over t points for numDeriv.
-
-  deriv_matrix <- matrix(NA, nrow = length(t), ncol = 3)
-  colnames(deriv_matrix) <- c("d_tau", "d_sigma", "d_rho")
-
-  for (i in seq_along(t)) {
-    # numDeriv::grad needs a function that takes params and returns a SINGLE value
-    # So we create a wrapper for each time point t[i]
-    current_t_func <- function(params_vec) {
-      hrf_lwu(t = t[i], tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
-    }
-    # Calculate gradient (vector of 3 partial derivatives) at t[i] w.r.t theta0
-    grad_at_t_i <- numDeriv::grad(func = current_t_func, x = theta0)
-    deriv_matrix[i, ] <- grad_at_t_i
-  }
-
-  basis_mat <- cbind(h0 = h0, deriv_matrix)
-  return(basis_mat)
+  cbind(h0 = h0, deriv_matrix)
 }
