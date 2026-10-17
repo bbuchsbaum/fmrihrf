@@ -275,12 +275,11 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
 }
 
 # Shared base-graphics body for plot.Reg() and plot.FeatureReg(): evaluate `x`
-# (by default from 0 to the last onset + span) and draw it.
+# (by default on .reg_plot_grid()) and draw it.
 .plot_reg_base <- function(x, grid, precision, title, show_onsets,
                            onset_color, onset_alpha, layout, ...) {
   if (is.null(grid)) {
-    max_time <- max(x$onsets, na.rm = TRUE) + x$span
-    grid <- seq(0, max_time, by = 0.25)
+    grid <- .reg_plot_grid(list(x))
   }
   response <- evaluate(x, grid, precision = .plot_precision(precision, grid))
   onset_col <- grDevices::adjustcolor(onset_color %||% .hrf_neutral,
@@ -422,11 +421,7 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
   n_regs <- length(regs)
 
   if (is.null(grid)) {
-    max_time <- max(vapply(regs, function(r) {
-      if (length(r$onsets) == 0) return(as.numeric(r$span))
-      max(r$onsets, na.rm = TRUE) + r$span
-    }, numeric(1)))
-    grid <- seq(0, max_time, by = 0.25)
+    grid <- .reg_plot_grid(regs)
   }
 
   if (is.null(show_onsets)) {
@@ -591,6 +586,16 @@ plot.FeatureReg <- function(x, grid = NULL, show_onsets = FALSE,
   )
   names(df)[2] <- name
   df
+}
+
+# Default plotting grid for regressors: 0.25 s steps from 0 to the last onset
+# plus span (just the span for a regressor without events).
+.reg_plot_grid <- function(regs) {
+  ends <- vapply(regs, function(r) {
+    if (length(r$onsets) == 0) return(as.numeric(r$span))
+    max(r$onsets, na.rm = TRUE) + r$span
+  }, numeric(1))
+  seq(0, max(ends), by = 0.25)
 }
 
 # Evaluation precision for plotting: the grid spacing, capped at 0.33 s (the

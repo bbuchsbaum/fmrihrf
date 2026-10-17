@@ -21,6 +21,13 @@ test_that("plot.Reg returns the evaluated grid data", {
   expect_equal(plotted$response, evaluate(reg, grid))
 })
 
+test_that("plot.Reg draws a regressor without events", {
+  reg <- regressor(numeric(0), HRF_SPMG1)
+  plotted <- expect_no_warning(.with_pdf_device(plot(reg)))
+  expect_equal(plotted$time, seq(0, reg$span, by = 0.25))
+  expect_true(all(plotted$response == 0))
+})
+
 test_that("plot_regressors returns labelled long-form data", {
   reg1 <- regressor(onsets = c(2, 8), hrf = HRF_SPMG1)
   reg2 <- regressor(onsets = c(4, 10), hrf = HRF_GAMMA)
