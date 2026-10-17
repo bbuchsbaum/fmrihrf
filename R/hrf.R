@@ -454,7 +454,9 @@ nbasis.HRF <- function(x,...) attr(x, "nbasis")
 #' @param normalize A logical value indicating whether to rescale the output so that the maximum absolute value is 1. Defaults to `FALSE`.
 #' @param ... Extra arguments supplied to the `hrf` function.
 #'
-#' @return A function representing the lagged HRF. If `lag` is a vector of lags, the function returns an HRF set.
+#' @return For a scalar `lag`, a function of `t` giving the lagged response. For a
+#'   vector of lags, an `HRF` basis set (see \code{\link{hrf_set}}) with
+#'   \code{nbasis(hrf)} columns per lag.
 #' @family gen_hrf
 #' @examples
 #' \donttest{
@@ -465,18 +467,24 @@ nbasis.HRF <- function(x,...) attr(x, "nbasis")
 #' @export
 gen_hrf_lagged <- function(hrf, lag=2, normalize=FALSE, ...) {
   force(hrf)
-  # TODO deal with nbasis arg in ...
-  if (length(lag)>1) {
-    do.call(gen_hrf_set, lapply(lag, function(l) gen_hrf_lagged(hrf, l,...)))
-  } else {
-    function(t) {
-      ret <- hrf(t-lag,...)
-      if (normalize) {
-        ret <- ret/max(abs(ret))
-      } 
-      
-      ret
+  if (length(lag) > 1) {
+    # One lagged copy of `hrf` per lag, combined into an HRF set
+    lagged <- lapply(lag, function(l) gen_hrf_lagged(hrf, l, normalize = normalize, ...))
+    is_hrf <- inherits(hrf, "HRF")
+    nb <- if (is_hrf) nbasis(hrf) else NCOL(lagged[[1]](1:10))
+    span <- if (is_hrf) attr(hrf, "span") else 24
+    parts <- Map(function(f, l) {
+      as_hrf(f, name = paste0("lag(", l, ")"), nbasis = nb, span = span + max(0, l))
+    }, lagged, lag)
+    return(do.call(hrf_set, parts))
+  }
+  function(t) {
+    ret <- hrf(t - lag, ...)
+    if (normalize) {
+      peak <- max(abs(ret))
+      if (peak > 0) ret <- ret / peak
     }
+    ret
   }
 }
 

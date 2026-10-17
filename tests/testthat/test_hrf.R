@@ -1248,3 +1248,23 @@ test_that("list_available_hrfs flags registry aliases of objects and generators"
   expect_equal(info$nbasis_default[info$name == "fir"], "12")
   expect_equal(info$nbasis_default[info$name == "daguerre"], "3")
 })
+
+test_that("gen_hrf_lagged builds an HRF set for a vector of lags and keeps normalize", {
+  t <- seq(0, 30, by = 0.5)
+  expect_no_warning(set <- gen_hrf_lagged(HRF_SPMG1, lag = c(0, 2, 4)))
+  expect_s3_class(set, "HRF")
+  expect_equal(nbasis(set), 3L)
+  expect_equal(set(t), cbind(HRF_SPMG1(t), HRF_SPMG1(t - 2), HRF_SPMG1(t - 4)))
+  expect_equal(nbasis(gen_hrf_lagged(HRF_SPMG2, lag = c(1, 2))), 4L)
+
+  nset <- hrf_lagged(hrf_gaussian, lag = c(1, 3), normalize = TRUE, sd = 3)
+  vals <- nset(t)
+  expect_equal(apply(abs(vals), 2, max), c(1, 1))
+  g3 <- hrf_gaussian(t - 3, sd = 3)
+  expect_equal(vals[, 2], g3 / max(g3))
+
+  # a scalar lag still returns the lagged function itself
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5)(t), HRF_SPMG1(t - 5))
+  # normalising an all-zero stretch leaves zeros instead of NaN
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5, normalize = TRUE)(0:3), rep(0, 4))
+})
