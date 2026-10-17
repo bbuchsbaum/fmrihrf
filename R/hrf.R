@@ -27,6 +27,10 @@
 as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
                    params = list()) {
   assertthat::assert_that(is.function(f))
+  if (missing(name)) {
+    # A function literal can deparse to several lines; use one label
+    name <- paste(trimws(name), collapse = " ")
+  }
   assertthat::assert_that(is.character(name), length(name) == 1)
   assertthat::assert_that(is.numeric(nbasis), length(nbasis) == 1)
   assertthat::assert_that(nbasis >= 1, msg = "nbasis must be >= 1")
@@ -176,19 +180,20 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   # 1. Ensure we start with an HRF object
   if (is.function(hrf) && !inherits(hrf, "HRF")) {
     # If it's a plain function, convert it using as_hrf
+    hrf_label <- paste(trimws(deparse(substitute(hrf))), collapse = " ")
     # Determine nbasis by evaluating the function
     test_t <- 1:10 # A small sample range
     test_val <- try(hrf(test_t, ...), silent = TRUE)
     determined_nbasis <- if (!inherits(test_val, "try-error") && !is.null(test_val)) {
       if (is.matrix(test_val)) ncol(test_val) else 1L
     } else {
-      warning(paste("Could not determine nbasis for function", deparse(substitute(hrf)), "- defaulting to 1. Evaluation failed."))
+      warning(paste("Could not determine nbasis for function", hrf_label, "- defaulting to 1. Evaluation failed."))
       1L
     }
     
     # Pass extra args (...) here if they are meant for the base function construction
     base_hrf <- as_hrf(f = function(t) hrf(t, ...),
-                       name = deparse(substitute(hrf)),
+                       name = hrf_label,
                        nbasis = determined_nbasis) # Pass determined nbasis
                        # Let as_hrf determine default span, params
   } else if (inherits(hrf, "HRF")) {

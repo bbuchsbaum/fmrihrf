@@ -1268,3 +1268,22 @@ test_that("gen_hrf_lagged builds an HRF set for a vector of lags and keeps norma
   # normalising an all-zero stretch leaves zeros instead of NaN
   expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5, normalize = TRUE)(0:3), rep(0, 4))
 })
+
+test_that("as_hrf and gen_hrf accept function literals that deparse to several lines", {
+  h <- as_hrf(function(t) {
+    exp(-t / 5)
+  })
+  expect_s3_class(h, "HRF")
+  expect_length(attr(h, "name"), 1)
+  expect_equal(h(c(0, 5)), exp(-c(0, 5) / 5))
+
+  long <- as_hrf(function(t) dgamma(t, shape = 6, rate = 1) * 2 + dnorm(t, mean = 3, sd = 1))
+  expect_length(attr(long, "name"), 1)
+
+  g <- gen_hrf(function(t) {
+    exp(-t / 5)
+  }, lag = 1)
+  expect_length(attr(g, "name"), 1)
+  expect_equal(g(3), exp(-2 / 5))
+  expect_equal(attr(as_hrf(hrf_gamma), "name"), "hrf_gamma")
+})
