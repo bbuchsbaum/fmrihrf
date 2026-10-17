@@ -12,6 +12,32 @@ test_that("fmrihrf_cli help paths return success", {
   expect_true(any(grepl("Usage: fmrihrf eval", out, fixed = TRUE)))
 })
 
+test_that("help lists exactly the options and defaults each command accepts", {
+  specs <- fmrihrf:::.cli_specs
+  main <- capture.output(fmrihrf_cli("help"))
+  commands <- sub("^  (\\S+).*", "\\1", grep("^  [a-z]", main, value = TRUE))
+  expect_setequal(commands, names(specs))
+  for (command in names(specs)) {
+    spec <- specs[[command]]
+    help <- capture.output(fmrihrf_cli(c("help", command)))
+    lines <- grep("^  --", help, value = TRUE)
+    options <- sub("^  --(\\S+).*", "\\1", lines)
+    negated <- if (length(spec$false_flags)) paste0("no-", spec$false_flags)
+    expect_setequal(options, c(spec$flags, names(spec$values), negated))
+    # Defaults shown as "[value]" are exactly the parser's non-boolean defaults
+    shown <- grepl("\\[[^]]+\\]$", lines)
+    defaults <- stats::setNames(sub(".*\\[([^]]+)\\]$", "\\1", lines[shown]),
+                                options[shown])
+    expected <- Filter(Negate(is.logical), spec$defaults)
+    expect_equal(sort(names(defaults)), sort(as.character(names(expected))),
+                 info = command)
+    for (name in names(expected)) {
+      expect_equal(defaults[[name]], as.character(expected[[name]]),
+                   info = paste(command, name))
+    }
+  }
+})
+
 test_that("parser rejects unknown options and missing values", {
   expect_equal(suppressMessages(fmrihrf_cli(c("list", "--bogus"))), 2L)
   expect_equal(suppressMessages(fmrihrf_cli(c("eval", "--hrf"))), 2L)
