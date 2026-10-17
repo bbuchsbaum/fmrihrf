@@ -862,8 +862,21 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   lwu_at <- function(params_vec) {
     hrf_lwu(t = t, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
   }
-  deriv_matrix <- matrix(numDeriv::jacobian(func = lwu_at, x = theta0),
-                         nrow = length(t), ncol = 3,
+  # numDeriv's Richardson steps reach +-h (its default d = eps = 1e-4); where
+  # a central step would leave the validated domain (sigma > 0.05,
+  # 0 <= rho <= 1.5), difference one-sidedly into the domain instead.
+  zero_tol <- sqrt(.Machine$double.eps / 7e-7)
+  h <- abs(1e-4 * theta0) + 1e-4 * (abs(theta0) < zero_tol)
+  side <- rep(NA_real_, 3)
+  if (theta0[["sigma"]] - h[2] <= 0.05) side[2] <- 1
+  if (theta0[["rho"]] - h[3] < 0) {
+    side[3] <- 1
+  } else if (theta0[["rho"]] + h[3] > 1.5) {
+    side[3] <- -1
+  }
+  jac <- numDeriv::jacobian(func = lwu_at, x = theta0, side = side,
+                            method.args = list(eps = 1e-4, d = 1e-4, zero.tol = zero_tol))
+  deriv_matrix <- matrix(jac, nrow = length(t), ncol = 3,
                          dimnames = list(NULL, c("d_tau", "d_sigma", "d_rho")))
 
   cbind(h0 = h0, deriv_matrix)
