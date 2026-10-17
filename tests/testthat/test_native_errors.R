@@ -14,3 +14,13 @@ test_that("native method errors return safely through the Rcpp wrapper", {
   reg <- regressor(0, h)
   expect_equal(evaluate(reg, c(0, 1, 2), precision = 1), c(0, 1, 0))
 })
+
+test_that("the native evaluator rejects an empty kernel", {
+  expect_error(
+    fmrihrf:::evaluate_regressor_cpp(
+      grid = c(0, 1), onsets = 0, durations = 0, amplitudes = 1,
+      hrf_matrix = matrix(numeric(0), ncol = 1), hrf_span = 2, precision = 1
+    ),
+    "at least one row"
+  )
+})

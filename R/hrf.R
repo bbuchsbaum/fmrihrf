@@ -27,6 +27,10 @@
 as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
                    params = list()) {
   assertthat::assert_that(is.function(f))
+  if (missing(name)) {
+    # A function literal can deparse to several lines; use one label
+    name <- paste(trimws(name), collapse = " ")
+  }
   assertthat::assert_that(is.character(name), length(name) == 1)
   assertthat::assert_that(is.numeric(nbasis), length(nbasis) == 1)
   assertthat::assert_that(nbasis >= 1, msg = "nbasis must be >= 1")
@@ -36,36 +40,24 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 
   # If params are provided, create a closure that captures them
   if (length(params) > 0) {
-    # Validate that f accepts the provided parameters
-    f_formals <- names(formals(f))
-    param_names <- names(params)
-
-    # Params starting with '.' are metadata (e.g., .lag, .width from decorators)
-    # and should not be validated as function arguments
-    metadata_params <- param_names[startsWith(param_names, ".")]
-    callable_params <- param_names[!startsWith(param_names, ".")]
-
-    # Check if callable param names are valid arguments to f (excluding 't')
-    # 't' is special and should not be in params
-    invalid_params <- setdiff(callable_params, f_formals)
-    if (length(invalid_params) > 0) {
+    # Params starting with '.' are metadata (e.g., .lag, .width from decorators):
+    # they are stored but neither validated against nor passed to `f`.
+    is_meta <- startsWith(names(params), ".")
+    invalid <- !is_meta & !(names(params) %in% names(formals(f)))
+    if (any(invalid)) {
       warning(sprintf("Parameters %s are not arguments to function %s and will be ignored",
-                      paste(invalid_params, collapse = ", "), name),
+                      paste(unique(names(params)[invalid]), collapse = ", "), name),
               call. = FALSE)
-      # Keep metadata params, filter out invalid callable params
-      params <- params[param_names %in% c(f_formals, metadata_params)]
+      params <- params[!invalid]
+      is_meta <- is_meta[!invalid]
     }
 
-    # Separate callable params (to be passed to function) from metadata (just stored)
-    callable_params_list <- params[!startsWith(names(params), ".")]
-
-    # Create closure that captures parameters if any callable params remain
-    if (length(callable_params_list) > 0) {
-      # Capture the original function in a local variable to avoid recursion issues
+    callable_params <- params[!is_meta]
+    if (length(callable_params) > 0) {
+      # Keep the original function under its own name to avoid recursion
       orig_f <- f
-      # Create a closure that calls the original function with captured callable parameters only
       f <- function(t) {
-        do.call(orig_f, c(list(t = t), callable_params_list))
+        do.call(orig_f, c(list(t = t), callable_params))
       }
     }
   }
@@ -84,10 +76,14 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 
 # Internal constructors already capture their parameters in a closure. Preserve
 # those values as metadata without trying to pass them to a function(t).
-.as_closed_hrf <- function(f, name, nbasis, span, params) {
+# `subclass` is prepended to the class vector (e.g. "BSpline_HRF").
+.as_closed_hrf <- function(f, name, nbasis, span, params, subclass = NULL) {
   obj <- as_hrf(f, name = name, nbasis = nbasis, span = span)
   attr(obj, "params") <- params
   attr(obj, "param_names") <- names(params)
+  if (!is.null(subclass)) {
+    class(obj) <- c(subclass, class(obj))
+  }
   obj
 }
 
@@ -179,32 +175,16 @@ bind_basis <- function(...) {
 gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
                     summate=TRUE, normalize=FALSE, name=NULL, span=NULL,
                     hrf_norm="none", ...) {
-
-  hrf_norm <- match.arg(hrf_norm, c(
-    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
-  ))
-  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
-    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
-         call. = FALSE)
-  }
+  hrf_norm <- .match_hrf_norm(hrf_norm, normalize)
 
   # 1. Ensure we start with an HRF object
   if (is.function(hrf) && !inherits(hrf, "HRF")) {
     # If it's a plain function, convert it using as_hrf
-    # Determine nbasis by evaluating the function
-    test_t <- 1:10 # A small sample range
-    test_val <- try(hrf(test_t, ...), silent = TRUE)
-    determined_nbasis <- if (!inherits(test_val, "try-error") && !is.null(test_val)) {
-      if (is.matrix(test_val)) ncol(test_val) else 1L
-    } else {
-      warning(paste("Could not determine nbasis for function", deparse(substitute(hrf)), "- defaulting to 1. Evaluation failed."))
-      1L
-    }
-    
+    hrf_label <- paste(trimws(deparse(substitute(hrf))), collapse = " ")
     # Pass extra args (...) here if they are meant for the base function construction
     base_hrf <- as_hrf(f = function(t) hrf(t, ...),
-                       name = deparse(substitute(hrf)),
-                       nbasis = determined_nbasis) # Pass determined nbasis
+                       name = hrf_label,
+                       nbasis = .detect_nbasis(hrf, hrf_label, ...))
                        # Let as_hrf determine default span, params
   } else if (inherits(hrf, "HRF")) {
     # If already an HRF object, use it directly
@@ -216,29 +196,10 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
     stop("'hrf' must be a function or an HRF object.")
   }
 
-  # Apply decorators conditionally
-  decorated_hrf <- base_hrf
-
-  # Apply width decorator first if needed
-  if (width != 0) {
-    # Check positivity *before* applying
-    stopifnot(width > 0)
-    # Note: block_hrf handles normalize=FALSE internally by default
-    decorated_hrf <- block_hrf(decorated_hrf, width=width, precision=precision,
-                               half_life=half_life, summate=summate, normalize=FALSE)
-  }
-
-  # Apply lag decorator if needed
-  if (lag != 0) {
-    decorated_hrf <- lag_hrf(decorated_hrf, lag=lag)
-  }
-
-  # Apply normalization decorator last if needed
-  if (normalize) {
-    decorated_hrf <- normalise_hrf(decorated_hrf)
-  } else if (!identical(hrf_norm, "none")) {
-    decorated_hrf <- normalize_hrf(decorated_hrf, hrf_norm)
-  }
+  decorated_hrf <- .decorate_hrf(base_hrf, lag = lag, width = width,
+                                 precision = precision, half_life = half_life,
+                                 summate = summate, normalize = normalize,
+                                 hrf_norm = hrf_norm)
 
   # Override name and span if provided by user
   if (!is.null(name)) {
@@ -247,9 +208,55 @@ gen_hrf <- function(hrf, lag=0, width=0, precision=.1, half_life=Inf,
   if (!is.null(span)) {
     attr(decorated_hrf, "span") <- span
   }
+  decorated_hrf
+}
 
-  # Return the final (potentially decorated) HRF object
-  return(decorated_hrf)
+
+# Number of basis functions of a plain function, from the columns it returns
+# on a small time grid; 1 (with a warning) if it cannot be evaluated there.
+.detect_nbasis <- function(f, label, ...) {
+  val <- try(f(1:10, ...), silent = TRUE)
+  if (inherits(val, "try-error") || is.null(val)) {
+    warning(paste("Could not determine nbasis for function", label,
+                  "- defaulting to 1. Evaluation failed."))
+    return(1L)
+  }
+  if (is.matrix(val)) ncol(val) else 1L
+}
+
+# Validate `hrf_norm` for gen_hrf()/getHRF() and reject combining it with the
+# legacy `normalize = TRUE` shortcut.
+.match_hrf_norm <- function(hrf_norm, normalize) {
+  hrf_norm <- match.arg(hrf_norm, c(
+    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
+  ))
+  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
+    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
+         call. = FALSE)
+  }
+  hrf_norm
+}
+
+# Decorator pipeline shared by gen_hrf() and getHRF(): block (width), then
+# lag, then normalisation.
+.decorate_hrf <- function(hrf, lag = 0, width = 0, precision = 0.1,
+                          half_life = Inf, summate = TRUE, normalize = FALSE,
+                          hrf_norm = "none") {
+  if (width != 0) {
+    stopifnot(width > 0)
+    hrf <- block_hrf(hrf, width = width, precision = precision,
+                     half_life = half_life, summate = summate)
+  }
+  if (lag != 0) {
+    hrf <- lag_hrf(hrf, lag = lag)
+  }
+  if (normalize) {
+    normalise_hrf(hrf)
+  } else if (!identical(hrf_norm, "none")) {
+    normalize_hrf(hrf, hrf_norm)
+  } else {
+    hrf
+  }
 }
 
 
@@ -349,7 +356,7 @@ gen_hrf_set <- function(...) {
 #'   function(lag) gen_hrf(HRF_SPMG1, lag = lag),
 #'   param_grid2
 #' )
-#' @importFrom purrr pmap partial
+#' @importFrom purrr pmap
 #' @export
 hrf_library <- function(fun, pgrid, ...) {
   extras <- list(...)
@@ -396,7 +403,7 @@ gen_hrf_library <- function(...) {
 #' **Flexible basis sets:**
 #' * `"bspline"` or `"bs"` or `HRF_BSPLINE`: B-spline basis for flexible HRF modeling
 #' * `"tent"`: Tent (triangular) basis functions for flexible HRF modeling
-#' * `"daguerre"` or `HRF_DAGUERRE`: Daguerre basis functions
+#' * `"daguerre"`: Daguerre basis functions
 #'
 #' To see a complete list of available HRF types with details, use the `list_available_hrfs()` function.
 #'
@@ -444,19 +451,6 @@ HRF <- function(fun, name, nbasis=1, span=24, param_names=NULL) {
 nbasis.HRF <- function(x,...) attr(x, "nbasis")
 
 
-
-#' @keywords internal
-#' @noRd
-makeDeriv <- function(HRF, n=1) {
-  #with_package("numDeriv")
-  if (n == 1) {
-    function(t) numDeriv::grad(HRF, t)
-  } else {
-    Recall(function(t) numDeriv::grad(HRF,t), n-1)
-  }
-}
-
-
 #' Generate a Lagged HRF Function
 #'
 #' @description
@@ -467,7 +461,9 @@ makeDeriv <- function(HRF, n=1) {
 #' @param normalize A logical value indicating whether to rescale the output so that the maximum absolute value is 1. Defaults to `FALSE`.
 #' @param ... Extra arguments supplied to the `hrf` function.
 #'
-#' @return A function representing the lagged HRF. If `lag` is a vector of lags, the function returns an HRF set.
+#' @return For a scalar `lag`, a function of `t` giving the lagged response. For a
+#'   vector of lags, an `HRF` basis set (see \code{\link{hrf_set}}) with
+#'   \code{nbasis(hrf)} columns per lag.
 #' @family gen_hrf
 #' @examples
 #' \donttest{
@@ -478,18 +474,24 @@ makeDeriv <- function(HRF, n=1) {
 #' @export
 gen_hrf_lagged <- function(hrf, lag=2, normalize=FALSE, ...) {
   force(hrf)
-  # TODO deal with nbasis arg in ...
-  if (length(lag)>1) {
-    do.call(gen_hrf_set, lapply(lag, function(l) gen_hrf_lagged(hrf, l,...)))
-  } else {
-    function(t) {
-      ret <- hrf(t-lag,...)
-      if (normalize) {
-        ret <- ret/max(abs(ret))
-      } 
-      
-      ret
+  if (length(lag) > 1) {
+    # One lagged copy of `hrf` per lag, combined into an HRF set
+    lagged <- lapply(lag, function(l) gen_hrf_lagged(hrf, l, normalize = normalize, ...))
+    is_hrf <- inherits(hrf, "HRF")
+    nb <- if (is_hrf) nbasis(hrf) else NCOL(lagged[[1]](1:10))
+    span <- if (is_hrf) attr(hrf, "span") else 24
+    parts <- Map(function(f, l) {
+      as_hrf(f, name = paste0("lag(", l, ")"), nbasis = nb, span = span + max(0, l))
+    }, lagged, lag)
+    return(do.call(hrf_set, parts))
+  }
+  function(t) {
+    ret <- hrf(t - lag, ...)
+    if (normalize) {
+      peak <- max(abs(ret))
+      if (peak > 0) ret <- ret / peak
     }
+    ret
   }
 }
 
@@ -500,10 +502,14 @@ gen_hrf_lagged <- function(hrf, lag=2, normalize=FALSE, ...) {
 hrf_lagged <- gen_hrf_lagged
 
 
-#' Generate a Blocked HRF Function
+#' Generate a Blocked HRF Function (deprecated)
 #'
+#' @md
 #' @description
-#' The `gen_hrf_blocked` function creates a blocked HRF by convolving the input HRF with a boxcar function. This can be used to model block designs in fMRI analysis.
+#' `gen_hrf_blocked()` and its alias `hrf_blocked()` are deprecated and warn
+#' when called. Use [block_hrf()] to block an existing HRF object, or
+#' [gen_hrf()] with `width` (e.g. `gen_hrf(hrf_gaussian, width = 5)`), which
+#' is exactly what `gen_hrf_blocked()` calls.
 #'
 #' @param hrf A function representing the hemodynamic response function. Default is `hrf_gaussian`.
 #' @param width A numeric value specifying the width of the block in seconds. Default is 5.
@@ -515,51 +521,28 @@ hrf_lagged <- gen_hrf_lagged
 #'   Use `normalize = TRUE` for unit-peak scaling.
 #' @param normalize A logical value indicating whether to rescale the output so that the peak of the output is 1. Default is `FALSE`.
 #' @param ... Extra arguments passed to the HRF function.
-#' @family gen_hrf
+#' @seealso [block_hrf()], [gen_hrf()]
 #'
-#' @return A \code{function} representing the blocked HRF.
+#' @return The blocked `HRF` object returned by `gen_hrf()`.
 #' @examples
-#' # Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
-#' @importFrom purrr partial
+#' # Instead of gen_hrf_blocked(hrf_gaussian, width = 10), use
+#' blocked <- gen_hrf(hrf_gaussian, width = 10)
+#' # or, for an existing HRF object
+#' blocked <- block_hrf(HRF_SPMG1, width = 10)
 #' @export
 gen_hrf_blocked <- function(hrf=hrf_gaussian, width=5, precision=.1, 
                             half_life=Inf, summate=TRUE, normalize=FALSE, ...) {
-  # Deprecated - use gen_hrf with width parameter instead
-  .Deprecated("gen_hrf")
+  old <- deparse(sys.call()[[1]])
+  .Deprecated("block_hrf", msg = sprintf(
+    "`%s()` is deprecated; use `block_hrf(hrf, width = )` or `gen_hrf(hrf, width = )` instead.",
+    old))
   gen_hrf(hrf, width=width, precision=precision, half_life=half_life, 
           summate=summate, normalize=normalize, ...)
 }
 
 #' @export
-#' @aliases gen_hrf_blocked
-#' @describeIn gen_hrf_blocked alias for gen_hrf_blocked
-#' @return A \code{function} representing the blocked HRF.
+#' @rdname gen_hrf_blocked
 hrf_blocked <- gen_hrf_blocked
-
-
-
-
-
-#' Soft-threshold function
-#'
-#' This function applies soft-thresholding to the input values, setting values below the threshold to zero
-#' and shrinking the remaining values by the threshold amount.
-#'
-#' @param x A numeric vector of input values
-#' @param threshold A non-negative threshold value for the soft-thresholding operation
-#'
-#' @return A numeric vector with the soft-thresholded values
-#'
-#' @noRd
-#' @keywords internal
-soft_threshold <- function(x, threshold) {
-  if (threshold < 0) {
-    stop("Threshold value should be non-negative.")
-  }
-
-  sign(x) * pmax(0, abs(x) - threshold)
-}
-
 
 
 #' List all available hemodynamic response functions (HRFs)
@@ -568,7 +551,9 @@ soft_threshold <- function(x, threshold) {
 #' Reads the internal HRF registry to list available HRF types.
 #'
 #' @param details Logical; if TRUE, attempt to add descriptions (basic for now).
-#' @return A data frame with columns: name, type (object/generator), nbasis_default.
+#' @return A data frame with columns \code{name}, \code{type}
+#'   (\code{"object"} or \code{"generator"}), \code{nbasis_default} and
+#'   \code{is_alias}, plus \code{description} when \code{details = TRUE}.
 #' @examples
 #' # List all available HRFs
 #' hrfs <- list_available_hrfs()
@@ -579,43 +564,28 @@ soft_threshold <- function(x, threshold) {
 #' print(hrfs_detailed)
 #' @export
 list_available_hrfs <- function(details = FALSE) {
-  # Get names directly from the registry
   hrf_names <- names(HRF_REGISTRY)
-  
-  # Determine type and default nbasis by inspecting registry entries
-  hrf_info <- lapply(hrf_names, function(name) {
-    entry <- HRF_REGISTRY[[name]]
-    type <- if (inherits(entry, 'HRF')) "object" else if (is.function(entry)) "generator" else "unknown"
-    
-    nbasis_default <- NA
-    if (type == "object") {
-      nbasis_default <- tryCatch(nbasis(entry), error = function(e) NA)
-    } else if (type == "generator") {
-      fmls <- formals(entry)
-      if ("nbasis" %in% names(fmls)) {
-        nb_val <- fmls$nbasis
-        if(is.numeric(nb_val)) nbasis_default <- nb_val 
-      } 
-      if(is.na(nbasis_default)) nbasis_default <- "variable"
+  is_object <- vapply(HRF_REGISTRY, inherits, logical(1), "HRF", USE.NAMES = FALSE)
+  # Objects report their basis count; generators their `nbasis` default, if any.
+  nbasis_default <- vapply(HRF_REGISTRY, function(entry) {
+    nb <- if (inherits(entry, "HRF")) {
+      nbasis(entry)
+    } else {
+      # Generators without an `nbasis` argument have a fixed basis count
+      formals(entry)[["nbasis"]] %||% nbasis(entry())
     }
-    
-    # Check if this name is an alias (points to the same object/func as another primary name)
-    is_alias <- FALSE
-    if (type == "object") {
-      primary_names <- names(HRF_REGISTRY)[sapply(HRF_REGISTRY, identical, entry)]
-      is_alias <- length(primary_names) > 1 && name %in% primary_names[primary_names != name]
-    } else if (type == "generator") {
-      # More complex for functions, check if it points to the same generator function
-      # For now, let's assume aliases only exist for objects, or mark known ones
-      is_alias <- name %in% c("gam", "bs")
-    }
+    if (is.numeric(nb)) as.character(nb) else "variable"
+  }, character(1), USE.NAMES = FALSE)
 
-    list(name = name, type = type, nbasis_default = as.character(nbasis_default), is_alias = is_alias) 
-  })
-  
-  # Combine into a data frame
-  hrf_df <- do.call(rbind.data.frame, c(hrf_info, list(stringsAsFactors = FALSE)))
-  
+  hrf_df <- data.frame(
+    name = hrf_names,
+    type = ifelse(is_object, "object", "generator"),
+    nbasis_default = nbasis_default,
+    # An alias repeats an earlier registry entry (e.g. "gam", "bs")
+    is_alias = duplicated(HRF_REGISTRY),
+    stringsAsFactors = FALSE
+  )
+
   # Add basic descriptions if requested
   if (details) {
       hrf_df$description <- paste(hrf_df$name, "HRF", 
@@ -683,7 +653,10 @@ list_available_hrfs <- function(details = FALSE) {
 #'
 #' @return 
 #' When called as functions, return numeric vectors or matrices of HRF values.
-#' When used as objects, they are HRF objects with class \code{c("HRF", "function")}.
+#' When used as objects, they are HRF objects with class \code{c("HRF", "function")};
+#' \code{HRF_SPMG1}, \code{HRF_SPMG2} and \code{HRF_SPMG3} are additionally
+#' classed \code{"SPMG1_HRF"}, \code{"SPMG2_HRF"} and \code{"SPMG3_HRF"}, which
+#' select analytic \code{\link{deriv}} and \code{\link{penalty_matrix}} methods.
 #' 
 #' @examples
 #' # Evaluate HRFs at specific time points
@@ -750,6 +723,8 @@ HRF_GAUSSIAN <- as_hrf(hrf_gaussian, name="gaussian", params=list(mean=6, sd=2))
 #' @rdname HRF_objects
 #' @export
 HRF_SPMG1 <- as_hrf(hrf_spmg1, name="SPMG1", params=list(P1=5, P2=15, A1=1/120))
+# Subclass (like SPMG2/SPMG3) so deriv() dispatches to the analytic derivative
+class(HRF_SPMG1) <- c("SPMG1_HRF", class(HRF_SPMG1))
 
 #' @rdname HRF_objects
 #' @export
@@ -780,7 +755,7 @@ class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 #' This is the generator function that creates HRF objects with variable numbers
 #' of basis functions, unlike the pre-defined \code{HRF_BSPLINE} which has 5 functions.
 #'
-#' @param nbasis Number of basis functions (default: 5)
+#' @param nbasis Number of basis functions, at least 2 (default: 5)
 #' @param span Temporal window in seconds (default: 24)
 #' @return An HRF object of class \code{c("BSpline_HRF", "HRF", "function")}
 #' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
@@ -794,59 +769,38 @@ class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 #' @export
 hrf_bspline_generator <- function(nbasis=5, span=24) {
   # Validate inputs
-  if (nbasis < 1) {
-    stop("nbasis must be at least 1", call. = FALSE)
+  # The cubic basis drops the two boundary functions of a clamped basis, which
+  # needs at least degree + 1 = 4 functions (see hrf_bspline())
+  if (nbasis < 2) {
+    stop("nbasis must be at least 2 for a cubic B-spline basis", call. = FALSE)
   }
   if (span <= 0) {
     stop("span must be positive", call. = FALSE)
   }
   
-  # Ensure nbasis is integer
   nbasis <- as.integer(nbasis)
-  
   degree <- 3 # Default cubic B-splines
-  effective_nbasis <- max(1, nbasis) 
-  
+
   # Delegate to hrf_bspline() so the knot sequence is fixed by `span` at
   # construction rather than inferred by splines::bs() from whatever `t` the
   # caller happens to supply. Evaluating on a coarse grid, a grid that stops
   # short of `span`, or a single time point must not change the basis.
   f_bspline <- function(t) {
-    bs_matrix <- tryCatch({
-        hrf_bspline(t, span = span, N = effective_nbasis, degree = degree)
-    }, error = function(e) {
-        warning(sprintf("splines::bs failed for effective_nbasis=%d, span=%g: %s",
-                        effective_nbasis, span, e$message), call. = FALSE)
-        NULL
-    })
-
-    if (is.null(bs_matrix)) {
-      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
-    }
-    if (ncol(bs_matrix) != effective_nbasis) {
-      warning(sprintf("splines::bs returned %d columns, expected %d for effective_nbasis=%d, span=%g. Returning zeros.",
-                      ncol(bs_matrix), effective_nbasis, effective_nbasis, span), call. = FALSE)
-      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
-    }
-    matrix(as.numeric(bs_matrix), nrow = length(t), ncol = effective_nbasis)
+    bs_matrix <- hrf_bspline(t, span = span, N = nbasis, degree = degree)
+    matrix(as.numeric(bs_matrix), nrow = length(t), ncol = nbasis)
   }
 
-  obj <- as_hrf(
-    f = f_bspline,
-    name = "bspline", nbasis = as.integer(effective_nbasis), span = span
-  )
-  # Store params as metadata (the closure already captured these values)
-  attr(obj, "params") <- list(nbasis = effective_nbasis, degree = degree, span = span)
-  attr(obj, "param_names") <- c("nbasis", "degree", "span")
-  class(obj) <- c("BSpline_HRF", class(obj))
-  obj
+  .as_closed_hrf(f_bspline, name = "bspline", nbasis = nbasis, span = span,
+                 params = list(nbasis = as.numeric(nbasis), degree = degree,
+                               span = span),
+                 subclass = "BSpline_HRF")
 }
 
 #' Create Tent HRF Basis Set
 #'
 #' Generates an HRF object using tent (piecewise linear) basis functions with
-#' custom parameters. This generator mirrors \code{HRF_TENT} but allows callers
-#' to control the number of basis elements and temporal span.
+#' custom parameters. Unlike the fixed \code{HRF_*} objects, it lets callers
+#' control the number of basis elements and temporal span.
 #'
 #' @param nbasis Number of tent basis functions (default: 5)
 #' @param span Temporal window in seconds (default: 24)
@@ -862,13 +816,12 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Tent HRF with 6 basis functions")
 #' @export
 hrf_tent_generator <- function(nbasis=5, span=24) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1),
     name="tent", nbasis=as.integer(nbasis), span=span,
-    params=list(N=nbasis, degree=1, span=span)
+    params=list(N=nbasis, degree=1, span=span),
+    subclass = "Tent_HRF"
   )
-  class(obj) <- c("Tent_HRF", class(obj))
-  obj
 }
 
 #' Create Fourier HRF Basis Set
@@ -893,13 +846,12 @@ hrf_tent_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Fourier HRF with 8 basis functions")
 #' @export
 hrf_fourier_generator <- function(nbasis=5, span=24) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) hrf_fourier(t, span=span, nbasis=nbasis),
     name="fourier", nbasis=as.integer(nbasis), span=span,
-    params=list(nbasis=nbasis, span=span)
+    params=list(nbasis=nbasis, span=span),
+    subclass = "Fourier_HRF"
   )
-  class(obj) <- c("Fourier_HRF", class(obj))
-  obj
 }
 
 #' Create Daguerre HRF Basis Set
@@ -925,13 +877,12 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Daguerre HRF with 5 basis functions")
 #' @export
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale, span=24),
     name="daguerre", nbasis=as.integer(nbasis), span=24,
-    params=list(n_basis=nbasis, scale=scale)
+    params=list(n_basis=nbasis, scale=scale),
+    subclass = "Daguerre_HRF"
   )
-  class(obj) <- c("Daguerre_HRF", class(obj))
-  obj
 }
 
 #' Create FIR HRF Basis Set
@@ -981,28 +932,26 @@ hrf_fir_generator <- function(nbasis = 12, span = 24) {
       return(matrix(0, nrow = 0, ncol = nbasis))
     }
     output_matrix <- matrix(0, nrow = length(t), ncol = nbasis)
-    for (i in seq_along(t)) {
-      current_t <- t[i]
-      if (!is.na(current_t) && current_t >= 0 && current_t < span) {
-        bin_index <- if (current_t == 0) 1 else floor(current_t / bin_width) + 1
-        bin_index <- min(bin_index, nbasis) 
-        output_matrix[i, bin_index] <- 1
-      }
-    }
-    return(output_matrix)
+    # Indicator of the bin [k * bin_width, (k + 1) * bin_width) holding each t
+    inside <- which(!is.na(t) & t >= 0 & t < span)
+    bin_index <- pmin(floor(t[inside] / bin_width) + 1, nbasis)
+    output_matrix[cbind(inside, bin_index)] <- 1
+    output_matrix
   }
 
-  obj <- as_hrf(
-    f = f_fir,
-    name = "fir",
-    nbasis = nbasis,
-    span = span
-  )
-  # Store params as metadata (the closure already captured these values)
-  attr(obj, "params") <- list(nbasis = nbasis, span = span, bin_width = bin_width)
-  attr(obj, "param_names") <- c("nbasis", "span", "bin_width")
-  class(obj) <- c("FIR_HRF", class(obj))
-  obj
+  .as_closed_hrf(f_fir, name = "fir", nbasis = nbasis, span = span,
+                 params = list(nbasis = nbasis, span = span,
+                               bin_width = bin_width),
+                 subclass = "FIR_HRF")
+}
+
+# Registry generator for "lwu": hrf_lwu() is a shape function of `t`, so wrap
+# it as a single-basis HRF with the shape parameters captured. The parameters
+# are validated here rather than at first evaluation.
+.hrf_lwu_generator <- function(tau = 6, sigma = 2.5, rho = 0.35, span = 24) {
+  hrf_lwu(0, tau = tau, sigma = sigma, rho = rho)
+  as_hrf(hrf_lwu, name = "lwu", nbasis = 1L, span = span,
+         params = list(tau = tau, sigma = sigma, rho = rho))
 }
 
 # Define HRF Registry -----
@@ -1019,7 +968,7 @@ HRF_REGISTRY <- list(
   fourier  = hrf_fourier_generator,
   daguerre = hrf_daguerre_generator,
   fir      = hrf_fir_generator,
-  lwu      = hrf_lwu,
+  lwu      = .hrf_lwu_generator,
   # Aliases
   gam      = HRF_GAMMA,
   bs       = hrf_bspline_generator
@@ -1042,6 +991,8 @@ HRF_REGISTRY <- list(
 #'     \item \code{"fourier"} - Fourier basis
 #'     \item \code{"daguerre"} - Daguerre spherical basis
 #'     \item \code{"tent"} - Tent (linear spline) basis
+#'     \item \code{"lwu"} - Lag-Width-Undershoot HRF (see \code{\link{hrf_lwu}});
+#'       shape parameters \code{tau}, \code{sigma}, \code{rho} are passed via \code{...}
 #'   }
 #' @param nbasis Number of basis functions (for basis set types)
 #' @param span Temporal window in seconds (default: 24)
@@ -1052,7 +1003,8 @@ HRF_REGISTRY <- list(
 #' @param hrf_norm Fixed-scale normalization mode passed to [normalize_hrf()].
 #'   The default `"none"` leaves the HRF unchanged. `normalize = TRUE` is the
 #'   legacy per-basis unit-peak shortcut; do not supply both.
-#' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre)
+#' @param ... Additional arguments passed to generator functions (e.g., \code{scale} for daguerre,
+#'   \code{tau}, \code{sigma}, \code{rho} for lwu)
 #' @return An HRF object
 #' @details
 #' For single HRF types (spmg1, gamma, gaussian), the function returns
@@ -1076,41 +1028,22 @@ getHRF <- function(name = "spmg1", # Default to spmg1
                    lag=0, width=0,
                    summate=TRUE, normalize=FALSE, hrf_norm="none", ...) {
 
-  hrf_norm <- match.arg(hrf_norm, c(
-    "none", "spm", "unit_peak", "unit_integral", "unit_peak_per_basis"
-  ))
-  if (isTRUE(normalize) && !identical(hrf_norm, "none")) {
-    stop("Use either `normalize = TRUE` or a non-'none' `hrf_norm`, not both.",
-         call. = FALSE)
-  }
+  hrf_norm <- .match_hrf_norm(hrf_norm, normalize)
 
   key   <- match.arg(tolower(name), names(HRF_REGISTRY))
   entry <- HRF_REGISTRY[[key]]
 
   base <- if (inherits(entry, "HRF")) {
-            entry # Use pre-defined object
-      } else {
-            # Call generator, passing nbasis, span, and any relevant ... args
-            gen_args <- c(list(nbasis=as.integer(nbasis), span=span), list(...))
-            # Only pass args the generator actually accepts
-            valid_args <- gen_args[names(gen_args) %in% names(formals(entry))]
-            do.call(entry, valid_args)
-          }
-
-  # Apply decorators
-  if (width != 0) {
-      stopifnot(width > 0)
-      base <- block_hrf(base, width = width, summate = summate)
-  }
-  if (lag != 0) {
-      base <- lag_hrf(base, lag = lag)
-  }
-  if (normalize) {
-      base <- normalise_hrf(base)
-  } else if (!identical(hrf_norm, "none")) {
-      base <- normalize_hrf(base, hrf_norm)
+    entry # Use pre-defined object
+  } else {
+    # Call generator, passing nbasis, span, and any relevant ... args
+    gen_args <- c(list(nbasis = as.integer(nbasis), span = span), list(...))
+    # Only pass args the generator actually accepts
+    do.call(entry, gen_args[names(gen_args) %in% names(formals(entry))])
   }
 
+  base <- .decorate_hrf(base, lag = lag, width = width, summate = summate,
+                        normalize = normalize, hrf_norm = hrf_norm)
   attr(base, "name") <- key # Set name attribute to the matched registry key
   base
 }
@@ -1225,12 +1158,12 @@ print.HRF <- function(x, ...) {
 
   # Show parameters if they exist
   if (!is.null(params) && length(params) > 0) {
-    param_str <- paste(
-      names(params),
-      sapply(params, function(p) format(p, digits = 4)),
-      sep = " = ",
-      collapse = ", "
-    )
+    # Vector-valued parameters (e.g. hrf_weighted() times) print as [a, b, ...]
+    values <- vapply(params, function(p) {
+      txt <- format(p, digits = 4, trim = TRUE)
+      if (length(txt) == 1L) txt else paste0("[", paste(txt, collapse = ", "), "]")
+    }, character(1))
+    param_str <- paste(names(params), values, sep = " = ", collapse = ", ")
     cat("   Parameters:", param_str, "\n")
   } else if (!is.null(param_names) && length(param_names) > 0) {
     cat("   Parameter names:", paste(param_names, collapse = ", "), "\n")

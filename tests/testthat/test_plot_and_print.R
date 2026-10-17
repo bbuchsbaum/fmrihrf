@@ -21,6 +21,25 @@ test_that("plot.Reg returns the evaluated grid data", {
   expect_equal(plotted$response, evaluate(reg, grid))
 })
 
+test_that("plot.Reg draws a regressor without events", {
+  reg <- regressor(numeric(0), HRF_SPMG1)
+  plotted <- expect_no_warning(.with_pdf_device(plot(reg)))
+  expect_equal(plotted$time, seq(0, reg$span, by = 0.25))
+  expect_true(all(plotted$response == 0))
+})
+
+test_that("plot.Reg and plot.FeatureReg accept a custom main title", {
+  reg <- regressor(c(2, 8), HRF_SPMG1)
+  reg3 <- regressor(c(2, 8), HRF_SPMG3)
+  feat <- feature_regressor(c(1, 2, 1), dt = 2)
+  .with_pdf_device({
+    expect_equal(plot(reg, main = "Custom"), plot(reg))
+    expect_equal(plot(reg3, main = "Custom"), plot(reg3))
+    expect_no_error(plot(reg3, main = "Custom", layout = "overlay"))
+    expect_equal(plot(feat, main = "Custom"), plot(feat))
+  })
+})
+
 test_that("plot_regressors returns labelled long-form data", {
   reg1 <- regressor(onsets = c(2, 8), hrf = HRF_SPMG1)
   reg2 <- regressor(onsets = c(4, 10), hrf = HRF_GAMMA)
@@ -130,4 +149,78 @@ test_that("onset transparency is respected by event and feature plots", {
     expect_identical(transparent, hidden)
     expect_false(identical(transparent, opaque))
   }
+})
+
+test_that("base plot methods let ... override their default arguments", {
+  png_type <- .working_png_type()
+  skip_if(is.null(png_type), "no working PNG device")
+  render <- function(...) {
+    path <- tempfile(fileext = ".png")
+    on.exit(unlink(path), add = TRUE)
+    grDevices::png(path, width = 500, height = 500, type = png_type)
+    tryCatch(plot(...), finally = grDevices::dev.off())
+    readBin(path, "raw", n = file.info(path)$size)
+  }
+  for (x in list(regressor(c(2, 8), HRF_SPMG3),
+                 feature_regressor(c(1, 2, 1), dt = 2, hrf = HRF_SPMG3))) {
+    # Stacked panels: xlab labels the shared time axis, ylab the panels
+    stacked <- render(x)
+    expect_identical(render(x, xlab = "Time (s)", ylab = c("B1", "B2", "B3")), stacked)
+    expect_false(identical(render(x, xlab = "Seconds"), stacked))
+    expect_false(identical(render(x, ylab = "BOLD"), stacked))
+    expect_false(identical(render(x, xaxt = "n"), stacked))
+    overlay <- render(x, layout = "overlay")
+    expect_identical(render(x, layout = "overlay", ylab = "Response"), overlay)
+    expect_false(identical(render(x, layout = "overlay", labels = c("a", "b", "c")),
+                           overlay))
+  }
+  expect_identical(render(HRF_SPMG1, ylab = "Response", type = "n"), render(HRF_SPMG1))
+  expect_false(identical(render(HRF_SPMG1, ylab = "BOLD"), render(HRF_SPMG1)))
+  expect_false(identical(render(HRF_SPMG3, labels = c("a", "b", "c")), render(HRF_SPMG3)))
+})
+
+# Calls and text drawn by a base-graphics plot, from its display list.
+base_display_list <- function(expr) {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  grDevices::dev.control("enable")
+  force(expr)
+  dl <- grDevices::recordPlot()[[1]]
+  fn <- function(e) {
+    f <- e[[2]][[1]]
+    if (is.list(f) && !is.null(f$name)) f$name else ""
+  }
+  list(calls = vapply(dl, fn, character(1)),
+       windows = lapply(dl[vapply(dl, fn, character(1)) == "C_plot_window"],
+                        function(e) e[[2]][[3]]),
+       text = unlist(lapply(dl, function(e) Filter(is.character, e[[2]][-1]))))
+}
+
+test_that("base-graphics plot_hrfs() and plot_regressors() honour layout, scales, subtitle and reference", {
+  # The use_ggplot = FALSE fallback used to draw a single overlay panel and
+  # ignore layout, scales, subtitle and the reference caption.
+  panels <- function(d) sum(d$calls == "C_plot_new")
+  d <- base_display_list(plot_hrfs(HRF_SPMG1, HRF_GAMMA, HRF_GAUSSIAN,
+                                   layout = "stack", use_ggplot = FALSE))
+  expect_equal(panels(d), 3)
+  d <- base_display_list(plot_hrfs(HRF_SPMG1, HRF_GAMMA, use_ggplot = FALSE))
+  expect_equal(panels(d), 1)
+
+  for (layout in c("overlay", "stack")) {
+    d <- base_display_list(plot_hrfs(HRF_GAMMA, HRF_GAUSSIAN, layout = layout,
+                                     subtitle = "two shapes", reference = HRF_SPMG1,
+                                     use_ggplot = FALSE))
+    expect_true("two shapes" %in% d$text)
+    expect_true("Dashed grey: SPMG1" %in% d$text)
+  }
+
+  r1 <- regressor(c(10, 30, 50), HRF_SPMG1)
+  r2 <- regressor(c(15, 45), HRF_GAMMA, duration = 4)
+  d <- base_display_list(plot_regressors(r1, r2, layout = "stack", scales = "fixed",
+                                         subtitle = "sub", use_ggplot = FALSE))
+  expect_equal(panels(d), 2)
+  expect_true("sub" %in% d$text)
+  expect_identical(d$windows[[1]], d$windows[[2]])
+  d <- base_display_list(plot_regressors(r1, r2, layout = "stack", use_ggplot = FALSE))
+  expect_false(identical(d$windows[[1]], d$windows[[2]]))
 })

@@ -19,7 +19,9 @@ hrf_lagged(hrf, lag = 2, normalize = FALSE, ...)
 \item{...}{Extra arguments supplied to the `hrf` function.}
 }
 \value{
-A function representing the lagged HRF. If `lag` is a vector of lags, the function returns an HRF set.
+For a scalar `lag`, a function of `t` giving the lagged response. For a
+  vector of lags, an `HRF` basis set (see \code{\link{hrf_set}}) with
+  \code{nbasis(hrf)} columns per lag.
 
 an lagged hrf function
 }
@@ -37,12 +39,5 @@ hrf_lag5 <- gen_hrf_lagged(HRF_SPMG1, lag=5)
 hrf_lag5(0:20)
 }
 
-}
-\seealso{
-Other gen_hrf: 
-\code{\link{gen_hrf_blocked}()}
-
-Other gen_hrf: 
-\code{\link{gen_hrf_blocked}()}
 }
 \concept{gen_hrf}

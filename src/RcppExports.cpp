@@ -11,42 +11,8 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// neural_input_rcpp
-List neural_input_rcpp(List x, double from, double to, double resolution);
-RcppExport SEXP _fmrihrf_neural_input_rcpp(SEXP xSEXP, SEXP fromSEXP, SEXP toSEXP, SEXP resolutionSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type from(fromSEXP);
-    Rcpp::traits::input_parameter< double >::type to(toSEXP);
-    Rcpp::traits::input_parameter< double >::type resolution(resolutionSEXP);
-    rcpp_result_gen = Rcpp::wrap(neural_input_rcpp(x, from, to, resolution));
-    return rcpp_result_gen;
-END_RCPP
-}
-// evaluate_regressor_convolution
-NumericMatrix evaluate_regressor_convolution(NumericVector grid, NumericVector onsets, NumericVector durations, NumericVector amplitudes, NumericMatrix hrf_values, double hrf_span, double start, double end, double precision, bool summate);
-RcppExport SEXP _fmrihrf_evaluate_regressor_convolution(SEXP gridSEXP, SEXP onsetsSEXP, SEXP durationsSEXP, SEXP amplitudesSEXP, SEXP hrf_valuesSEXP, SEXP hrf_spanSEXP, SEXP startSEXP, SEXP endSEXP, SEXP precisionSEXP, SEXP summateSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type grid(gridSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type onsets(onsetsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type durations(durationsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type amplitudes(amplitudesSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type hrf_values(hrf_valuesSEXP);
-    Rcpp::traits::input_parameter< double >::type hrf_span(hrf_spanSEXP);
-    Rcpp::traits::input_parameter< double >::type start(startSEXP);
-    Rcpp::traits::input_parameter< double >::type end(endSEXP);
-    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
-    Rcpp::traits::input_parameter< bool >::type summate(summateSEXP);
-    rcpp_result_gen = Rcpp::wrap(evaluate_regressor_convolution(grid, onsets, durations, amplitudes, hrf_values, hrf_span, start, end, precision, summate));
-    return rcpp_result_gen;
-END_RCPP
-}
 // evaluate_regressor_cpp
-SEXP evaluate_regressor_cpp(const arma::vec& grid, const arma::vec& onsets, const arma::vec& durations, const arma::vec& amplitudes, const arma::mat& hrf_matrix, double hrf_span, double precision, std::string method, bool summate);
+Rcpp::NumericMatrix evaluate_regressor_cpp(const arma::vec& grid, const arma::vec& onsets, const arma::vec& durations, const arma::vec& amplitudes, const arma::mat& hrf_matrix, double hrf_span, double precision, std::string method, bool summate);
 RcppExport SEXP _fmrihrf_evaluate_regressor_cpp(SEXP gridSEXP, SEXP onsetsSEXP, SEXP durationsSEXP, SEXP amplitudesSEXP, SEXP hrf_matrixSEXP, SEXP hrf_spanSEXP, SEXP precisionSEXP, SEXP methodSEXP, SEXP summateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -64,11 +30,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// neural_input_cpp
+Rcpp::NumericVector neural_input_cpp(const arma::vec& onsets, const arma::vec& durations, const arma::vec& amplitudes, double start, double dt, int n, bool summate);
+RcppExport SEXP _fmrihrf_neural_input_cpp(SEXP onsetsSEXP, SEXP durationsSEXP, SEXP amplitudesSEXP, SEXP startSEXP, SEXP dtSEXP, SEXP nSEXP, SEXP summateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type onsets(onsetsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type durations(durationsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type amplitudes(amplitudesSEXP);
+    Rcpp::traits::input_parameter< double >::type start(startSEXP);
+    Rcpp::traits::input_parameter< double >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type summate(summateSEXP);
+    rcpp_result_gen = Rcpp::wrap(neural_input_cpp(onsets, durations, amplitudes, start, dt, n, summate));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fmrihrf_neural_input_rcpp", (DL_FUNC) &_fmrihrf_neural_input_rcpp, 4},
-    {"_fmrihrf_evaluate_regressor_convolution", (DL_FUNC) &_fmrihrf_evaluate_regressor_convolution, 10},
     {"_fmrihrf_evaluate_regressor_cpp", (DL_FUNC) &_fmrihrf_evaluate_regressor_cpp, 9},
+    {"_fmrihrf_neural_input_cpp", (DL_FUNC) &_fmrihrf_neural_input_cpp, 7},
     {NULL, NULL, 0}
 };
 

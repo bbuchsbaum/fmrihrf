@@ -251,25 +251,15 @@ print.FeatureReg <- function(x, ...) {
 #' @rdname shift
 #' @export
 #' @method shift FeatureReg
-#' @importFrom assertthat assert_that
 shift.FeatureReg <- function(x, shift_amount, ...) {
-  dots <- list(...)
-
-  if (missing(shift_amount) && "offset" %in% names(dots)) {
-    shift_amount <- dots$offset
-  }
-
-  if (missing(shift_amount)) {
-    stop("Must supply `shift_amount` or `offset`.", call. = FALSE)
-  }
-
-  assert_that(is.numeric(shift_amount) && length(shift_amount) == 1,
-              msg = "`shift_amount` must be a single numeric value")
+  shift_amount <- resolve_shift_amount(shift_amount, list(...))
 
   if (length(x$onsets) == 0L) {
     return(x)
   }
 
+  # Move the samples in place: rebuilding through Reg() would drop the
+  # FeatureReg class and attributes. Centering is not re-applied.
   shifted <- x$onsets + shift_amount
   if (any(shifted < 0)) {
     stop("Shifting would produce negative sample times.", call. = FALSE)
@@ -278,5 +268,3 @@ shift.FeatureReg <- function(x, shift_amount, ...) {
   x$onsets <- shifted
   x
 }
-
-

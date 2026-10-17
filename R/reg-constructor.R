@@ -23,11 +23,9 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
   duration  <- as.numeric(duration)
   amplitude <- as.numeric(amplitude)
 
-  assert_that(is.logical(summate), length(summate) == 1)
-  summate   <- as.logical(summate)
+  assert_that(is.logical(summate), length(summate) == 1, !is.na(summate))
   assert_that(is.logical(drop_zero_amplitude), length(drop_zero_amplitude) == 1,
               !is.na(drop_zero_amplitude))
-  drop_zero_amplitude <- isTRUE(drop_zero_amplitude)
   span_arg  <- as.numeric(span) # Store original arg
 
   # Handle NA onset case explicitly (represents intent for zero events)
@@ -60,11 +58,9 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
   duration  <- recycle_or_error(duration, n_onsets, "duration")
   amplitude <- recycle_or_error(amplitude, n_onsets, "amplitude")
 
-  # Check for invalid inputs early
-  if (any(duration < 0, na.rm = TRUE)) stop("`duration` cannot be negative.")
+  if (any(duration < 0)) stop("`duration` cannot be negative.")
 
   # Check if hrf is a list of HRFs (trial-varying case)
-
   hrf_is_list <- is.list(hrf) && !inherits(hrf, "HRF")
 
   if (hrf_is_list) {
@@ -73,56 +69,50 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
       stop("`hrf` list must have length 1 or length equal to number of onsets (",
            n_onsets, "), got ", length(hrf), ".", call. = FALSE)
     }
-    # Validate each element is an HRF
+    # Convert each element to an HRF (make_hrf() errors on anything else)
     for (i in seq_along(hrf)) {
       hrf[[i]] <- make_hrf(hrf[[i]], lag = 0)
-      if (!inherits(hrf[[i]], "HRF")) {
-        stop("Element ", i, " of `hrf` list is not a valid HRF object.", call. = FALSE)
-      }
     }
+    first_hrf <- if (length(hrf) > 0) hrf[[1]]
     # Recycle if length 1
     if (length(hrf) == 1) {
       hrf <- rep(hrf, n_onsets)
     }
   }
 
-  # Filter events based on non-zero and non-NA amplitude
-  if (n_onsets > 0) {
-      if (drop_zero_amplitude) {
-          keep_indices <- which(amplitude != 0 & !is.na(amplitude))
-          # Store whether filtering occurred
-          filtered_some <- length(keep_indices) < n_onsets
-          # Store whether *all* were filtered
-          filtered_all <- length(keep_indices) == 0
-
-          if (filtered_some) {
-              onsets    <- onsets[keep_indices]
-              duration  <- duration[keep_indices]
-              amplitude <- amplitude[keep_indices]
-              # Also filter HRF list if applicable
-              if (hrf_is_list) {
-                hrf <- hrf[keep_indices]
-              }
-              n_onsets  <- length(onsets) # Update count after filtering
-          }
-      } else {
-          filtered_all <- FALSE
-      }
-  } else {
-      filtered_all <- TRUE # If input was empty, effectively all are filtered
+  # Drop zero-amplitude events (NA amplitudes were rejected above). An empty
+  # input counts as having had all of its events filtered.
+  filtered_all <- n_onsets == 0
+  if (drop_zero_amplitude && n_onsets > 0) {
+    keep <- which(amplitude != 0)
+    filtered_all <- length(keep) == 0
+    if (length(keep) < n_onsets) {
+      onsets    <- onsets[keep]
+      duration  <- duration[keep]
+      amplitude <- amplitude[keep]
+      if (hrf_is_list) hrf <- hrf[keep]
+    }
   }
 
-  # Process single HRF case (non-list)
+  # With no events left there is nothing to vary per trial. Keep the first
+  # supplied HRF, so that the span and number of basis functions survive
+  # (an empty per-event list has neither).
+  if (hrf_is_list && length(hrf) == 0 && !is.null(first_hrf)) {
+    hrf <- first_hrf
+    hrf_is_list <- FALSE
+  }
+
+  # Process single HRF case (non-list); make_hrf() errors on anything that
+  # cannot be made into an HRF.
   if (!hrf_is_list) {
     hrf <- make_hrf(hrf, lag = 0)
-    assert_that(inherits(hrf, "HRF"), msg = "Invalid 'hrf' provided or generated.")
   }
 
   # Determine final span
   if (hrf_is_list) {
     # For list of HRFs, use max span across all HRFs
     all_spans <- vapply(hrf, function(h) attr(h, "span") %||% span_arg, numeric(1))
-    final_span <- max(all_spans)
+    final_span <- if (length(all_spans) > 0) max(all_spans) else span_arg
   } else {
     final_span <- attr(hrf, "span") %||% span_arg
   }
@@ -140,7 +130,6 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
   # Add attribute to signal if all events were filtered
   attr(out, "filtered_all") <- filtered_all
   # Add attribute to indicate if HRF varies per trial
-
   attr(out, "hrf_is_list") <- hrf_is_list
   return(out)
 }
@@ -295,8 +284,7 @@ single_trial_regressor <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=
     length(amplitude) <= 1,
     msg = "`amplitude` must have length 1 or be a scalar"
   )
-  
-  # Call Reg constructor, which now sets correct classes
+
   Reg(onsets       = onsets,
       hrf          = hrf,
       duration     = duration,

@@ -14,52 +14,19 @@
 #' @export
 #' @method deriv HRF
 deriv.HRF <- function(x, t, ...) {
-  # Get the number of basis functions
   nb <- nbasis(x)
-  
-  # Create result matrix
   result <- matrix(0, nrow = length(t), ncol = nb)
-  
-  # For multi-basis HRFs, compute derivative for each basis function separately
-  if (nb > 1) {
-    for (j in 1:nb) {
-      # Define function for j-th basis function
-      f_j <- function(time) {
-        val <- evaluate(x, time)
-        if (is.matrix(val)) {
-          return(val[1, j])
-        } else {
-          return(val[1])
-        }
-      }
-      
-      # Compute derivative for each time point
-      for (i in seq_along(t)) {
-        result[i, j] <- numDeriv::grad(f_j, t[i])
-      }
+  for (j in seq_len(nb)) {
+    # numDeriv::grad needs a scalar function: the j-th basis at one time point
+    f_j <- function(time) {
+      val <- evaluate(x, time)
+      if (is.matrix(val)) val[1, j] else val[1]
     }
-    return(result)
-  } else {
-    # For single basis functions, use simpler approach
     for (i in seq_along(t)) {
-      t_i <- t[i]
-      
-      # Define function to differentiate at time t_i
-      f <- function(time) {
-        val <- evaluate(x, time)
-        if (is.matrix(val)) {
-          return(val[1, 1])
-        } else {
-          return(val[1])
-        }
-      }
-      
-      # Compute gradient at t_i
-      result[i, 1] <- numDeriv::grad(f, t_i)
+      result[i, j] <- numDeriv::grad(f_j, t[i])
     }
-    
-    return(result[, 1])
   }
+  if (nb > 1) result else result[, 1]
 }
 
 
@@ -75,14 +42,7 @@ deriv.HRF <- function(x, t, ...) {
 #' @export
 #' @method deriv SPMG1_HRF
 deriv.SPMG1_HRF <- function(x, t, ...) {
-  # Extract parameters from the HRF object
-  params <- attr(x, "params")
-  if (is.null(params)) {
-    # Use defaults if params not found
-    params <- list(P1 = 5, P2 = 15, A1 = 1/120)
-  }
-  
-  # Call the analytic derivative function
+  params <- attr(x, "params") %||% list(P1 = 5, P2 = 15, A1 = 1/120)
   hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
 }
 
@@ -101,28 +61,10 @@ deriv.SPMG1_HRF <- function(x, t, ...) {
 #' @export
 #' @method deriv SPMG2_HRF
 deriv.SPMG2_HRF <- function(x, t, ...) {
-  # Extract parameters - SPMG2 is a basis set, so get params from first basis
-  params <- NULL
-  basis_list <- attr(x, "basis_list")
-  if (!is.null(basis_list) && length(basis_list) >= 1) {
-    params <- attr(basis_list[[1]], "params")
-  }
-  
-  if (is.null(params)) {
-    # Use defaults if params not found
-    params <- list(P1 = 5, P2 = 15, A1 = 1/120)
-  }
-  
-  # Create result matrix with 2 columns
-  result <- matrix(0, nrow = length(t), ncol = 2)
-  
-  # First column: derivative of canonical HRF
-  result[, 1] <- hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
-  
-  # Second column: second derivative (derivative of temporal derivative)
-  result[, 2] <- hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
-  
-  return(result)
+  # HRF_SPMG2/HRF_SPMG3 are built from the canonical parameters
+  # (P1 = 5, P2 = 15, A1 = 1/120), which are the derivative helpers' defaults.
+  matrix(c(hrf_spmg1_deriv(t), hrf_spmg1_second_deriv(t)),
+         nrow = length(t), ncol = 2)
 }
 
 
@@ -140,30 +82,7 @@ deriv.SPMG2_HRF <- function(x, t, ...) {
 #' @export
 #' @method deriv SPMG3_HRF
 deriv.SPMG3_HRF <- function(x, t, ...) {
-  # Extract parameters - SPMG3 is a basis set, so get params from first basis
-  params <- NULL
-  basis_list <- attr(x, "basis_list")
-  if (!is.null(basis_list) && length(basis_list) >= 1) {
-    params <- attr(basis_list[[1]], "params")
-  }
-  
-  if (is.null(params)) {
-    # Use defaults if params not found
-    params <- list(P1 = 5, P2 = 15, A1 = 1/120)
-  }
-  
-  # Create result matrix with 3 columns
-  result <- matrix(0, nrow = length(t), ncol = 3)
-  
-  # First column: derivative of canonical HRF (1st derivative)
-  result[, 1] <- hrf_spmg1_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
-  
-  # Second column: second derivative
-  result[, 2] <- hrf_spmg1_second_deriv(t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
-  
   # Third column: time derivative of the dispersion basis.
-  result[, 3] <- hrf_spmg1_dispersion_time_deriv(
-    t, P1 = params$P1, P2 = params$P2, A1 = params$A1)
-
-  return(result)
+  matrix(c(deriv.SPMG2_HRF(x, t), hrf_spmg1_dispersion_time_deriv(t)),
+         nrow = length(t), ncol = 3)
 }

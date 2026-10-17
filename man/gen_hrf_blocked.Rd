@@ -3,7 +3,7 @@
 \name{gen_hrf_blocked}
 \alias{gen_hrf_blocked}
 \alias{hrf_blocked}
-\title{Generate a Blocked HRF Function}
+\title{Generate a Blocked HRF Function (deprecated)}
 \usage{
 gen_hrf_blocked(
   hrf = hrf_gaussian,
@@ -26,41 +26,38 @@ hrf_blocked(
 )
 }
 \arguments{
-\item{hrf}{A function representing the hemodynamic response function. Default is `hrf_gaussian`.}
+\item{hrf}{A function representing the hemodynamic response function. Default is \code{hrf_gaussian}.}
 
 \item{width}{A numeric value specifying the width of the block in seconds. Default is 5.}
 
 \item{precision}{A numeric value specifying the sampling resolution in seconds. Default is 0.1.}
 
-\item{half_life}{A numeric value specifying the half-life of the exponential decay function, used to model response attenuation. Default is `Inf`, which means no decay.}
+\item{half_life}{A numeric value specifying the half-life of the exponential decay function, used to model response attenuation. Default is \code{Inf}, which means no decay.}
 
 \item{summate}{Logical; if TRUE (default), integrate responses over the block.
 If FALSE, divide by the block width to obtain a temporal average.
 Averaging does not fix the peak height: longer blocks can have smaller peaks.
-Use `normalize = TRUE` for unit-peak scaling.}
+Use \code{normalize = TRUE} for unit-peak scaling.}
 
-\item{normalize}{A logical value indicating whether to rescale the output so that the peak of the output is 1. Default is `FALSE`.}
+\item{normalize}{A logical value indicating whether to rescale the output so that the peak of the output is 1. Default is \code{FALSE}.}
 
 \item{...}{Extra arguments passed to the HRF function.}
 }
 \value{
-A \code{function} representing the blocked HRF.
-
-A \code{function} representing the blocked HRF.
+The blocked \code{HRF} object returned by \code{gen_hrf()}.
 }
 \description{
-The `gen_hrf_blocked` function creates a blocked HRF by convolving the input HRF with a boxcar function. This can be used to model block designs in fMRI analysis.
+\code{gen_hrf_blocked()} and its alias \code{hrf_blocked()} are deprecated and warn
+when called. Use \code{\link[=block_hrf]{block_hrf()}} to block an existing HRF object, or
+\code{\link[=gen_hrf]{gen_hrf()}} with \code{width} (e.g. \code{gen_hrf(hrf_gaussian, width = 5)}), which
+is exactly what \code{gen_hrf_blocked()} calls.
 }
-\section{Functions}{
-\itemize{
-\item \code{hrf_blocked()}: alias for gen_hrf_blocked
-
-}}
 \examples{
-# Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
+# Instead of gen_hrf_blocked(hrf_gaussian, width = 10), use
+blocked <- gen_hrf(hrf_gaussian, width = 10)
+# or, for an existing HRF object
+blocked <- block_hrf(HRF_SPMG1, width = 10)
 }
 \seealso{
-Other gen_hrf: 
-\code{\link{gen_hrf_lagged}()}
+\code{\link[=block_hrf]{block_hrf()}}, \code{\link[=gen_hrf]{gen_hrf()}}
 }
-\concept{gen_hrf}

@@ -37,3 +37,17 @@ test_that("evaluate.RegSet returns named columns (#63)", {
   expect_identical(colnames(evaluate(rs3, 0:30)),
                    c("x_basis1", "x_basis2", "y_basis1", "y_basis2"))
 })
+
+test_that("a RegSet without levels evaluates to a zero-column matrix", {
+  # evaluate() used to return NULL here, and regressor_design() errored.
+  rs <- regressor_set(numeric(0), factor(character(0)))
+  m <- evaluate(rs, 0:5)
+  expect_true(is.matrix(m))
+  expect_equal(dim(m), c(6L, 0L))
+  expect_equal(dim(evaluate(rs, 0:5, sparse = TRUE)), c(6L, 0L))
+
+  sf <- sampling_frame(blocklens = c(10, 5), TR = 2)
+  d <- regressor_design(numeric(0), factor(character(0)), integer(0), sf)
+  expect_true(is.matrix(d))
+  expect_equal(dim(d), c(15L, 0L))
+})

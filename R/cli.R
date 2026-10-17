@@ -85,26 +85,26 @@ install_cli <- function(dest_dir = "~/.local/bin",
 
 .fmrihrf_cli_main <- function(args) {
   if (length(args) == 0 || args[[1]] %in% c("-h", "--help", "help")) {
-    if (length(args) >= 2 && args[[1]] == "help") {
-      return(.fmrihrf_cli_help(args[[2]]))
-    }
-    .fmrihrf_cli_help()
-    return(0L)
+    topic <- if (length(args) >= 2 && args[[1]] == "help") args[[2]]
+    return(.fmrihrf_cli_help(topic))
   }
 
   command <- args[[1]]
   command_args <- args[-1]
-  if ("--help" %in% command_args || "-h" %in% command_args) {
+  if (any(c("--help", "-h") %in% command_args)) {
     return(.fmrihrf_cli_help(command))
   }
-
-  switch(command,
-    list = .fmrihrf_cli_list(command_args),
-    eval = .fmrihrf_cli_eval(command_args),
-    regressor = .fmrihrf_cli_regressor(command_args),
-    design = .fmrihrf_cli_design(command_args),
+  if (!command %in% names(.cli_specs)) {
     .cli_usage_error("Unknown command: ", command,
                      "\nRun `fmrihrf --help` for available commands.")
+  }
+
+  opts <- .parse_cli_args(command_args, .cli_specs[[command]])
+  switch(command,
+    list = .fmrihrf_cli_list(opts),
+    eval = .fmrihrf_cli_eval(opts),
+    regressor = .fmrihrf_cli_regressor(opts),
+    design = .fmrihrf_cli_design(opts)
   )
 }
 
@@ -146,6 +146,7 @@ install_cli <- function(dest_dir = "~/.local/bin",
       "  --duration SEC      Event duration for HRF evaluation [0]",
       "  --precision SEC     Internal block precision [0.2]",
       "  --normalize         Normalize columns to unit peak",
+      "  --summate           Summate the block response (the default)",
       "  --no-summate        Average block response instead of summating",
       "  --json              Write JSON instead of CSV",
       "  --output FILE       Write output to FILE instead of stdout"
@@ -159,8 +160,10 @@ install_cli <- function(dest_dir = "~/.local/bin",
       "  --hrf NAME          HRF name from `fmrihrf list` [spmg1]",
       "  --blocklens LIST    Scans per block for acquisition grid",
       "  --tr LIST           Repetition time(s) in seconds",
+      "  --start-time LIST   First acquisition offset(s); default TR / 2",
       "  --from SEC          Grid start when no sampling frame is supplied [0]",
-      "  --to SEC            Grid end when no sampling frame is supplied",
+      "  --to SEC            Grid end when no sampling frame is supplied;",
+      "                      default last onset + span",
       "  --by SEC            Grid step when no sampling frame is supplied [1]",
       "  --duration LIST     Event duration(s) when --events is not used [0]",
       "  --amplitude LIST    Event amplitude(s) when --events is not used [1]",
@@ -176,7 +179,8 @@ install_cli <- function(dest_dir = "~/.local/bin",
       "Usage: fmrihrf design --events FILE --blocklens LIST --tr LIST [options]",
       "",
       "The events file must include onset, condition, and block columns.",
-      "Optional duration and amplitude columns are used when present.",
+      "Duration and amplitude columns are used when present; a column named",
+      "with --duration or --amplitude must exist.",
       "",
       "Options:",
       "  --events FILE       CSV/TSV events table",
@@ -203,141 +207,124 @@ install_cli <- function(dest_dir = "~/.local/bin",
   0L
 }
 
-.fmrihrf_cli_list <- function(args) {
-  opts <- .parse_cli_args(args, flags = c("details", "json"),
-                         values = c("output"))
-  info <- list_available_hrfs(details = isTRUE(opts$details))
-  .write_cli_table(info, json = isTRUE(opts$json), output = opts$output)
-  0L
+# Options accepted by each subcommand. `flags` are booleans (`false_flags`
+# also accept --no-<flag>); `values` gives the type every value is parsed and
+# validated as when the command line is read (see .cli_value()); `defaults`
+# are already parsed. The help text lists the same options and defaults.
+.cli_specs <- list(
+  list = list(
+    flags = c("details", "json"),
+    values = c(output = "text")
+  ),
+  eval = list(
+    flags = c("normalize", "json", "summate"),
+    false_flags = "summate",
+    values = c(hrf = "text", from = "number", to = "number", by = "step",
+               times = "numbers", nbasis = "count", span = "number",
+               lag = "number", width = "number", amplitude = "number",
+               duration = "number", precision = "number", output = "text"),
+    defaults = list(hrf = "spmg1", from = 0, to = 32, by = 0.5, nbasis = 5L,
+                    span = 24, lag = 0, width = 0, amplitude = 1,
+                    duration = 0, precision = 0.2, summate = TRUE)
+  ),
+  regressor = list(
+    flags = c("normalize", "json"),
+    values = c(onsets = "numbers", events = "text", hrf = "text",
+               blocklens = "numbers", tr = "numbers", `start-time` = "numbers",
+               from = "number", to = "number", by = "step",
+               duration = "numbers", amplitude = "numbers", nbasis = "count",
+               span = "number", precision = "number", method = "method",
+               output = "text"),
+    defaults = list(hrf = "spmg1", from = 0, by = 1, duration = 0,
+                    amplitude = 1, nbasis = 5L, span = 24, precision = 0.33,
+                    method = "conv")
+  ),
+  design = list(
+    flags = c("sparse", "json"),
+    values = c(events = "text", condition = "text", onset = "text",
+               block = "text", duration = "text", amplitude = "text",
+               blocklens = "numbers", tr = "numbers", `start-time` = "numbers",
+               hrf = "text", nbasis = "count", span = "number",
+               precision = "number", method = "method", output = "text"),
+    defaults = list(condition = "condition", onset = "onset", block = "block",
+                    duration = "duration", amplitude = "amplitude",
+                    hrf = "spmg1", nbasis = 5L, span = 24, precision = 0.33,
+                    method = "conv")
+  )
+)
+
+.fmrihrf_cli_list <- function(opts) {
+  .cli_write(list_available_hrfs(details = isTRUE(opts$details)), opts)
 }
 
-.fmrihrf_cli_eval <- function(args) {
-  opts <- .parse_cli_args(
-    args,
-    flags = c("normalize", "json", "summate"),
-    false_flags = c("summate"),
-    values = c("hrf", "from", "to", "by", "times", "nbasis", "span", "lag",
-               "width", "amplitude", "duration", "precision", "output")
-  )
-  opts <- .defaults(opts, list(
-    hrf = "spmg1", from = "0", to = "32", by = "0.5",
-    nbasis = "5", span = "24", lag = "0", width = "0",
-    amplitude = "1", duration = "0", precision = "0.2",
-    summate = TRUE
-  ))
-
+.fmrihrf_cli_eval <- function(opts) {
   grid <- .grid_from_options(opts)
-  hrf <- getHRF(
-    opts$hrf,
-    nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
-    span = .as_scalar_numeric(opts$span, "span"),
-    lag = .as_scalar_numeric(opts$lag, "lag"),
-    width = .as_scalar_numeric(opts$width, "width"),
-    summate = isTRUE(opts$summate),
-    normalize = isTRUE(opts$normalize)
-  )
+  hrf <- .cli_hrf(opts, lag = opts$lag, width = opts$width,
+                  summate = isTRUE(opts$summate),
+                  normalize = isTRUE(opts$normalize))
   values <- evaluate(
     hrf, grid,
-    amplitude = .as_scalar_numeric(opts$amplitude, "amplitude"),
-    duration = .as_scalar_numeric(opts$duration, "duration"),
-    precision = .as_scalar_numeric(opts$precision, "precision"),
+    amplitude = opts$amplitude,
+    duration = opts$duration,
+    precision = opts$precision,
     summate = isTRUE(opts$summate),
     normalize = isTRUE(opts$normalize)
   )
-
-  out <- .values_to_frame(grid, values, time_name = "time")
-  .write_cli_table(out, json = isTRUE(opts$json), output = opts$output)
-  0L
+  .cli_write(.values_to_frame(grid, values), opts)
 }
 
-.fmrihrf_cli_regressor <- function(args) {
-  opts <- .parse_cli_args(
-    args,
-    flags = c("normalize", "json"),
-    values = c("onsets", "events", "hrf", "blocklens", "tr", "start-time",
-               "from", "to", "by", "duration", "amplitude", "nbasis", "span",
-               "precision", "method", "output")
-  )
-  opts <- .defaults(opts, list(
-    hrf = "spmg1", by = "1", duration = "0", amplitude = "1",
-    nbasis = "5", span = "24", precision = "0.33", method = "conv"
-  ))
-
+.fmrihrf_cli_regressor <- function(opts) {
   events <- .events_for_regressor(opts)
-  hrf <- getHRF(opts$hrf,
-                nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
-                span = .as_scalar_numeric(opts$span, "span"))
   reg <- regressor(
     onsets = events$onset,
-    hrf = hrf,
+    hrf = .cli_hrf(opts),
     duration = events$duration,
     amplitude = events$amplitude,
-    span = .as_scalar_numeric(opts$span, "span")
+    span = opts$span
   )
   grid <- .regressor_grid(opts, events$onset)
-  values <- evaluate(
-    reg, grid = grid,
-    precision = .as_scalar_numeric(opts$precision, "precision"),
-    method = .match_choice(opts$method, c("conv", "loop", "fft", "Rconv"), "method"),
-    normalize = isTRUE(opts$normalize)
-  )
-
-  out <- .values_to_frame(grid, values, time_name = "time")
-  .write_cli_table(out, json = isTRUE(opts$json), output = opts$output)
-  0L
+  values <- evaluate(reg, grid = grid, precision = opts$precision,
+                     method = opts$method, normalize = isTRUE(opts$normalize))
+  .cli_write(.values_to_frame(grid, values), opts)
 }
 
-.fmrihrf_cli_design <- function(args) {
-  opts <- .parse_cli_args(
-    args,
-    flags = c("sparse", "json"),
-    values = c("events", "condition", "onset", "block", "duration", "amplitude",
-               "blocklens", "tr", "start-time", "hrf", "nbasis", "span",
-               "precision", "method", "output")
-  )
-  opts <- .defaults(opts, list(
-    condition = "condition", onset = "onset", block = "block",
-    duration = "duration", amplitude = "amplitude", hrf = "spmg1",
-    nbasis = "5", span = "24", precision = "0.33", method = "conv"
-  ))
+.fmrihrf_cli_design <- function(opts) {
   .require_options(opts, c("events", "blocklens", "tr"))
-
   events <- .read_events_table(opts$events)
-  .require_columns(events, c(opts$onset, opts$condition, opts$block))
-  duration <- if (opts$duration %in% names(events)) events[[opts$duration]] else 0
-  amplitude <- if (opts$amplitude %in% names(events)) events[[opts$amplitude]] else 1
+  # The default duration/amplitude columns are optional; renamed ones are not.
+  renamed <- c(opts$duration, opts$amplitude)[
+    c(opts$duration != "duration", opts$amplitude != "amplitude")
+  ]
+  .require_columns(events, unique(c(opts$onset, opts$condition, opts$block, renamed)))
   sframe <- .sampling_frame_from_options(opts)
-  hrf <- getHRF(opts$hrf,
-                nbasis = .as_scalar_integer(opts$nbasis, "nbasis"),
-                span = .as_scalar_numeric(opts$span, "span"))
 
   design <- regressor_design(
     onsets = events[[opts$onset]],
     fac = events[[opts$condition]],
     block = events[[opts$block]],
     sframe = sframe,
-    hrf = hrf,
-    duration = duration,
-    amplitude = amplitude,
-    span = .as_scalar_numeric(opts$span, "span"),
-    precision = .as_scalar_numeric(opts$precision, "precision"),
-    method = .match_choice(opts$method, c("conv", "loop", "fft", "Rconv"), "method"),
+    hrf = .cli_hrf(opts),
+    duration = .column_or(events, opts$duration, 0),
+    amplitude = .column_or(events, opts$amplitude, 1),
+    span = opts$span,
+    precision = opts$precision,
+    method = opts$method,
     sparse = isTRUE(opts$sparse)
   )
-
-  grid <- samples(sframe, global = TRUE)
-  design <- as.matrix(design)
-  design_names <- .design_column_names(events[[opts$condition]], nbasis(hrf))
-  if (length(design_names) == ncol(design)) {
-    colnames(design) <- design_names
-  }
-  out <- .values_to_frame(grid, design, time_name = "time")
-  .write_cli_table(out, json = isTRUE(opts$json), output = opts$output)
-  0L
+  # regressor_design() names the columns after the condition levels.
+  .cli_write(.values_to_frame(samples(sframe, global = TRUE), as.matrix(design)),
+             opts)
 }
 
-.parse_cli_args <- function(args, flags = character(), values = character(),
-                            false_flags = character()) {
+# The HRF named by --hrf; `...` holds further getHRF() arguments.
+.cli_hrf <- function(opts, ...) {
+  getHRF(opts$hrf, nbasis = opts$nbasis, span = opts$span, ...)
+}
+
+# Parse `--key value`, `--key=value`, boolean `--flag` and `--no-flag`
+# options as described by `spec` (one of .cli_specs) into a named list of
+# parsed values, filled in from the spec's defaults.
+.parse_cli_args <- function(args, spec) {
   out <- list()
   i <- 1L
   while (i <= length(args)) {
@@ -346,69 +333,65 @@ install_cli <- function(dest_dir = "~/.local/bin",
       .cli_usage_error("Unexpected positional argument: ", token)
     }
     token <- substring(token, 3L)
-    value <- NULL
-    if (grepl("=", token, fixed = TRUE)) {
-      parts <- strsplit(token, "=", fixed = TRUE)[[1]]
-      key <- parts[[1]]
-      value <- paste(parts[-1], collapse = "=")
-    } else {
-      key <- token
-    }
+    # --key=value: split at the first "=" only; the value may contain more.
+    eq <- regexpr("=", token, fixed = TRUE)
+    key <- if (eq > 0) substring(token, 1L, eq - 1L) else token
+    value <- if (eq > 0) substring(token, eq + 1L)
 
-    if (startsWith(key, "no-")) {
-      flag <- substring(key, 4L)
-      if (!flag %in% false_flags) {
-        .cli_usage_error("Unknown option: --", key)
-      }
+    negated <- startsWith(key, "no-") && substring(key, 4L) %in% spec$false_flags
+    if (negated || key %in% spec$flags) {
       if (!is.null(value)) {
         .cli_usage_error("Boolean option does not take a value: --", key)
       }
-      out[[flag]] <- FALSE
-      i <- i + 1L
-      next
-    }
-
-    if (key %in% flags) {
-      if (!is.null(value)) {
-        .cli_usage_error("Boolean option does not take a value: --", key)
-      }
-      out[[key]] <- TRUE
-      i <- i + 1L
-      next
-    }
-
-    if (key %in% values) {
+      out[[if (negated) substring(key, 4L) else key]] <- !negated
+    } else if (key %in% names(spec$values)) {
       if (is.null(value)) {
-        if (i == length(args)) {
-          .cli_usage_error("Missing value for option: --", key)
-        }
-        value <- args[[i + 1L]]
-        if (startsWith(value, "--")) {
-          .cli_usage_error("Missing value for option: --", key)
-        }
         i <- i + 1L
+        if (i > length(args) || startsWith(args[[i]], "--")) {
+          .cli_usage_error("Missing value for option: --", key)
+        }
+        value <- args[[i]]
       }
-      out[[key]] <- value
-      i <- i + 1L
-      next
+      out[[key]] <- .cli_value(value, spec$values[[key]], key)
+    } else {
+      .cli_usage_error("Unknown option: --", key)
     }
-
-    .cli_usage_error("Unknown option: --", key)
+    i <- i + 1L
   }
-  out
+  utils::modifyList(spec$defaults %||% list(), out)
 }
 
-.defaults <- function(opts, defaults) {
-  for (nm in names(defaults)) {
-    if (is.null(opts[[nm]])) {
-      opts[[nm]] <- defaults[[nm]]
-    }
+# Parse and validate the value of option --<name> as `type`: "text" (any
+# non-empty string), "method" (an evaluate() method), "numbers" (a
+# comma-separated list), "number", "step" (a positive number) or "count" (a
+# whole number).
+.cli_value <- function(x, type, name) {
+  invalid <- function(...) .cli_usage_error("--", name, ...)
+  if (type == "text") {
+    if (!nzchar(x)) invalid(" must not be empty")
+    return(x)
   }
-  opts
+  if (type == "method") {
+    methods <- c("conv", "loop", "fft", "Rconv")
+    if (!x %in% methods) invalid(" must be one of: ", paste(methods, collapse = ", "))
+    return(x)
+  }
+  values <- .parse_numeric_list(x, name)
+  if (type == "numbers") {
+    return(values)
+  }
+  if (length(values) != 1) invalid(" must be a single number")
+  value <- values[[1]]
+  if (type == "step" && value <= 0) invalid(" must be positive")
+  if (type == "count") {
+    if (!is.finite(value) || value %% 1 != 0) invalid(" must be a whole number")
+    value <- as.integer(value)
+  }
+  value
 }
 
 .require_options <- function(opts, names) {
-  missing <- names[vapply(names, function(nm) is.null(opts[[nm]]), logical(1))]
+  missing <- setdiff(names, names(opts))
   if (length(missing) > 0) {
     .cli_usage_error("Missing required option(s): ",
                      paste(paste0("--", missing), collapse = ", "))
@@ -424,22 +407,15 @@ install_cli <- function(dest_dir = "~/.local/bin",
 
 .grid_from_options <- function(opts) {
   if (!is.null(opts$times)) {
-    values <- .parse_numeric_list(opts$times, "times")
-    if (length(values) == 0) {
+    if (length(opts$times) == 0) {
       .cli_usage_error("--times must contain at least one number")
     }
-    return(values)
+    return(opts$times)
   }
-  from <- .as_scalar_numeric(opts$from, "from")
-  to <- .as_scalar_numeric(opts$to, "to")
-  by <- .as_scalar_numeric(opts$by, "by")
-  if (by <= 0) {
-    .cli_usage_error("--by must be positive")
-  }
-  if (to < from) {
+  if (opts$to < opts$from) {
     .cli_usage_error("--to must be greater than or equal to --from")
   }
-  seq(from, to, by = by)
+  seq(opts$from, opts$to, by = opts$by)
 }
 
 .regressor_grid <- function(opts, onsets) {
@@ -447,29 +423,18 @@ install_cli <- function(dest_dir = "~/.local/bin",
     .require_options(opts, c("blocklens", "tr"))
     return(samples(.sampling_frame_from_options(opts), global = TRUE))
   }
-  if (is.null(opts$from)) {
-    opts$from <- "0"
-  }
   if (is.null(opts$to)) {
-    max_onset <- if (length(onsets) > 0) max(onsets) else 0
-    opts$to <- as.character(max_onset + .as_scalar_numeric(opts$span, "span"))
+    opts$to <- (if (length(onsets) > 0) max(onsets) else 0) + opts$span
   }
   .grid_from_options(opts)
 }
 
 .sampling_frame_from_options <- function(opts) {
-  blocklens <- .parse_numeric_list(opts$blocklens, "blocklens")
-  tr <- .parse_numeric_list(opts$tr, "tr")
-  start_time <- if (is.null(opts[["start-time"]])) {
-    tr / 2
-  } else {
-    .parse_numeric_list(opts[["start-time"]], "start-time")
-  }
   sampling_frame(
-    blocklens = blocklens,
-    TR = tr,
-    start_time = start_time,
-    precision = .as_scalar_numeric(opts$precision, "precision")
+    blocklens = opts$blocklens,
+    TR = opts$tr,
+    start_time = opts[["start-time"]] %||% (opts$tr / 2),
+    precision = opts$precision
   )
 }
 
@@ -477,26 +442,20 @@ install_cli <- function(dest_dir = "~/.local/bin",
   if (!is.null(opts$events)) {
     events <- .read_events_table(opts$events)
     .require_columns(events, "onset")
-    duration <- if ("duration" %in% names(events)) events$duration else 0
-    amplitude <- if ("amplitude" %in% names(events)) events$amplitude else 1
     return(data.frame(
       onset = as.numeric(events$onset),
-      duration = as.numeric(duration),
-      amplitude = as.numeric(amplitude)
+      duration = as.numeric(.column_or(events, "duration", 0)),
+      amplitude = as.numeric(.column_or(events, "amplitude", 1))
     ))
   }
   if (is.null(opts$onsets)) {
     .cli_usage_error("Provide --onsets or --events")
   }
-  onset <- .parse_numeric_list(opts$onsets, "onsets")
-  duration <- recycle_or_error(.parse_numeric_list(opts$duration, "duration"),
-                               length(onset), "duration")
-  amplitude <- recycle_or_error(.parse_numeric_list(opts$amplitude, "amplitude"),
-                                length(onset), "amplitude")
+  n <- length(opts$onsets)
   data.frame(
-    onset = onset,
-    duration = duration,
-    amplitude = amplitude
+    onset = opts$onsets,
+    duration = recycle_or_error(opts$duration, n, "duration"),
+    amplitude = recycle_or_error(opts$amplitude, n, "amplitude")
   )
 }
 
@@ -510,15 +469,13 @@ install_cli <- function(dest_dir = "~/.local/bin",
                     check.names = FALSE, comment.char = "", quote = "\"")
 }
 
+# Column `name` of an events table, or `default` when the table has none.
+.column_or <- function(data, name, default) {
+  if (name %in% names(data)) data[[name]] else default
+}
+
 .parse_numeric_list <- function(x, name) {
-  if (is.numeric(x)) {
-    return(x)
-  }
-  if (length(x) != 1 || is.na(x)) {
-    .cli_usage_error("--", name, " must be a scalar or comma-separated list")
-  }
-  pieces <- strsplit(x, ",", fixed = TRUE)[[1]]
-  pieces <- trimws(pieces)
+  pieces <- trimws(strsplit(x, ",", fixed = TRUE)[[1]])
   if (any(!nzchar(pieces))) {
     .cli_usage_error("--", name, " contains an empty value")
   }
@@ -529,86 +486,45 @@ install_cli <- function(dest_dir = "~/.local/bin",
   values
 }
 
-.as_scalar_numeric <- function(x, name) {
-  values <- .parse_numeric_list(x, name)
-  if (length(values) != 1) {
-    .cli_usage_error("--", name, " must be a single number")
-  }
-  values[[1]]
-}
-
-.as_scalar_integer <- function(x, name) {
-  value <- .as_scalar_numeric(x, name)
-  if (!is.finite(value) || value %% 1 != 0) {
-    .cli_usage_error("--", name, " must be a whole number")
-  }
-  as.integer(value)
-}
-
-.match_choice <- function(value, choices, name) {
-  if (!value %in% choices) {
-    .cli_usage_error("--", name, " must be one of: ",
-                     paste(choices, collapse = ", "))
-  }
-  value
-}
-
-.values_to_frame <- function(grid, values, time_name = "time") {
-  if (inherits(values, "Matrix")) {
-    values <- as.matrix(values)
-  }
+# A time column followed by one `value` column, or one column per basis
+# function (unnamed columns become `basis<k>`).
+.values_to_frame <- function(grid, values) {
   if (is.null(dim(values))) {
-    out <- data.frame(grid, value = as.numeric(values), check.names = FALSE)
-  } else {
-    values <- as.matrix(values)
-    colnames(values) <- colnames(values) %||% paste0("basis", seq_len(ncol(values)))
-    empty <- !nzchar(colnames(values))
-    colnames(values)[empty] <- paste0("basis", which(empty))
-    out <- data.frame(grid, values, check.names = FALSE)
+    return(data.frame(time = grid, value = as.numeric(values)))
   }
-  names(out)[[1]] <- time_name
-  out
+  values <- as.matrix(values)
+  nm <- colnames(values) %||% character(ncol(values))
+  empty <- !nzchar(nm)
+  nm[empty] <- paste0("basis", which(empty))
+  colnames(values) <- nm
+  data.frame(time = grid, values, check.names = FALSE)
 }
 
-.design_column_names <- function(condition, nbasis) {
-  levels <- levels(as.factor(condition))
-  if (identical(as.integer(nbasis), 1L)) {
-    return(levels)
-  }
-  unlist(lapply(levels, function(level) {
-    paste0(level, "_basis", seq_len(nbasis))
-  }), use.names = FALSE)
-}
-
-.write_cli_table <- function(data, json = FALSE, output = NULL) {
-  if (isTRUE(json)) {
-    text <- jsonlite::toJSON(data, dataframe = "rows", auto_unbox = TRUE,
-                             pretty = TRUE, na = "null")
+# Write a table as CSV, or JSON with --json, to stdout or --output, and
+# return the success status.
+.cli_write <- function(data, opts) {
+  text <- if (isTRUE(opts$json)) {
+    jsonlite::toJSON(data, dataframe = "rows", auto_unbox = TRUE,
+                     pretty = TRUE, na = "null", digits = NA)
   } else {
-    buffer <- character()
-    con <- textConnection("buffer", "w", local = TRUE)
-    on.exit(close(con), add = TRUE)
-    utils::write.csv(data, con, row.names = FALSE, na = "")
-    text <- paste(buffer, collapse = "\n")
+    paste(utils::capture.output(utils::write.csv(data, row.names = FALSE, na = "")),
+          collapse = "\n")
   }
-
-  if (is.null(output)) {
+  if (is.null(opts$output)) {
     cat(text, "\n", sep = "")
   } else {
-    writeLines(text, output, useBytes = TRUE)
+    writeLines(text, opts$output, useBytes = TRUE)
   }
+  0L
 }
 
-.cli_usage_error <- function(...) {
-  msg <- paste0(...)
-  stop(structure(list(message = msg, call = NULL),
-                 class = c("fmrihrf_cli_usage_error", "error", "condition")))
-}
+.cli_usage_error <- function(...) .cli_stop("fmrihrf_cli_usage_error", ...)
 
-.cli_domain_error <- function(...) {
-  msg <- paste0(...)
-  stop(structure(list(message = msg, call = NULL),
-                 class = c("fmrihrf_cli_domain_error", "error", "condition")))
+.cli_domain_error <- function(...) .cli_stop("fmrihrf_cli_domain_error", ...)
+
+.cli_stop <- function(class, ...) {
+  stop(structure(list(message = paste0(...), call = NULL),
+                 class = c(class, "error", "condition")))
 }
 
 .fmrihrf_exec_dir <- function() {

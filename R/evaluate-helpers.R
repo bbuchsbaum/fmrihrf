@@ -1,38 +1,28 @@
 #' @importFrom memoise memoise
 #' @keywords internal
 #' @noRd
-# Bounded in-memory LRU cache for HRF evaluations to prevent
-# unbounded growth in long-running sessions. If cachem isn't
-# available at runtime, fall back to memoise's default memory cache.
-.hrf_eval_cache <- tryCatch(
-  cachem::cache_mem(
-    max_size = getOption("fmrihrf.hrf_cache_max_size", 50 * 1024^2), # 50 MB default
-    evict = "lru"
-  ),
-  error = function(e) memoise::cache_memory()
-)
-
-.memo_hrf <- memoise::memoise(
-  function(hrf, span, dt) {
-    if (!is.numeric(span) || length(span) != 1 || span <= 0) {
-        stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
-    }
-    if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
-        stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
-    }
-    times <- seq(0, span, by = dt)
-    # Evaluate HRF - ensure it returns a matrix
-    val <- fmrihrf::evaluate(hrf, times)
-    if (is.vector(val)) matrix(val, ncol = 1) else val
-  },
-  cache = .hrf_eval_cache
-)
+# HRF sampled on [0, span] at step dt, as a matrix. .onLoad() (zzz.R) replaces
+# this with a memoised version backed by a bounded LRU cache, so the cache and
+# its `fmrihrf.hrf_cache_max_size` option are set up when the package is loaded
+# rather than when it is built.
+.memo_hrf <- function(hrf, span, dt) {
+  if (!is.numeric(span) || length(span) != 1 || span <= 0) {
+      stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
+  }
+  if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
+      stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
+  }
+  times <- seq(0, span, by = dt)
+  # Evaluate HRF - ensure it returns a matrix
+  val <- fmrihrf::evaluate(hrf, times)
+  if (is.vector(val)) matrix(val, ncol = 1) else val
+}
 
 #' Prepare Inputs for Regressor Evaluation Engines
 #'
-#' Internal helper function to perform common setup steps before calling
-#' a specific evaluation engine (fft, conv, loop, Rconv).
-#' Handles filtering of events, evaluation/memoization of HRF on fine grid.
+#' Internal helper performing the setup shared by the evaluation engines:
+#' sorts the grid, drops events whose response cannot reach it, and samples
+#' (memoised) the HRF on the fine grid.
 #'
 #' @param x A `Reg` object.
 #' @param grid The target evaluation time grid (numeric vector).
@@ -43,123 +33,76 @@
 #'   * `valid_ons`: Filtered onset times relevant to the grid.
 #'   * `valid_durs`: Corresponding durations.
 #'   * `valid_amp`: Corresponding amplitudes.
-#'   * `grid`: The original target grid.
+#'   * `grid`: The (sorted) target grid.
 #'   * `precision`: The precision value.
-#'   * `hrf_fine_matrix`: HRF values evaluated on the fine time grid (potentially memoized).
-#'     NULL if hrf_is_list is TRUE.
-#'   * `fine_grid`: The fine time grid itself (if needed by Rconv/loop).
+#'   * `hrf_fine_matrix`: HRF values sampled every `precision` seconds over
+#'     `[0, hrf_span]` (memoised). NULL if hrf_is_list is TRUE.
 #'   * `summate`: Logical summation flag from the regressor.
 #'   * `hrf`: The original HRF object (single HRF or list of HRFs).
 #'   * `hrf_is_list`: Logical indicating if hrf is a list of per-event HRFs.
 #'   * `valid_hrfs`: If hrf_is_list, the subset of HRFs corresponding to valid events.
+#'   When no event reaches the grid only `nb`, `grid`, `valid_ons` (empty) and
+#'   `hrf_is_list` are returned.
 #' @keywords internal
 #' @noRd
-#' @importFrom stats approx median convolve
 prep_reg_inputs <- function(x, grid, precision) {
 
-  # Ensure grid is sorted (Correctness 1.4)
   if (is.unsorted(grid)) {
       warning("Input grid is unsorted. Sorting grid for evaluation.")
       grid <- sort(grid)
   }
 
-  # Check if HRF is a list (trial-varying case)
   hrf_is_list <- isTRUE(attr(x, "hrf_is_list"))
-
-  # Get nbasis - for list HRFs, use the first one (all should have same nbasis)
-  if (hrf_is_list) {
-    nb <- if (length(x$hrf) > 0) nbasis(x$hrf[[1]]) else 1L
-  } else {
-    nb <- nbasis(x$hrf)
-  }
-
+  nb <- nbasis(x)
   hrf_span <- x$span
 
-  # Filter events based on grid boundaries and HRF span
-  onset_min_bound <- grid[1] - hrf_span
-  onset_max_bound <- grid[length(grid)]
-
-  # Start with potentially already filtered data from Reg constructor
-  # A block can begin before the ordinary point-event bound and still overlap
-  # the requested grid through its duration. Filter on the end of the neural
-  # input, not only on its onset, so late block tails remain available.
+  # Keep events whose response can reach the grid. A block can begin before
+  # the ordinary point-event bound and still overlap the requested grid
+  # through its duration, so filter on the end of the neural input, not only
+  # on its onset. (Zero amplitudes were already dropped by Reg().)
   event_ends <- x$onsets + pmax(x$duration, 0)
-  keep_indices <- which(event_ends >= onset_min_bound &
-                        x$onsets <= onset_max_bound)
+  keep <- which(event_ends >= grid[1] - hrf_span &
+                x$onsets <= grid[length(grid)])
 
-  # Note: Amplitude filtering already done in Reg(), no need to repeat here
-  valid_ons <- x$onsets[keep_indices]
-  valid_durs <- x$duration[keep_indices]
-  valid_amp <- x$amplitude[keep_indices]
-
-  # Also filter HRF list if applicable
-  valid_hrfs <- if (hrf_is_list) x$hrf[keep_indices] else NULL
-
-  if (length(valid_ons) == 0) {
-    # Return minimal info needed to signal zero output
+  if (length(keep) == 0) {
+    # Minimal info needed to signal zero output
     return(list(nb = nb, grid = grid, valid_ons = numeric(0), hrf_is_list = hrf_is_list))
   }
 
-  # Prepare/Memoize finely sampled HRF for efficient evaluation
-  # Only for single HRF case - list HRFs are handled per-event in eval_loop
-  if (hrf_is_list) {
-    hrf_fine_matrix <- NULL
-  } else {
-    hrf_fine_matrix <- .memo_hrf(x$hrf, hrf_span, precision)
-  }
-
-  # Prepare fine grid (needed for Rconv/loop interpolation)
-  # Start at the earliest possible contribution from kept events
-  # which occurs at `grid[1] - hrf_span`
-  fine_grid_start <- grid[1] - hrf_span
-  # Use the full range of onsets when determining the end of the fine grid
-  # to handle unsorted event inputs without reordering
-  fine_grid_end <- max(grid[length(grid)], max(valid_ons) + max(valid_durs)) + hrf_span
-  fine_grid <- seq(fine_grid_start, fine_grid_end, by = precision)
-
-  return(list(
+  list(
     nb         = nb,
     hrf_span   = hrf_span,
-    valid_ons  = valid_ons,
-    valid_durs = valid_durs,
-    valid_amp  = valid_amp,
+    valid_ons  = x$onsets[keep],
+    valid_durs = x$duration[keep],
+    valid_amp  = x$amplitude[keep],
     grid       = grid,
     precision  = precision,
-    hrf_fine_matrix = hrf_fine_matrix,
-    fine_grid  = fine_grid,
+    # Per-event HRFs are evaluated event by event in eval_loop instead.
+    hrf_fine_matrix = if (!hrf_is_list) .memo_hrf(x$hrf, hrf_span, precision),
     summate    = x$summate,
     hrf        = x$hrf,
     hrf_is_list = hrf_is_list,
-    valid_hrfs = valid_hrfs
-  ))
+    valid_hrfs = if (hrf_is_list) x$hrf[keep]
+  )
 }
 
 # Internal Evaluation Engines -----
 
 #' Direct Convolution Regressor Evaluation Engine
-#' @param p A list returned by prep_reg_inputs.
-#' @param ... Additional arguments.
+#' @param p A list returned by prep_reg_inputs (single HRF).
 #' @keywords internal
 #' @noRd
-eval_conv <- function(p, ...) {
-  # List HRFs require per-event evaluation - fallback to loop
-  if (isTRUE(p$hrf_is_list)) {
-    return(eval_loop(p, ...))
-  }
-
-  # Call the unified C++ wrapper
-  result <- evaluate_regressor_cpp(
-              grid = p$grid,
-              onsets = p$valid_ons,
-              durations = p$valid_durs,
-              amplitudes = p$valid_amp,
-              hrf_matrix = p$hrf_fine_matrix,
-              hrf_span = p$hrf_span,
-              precision = p$precision,
-              method = "conv",
-              summate = isTRUE(p$summate)
-            )
-  result
+eval_conv <- function(p) {
+  evaluate_regressor_cpp(
+    grid = p$grid,
+    onsets = p$valid_ons,
+    durations = p$valid_durs,
+    amplitudes = p$valid_amp,
+    hrf_matrix = p$hrf_fine_matrix,
+    hrf_span = p$hrf_span,
+    precision = p$precision,
+    summate = isTRUE(p$summate)
+  )
 }
 
 #' R Loop Regressor Evaluation Engine
@@ -168,35 +111,30 @@ eval_conv <- function(p, ...) {
 #' @keywords internal
 #' @noRd
 eval_loop <- function(p, ...) {
-  # Check if HRF is a list (trial-varying case)
-  hrf_is_list <- isTRUE(p$hrf_is_list)
-
-  # Validate HRF(s)
-  if (hrf_is_list) {
-    if (is.null(p$valid_hrfs) || length(p$valid_hrfs) == 0) {
-      stop("Error inside eval_loop: p$valid_hrfs is NULL or empty for list HRF case.")
-    }
-  } else {
-    if (is.null(p$hrf) || !inherits(p$hrf, "HRF")) {
-      stop("Error inside eval_loop: p$hrf is NULL or not an HRF object.")
-    }
-  }
-
-  nb <- p$nb
-  hrf_span <- p$hrf_span
   grid <- p$grid
+  hrf_span <- p$hrf_span
   valid_ons <- p$valid_ons
   valid_durs <- p$valid_durs
-  valid_amp <- p$valid_amp
-  precision <- p$precision
-  summate <- p$summate
 
-  # Pre-calculate nearest grid indices for onsets (more robust than RANN for this)
-  # Find the index of the grid point *just before or at* each onset
-  nidx <- findInterval(valid_ons, grid)
-  nidx[nidx == 0] <- 1
+  # Match the finite kernel sampled by the convolution engine. Mask before
+  # block integration, not after: a block near the end of the span contains
+  # both supported and unsupported kernel lags.
+  bounded <- function(kernel) {
+    out <- function(t) {
+      values <- kernel(t)
+      outside <- t < 0 | t > hrf_span
+      if (is.matrix(values)) values[outside, ] <- 0 else values[outside] <- 0
+      values
+    }
+    attributes(out) <- attributes(kernel)
+    out
+  }
+  shared_hrf <- if (!p$hrf_is_list) bounded(p$hrf)
 
-  outmat <- matrix(0, length(grid), nb)
+  # Index of the grid point just before or at each onset
+  start_idx <- pmax(findInterval(valid_ons, grid), 1L)
+
+  outmat <- matrix(0, length(grid), p$nb)
 
   for (i in seq_along(valid_ons)) {
     # A blocked event responds out to hrf_span + duration, not hrf_span. Using
@@ -204,62 +142,24 @@ eval_loop <- function(p, ...) {
     # that did not shrink with `precision`.
     event_span <- hrf_span + max(valid_durs[i], 0)
 
-    start_grid_idx <- nidx[i]
     # Select the final grid point inside the event's support directly. Unlike
     # estimating an index count from median(diff(grid)), this also works for a
     # one-point grid and for irregular or duplicated sampling grids.
-    end_grid_idx <- findInterval(valid_ons[i] + event_span, grid)
-    if (start_grid_idx > length(grid)) next
-    if (end_grid_idx < start_grid_idx) next
-    grid.idx <- seq.int(start_grid_idx, end_grid_idx)
+    end_idx <- findInterval(valid_ons[i] + event_span, grid)
+    if (end_idx < start_idx[i]) next
+    idx <- seq.int(start_idx[i], end_idx)
 
-    relOns <- grid[grid.idx] - valid_ons[i]
-    valid_rel_idx <- which(relOns >= 0 & relOns <= event_span)
+    rel <- grid[idx] - valid_ons[i]
+    in_support <- rel >= 0 & rel <= event_span
+    if (!any(in_support)) next
+    idx <- idx[in_support]
 
-    if (length(valid_rel_idx) > 0) {
-        target_indices_outmat <- grid.idx[valid_rel_idx]
+    kernel <- if (p$hrf_is_list) bounded(p$valid_hrfs[[i]]) else shared_hrf
+    resp <- evaluate(kernel, rel[in_support], amplitude = p$valid_amp[i],
+                     duration = valid_durs[i], precision = p$precision,
+                     summate = p$summate, ...)
 
-        # Select the appropriate HRF for this event
-        current_hrf <- if (hrf_is_list) p$valid_hrfs[[i]] else p$hrf
-
-        # Match the finite kernel sampled by the convolution engine. Mask
-        # before block integration, not after: a block near the end of the
-        # span contains both supported and unsupported kernel lags.
-        raw_hrf <- current_hrf
-        current_hrf <- local({
-          kernel <- raw_hrf
-          cutoff <- hrf_span
-          bounded <- function(t) {
-            values <- kernel(t)
-            outside <- t < 0 | t > cutoff
-            if (is.matrix(values)) values[outside, ] <- 0 else values[outside] <- 0
-            values
-          }
-          attributes(bounded) <- attributes(kernel)
-          bounded
-        })
-
-        # Call evaluate S3 generic, should dispatch to evaluate.HRF
-        resp <- evaluate(current_hrf, relOns[valid_rel_idx], amplitude=valid_amp[i],
-                         duration=valid_durs[i],
-                         precision=precision,
-                         summate=summate, ...)
-
-        if (!is.matrix(resp) && nb > 1) {
-            resp <- matrix(resp, ncol=nb)
-        }
-        if (!is.matrix(resp) && nb == 1) {
-            resp <- matrix(resp, ncol=1)
-        }
-
-        if (nrow(resp) != length(target_indices_outmat)){
-            warning("Dimension mismatch between response and target indices in loop.")
-            next
-        }
-
-        outmat[target_indices_outmat, seq_len(nb)] <-
-          outmat[target_indices_outmat, seq_len(nb), drop = FALSE] + resp
-    }
+    outmat[idx, ] <- outmat[idx, , drop = FALSE] + matrix(resp, ncol = p$nb)
   }
 
   outmat

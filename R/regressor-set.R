@@ -80,7 +80,7 @@ evaluate.RegSet <- function(x, grid, precision = .33,
   mats <- lapply(mats, function(m) {
     if (is.matrix(m)) m else matrix(m, nrow = length(grid))
   })
-  out <- do.call(cbind, mats)
+  out <- if (length(mats) > 0) do.call(cbind, mats) else matrix(0, length(grid), 0)
   colnames(out) <- regset_column_names(x$levels, vapply(mats, ncol, integer(1)))
   if (sparse) {
     return(Matrix::Matrix(out, sparse = TRUE))

@@ -85,7 +85,13 @@ scale_colour_hrf <- function(type = c("categorical", "ordered"), ...,
     stop("scale_colour_hrf() requires the 'ggplot2' package")
   }
   type <- match.arg(type)
-  ggplot2::discrete_scale(aesthetics, palette = function(n) hrf_palette(n, type), ...)
+  palette <- function(n) hrf_palette(n, type)
+  # ggplot2 < 3.5.0 requires `scale_name`; later versions deprecate it.
+  if (utils::packageVersion("ggplot2") < "3.5.0") {
+    return(ggplot2::discrete_scale(aesthetics, scale_name = "hrf",
+                                   palette = palette, ...))
+  }
+  ggplot2::discrete_scale(aesthetics, palette = palette, ...)
 }
 
 #' @md
@@ -200,10 +206,9 @@ print.fmrihrf_plot <- function(x, ...) {
   p <- attr(x, "plot")
   if (inherits(p, "ggplot")) {
     print(p)
-    return(invisible(x))
+  } else {
+    print(.plain_df(x), ...)
   }
-  class(x) <- setdiff(class(x), "fmrihrf_plot")
-  print(x, ...)
   invisible(x)
 }
 
@@ -285,19 +290,21 @@ knit_print.fmrihrf_plot <- function(x, ...) {
 }
 
 # Build the shared ggplot for long-form series data.
-#   df:        data.frame(time, series (factor), response)
+#   df:        data.frame(time, <series factor>, response), from .long_frame()
+#   pal:       palette from .series_palette()
 #   onsets:    NULL or data.frame(onset, duration, series (factor or NA))
 #   samples:   NULL or data.frame(time, series, response)
-.gg_series <- function(df, colours, title = NULL, subtitle = NULL,
+.gg_series <- function(df, pal, title = NULL, subtitle = NULL,
                        xlab = "Time (s)", ylab = "Response",
                        layout = c("overlay", "stack"), onsets = NULL,
                        samples = NULL, direct_labels = FALSE,
-                       linetypes = FALSE, reference = NULL,
-                       scales = "free_y") {
+                       reference = NULL, scales = "free_y") {
   layout <- match.arg(layout)
-  gg <- asNamespace("ggplot2")
+  names(df)[2] <- "series"
   n <- nlevels(df$series)
-  names(colours) <- levels(df$series)
+  colours <- stats::setNames(pal$colours, levels(df$series))
+  # Many categorical overlays also vary the line type.
+  linetypes <- pal$type == "categorical" && n > 4 && layout == "overlay"
 
   yr <- range(df$response, reference$response, 0, finite = TRUE)
   span_y <- diff(yr)
@@ -310,30 +317,29 @@ knit_print.fmrihrf_plot <- function(x, ...) {
 
   # Event marks: a bar from onset to onset + duration, drawn just below the
   # lowest point of the curve(s) it belongs to (per panel when stacked).
-  if (!is.null(onsets) && nrow(onsets) > 0) {
+  has_marks <- !is.null(onsets) && nrow(onsets) > 0
+  if (has_marks) {
     # One set of marks per panel when stacked, so colour is not needed there.
     by_series <- !isFALSE(attr(onsets, "by_series")) && layout == "overlay"
     onsets$series <- factor(onsets$series, levels = levels(df$series))
     width <- pmax(onsets$duration, diff(xr) * 0.004)
     onsets$xend <- onsets$onset + width
-    if (layout == "stack" && scales == "fixed") {
-      # Shared y axis: place every panel's marks from the shared range so the
-      # label floor below holds for all panels.
-      onsets$y0 <- yr[1] - 0.22 * span_y
-      onsets$y1 <- yr[1] - 0.06 * span_y
-    } else if (layout == "stack") {
-      lo <- tapply(df$response, df$series, function(v) min(v, 0, na.rm = TRUE))
+    # Bottom and range of the data the marks hang from: per panel for free
+    # stacked panels; otherwise the shared range, so the label floor below
+    # holds for every panel.
+    if (layout == "stack" && scales != "fixed") {
+      key <- as.character(onsets$series)
+      lo <- tapply(df$response, df$series, function(v) min(v, 0, na.rm = TRUE))[key]
       rg <- tapply(df$response, df$series, function(v) {
         r <- diff(range(v, 0, na.rm = TRUE))
         if (!is.finite(r) || r == 0) 1 else r
-      })
-      key <- as.character(onsets$series)
-      onsets$y0 <- lo[key] - 0.22 * rg[key]
-      onsets$y1 <- lo[key] - 0.06 * rg[key]
+      })[key]
     } else {
-      onsets$y0 <- yr[1] - 0.16 * span_y
-      onsets$y1 <- yr[1] - 0.06 * span_y
+      lo <- yr[1]
+      rg <- span_y
     }
+    onsets$y0 <- lo - (if (layout == "stack") 0.22 else 0.16) * rg
+    onsets$y1 <- lo - 0.06 * rg
     if (by_series) {
       p <- p + ggplot2::geom_rect(
         data = onsets, inherit.aes = FALSE,
@@ -357,7 +363,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
                                 colour = .hrf_neutral, linewidth = 0.7, linetype = "22")
   }
 
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::geom_line(ggplot2::aes(linetype = .data$series), linewidth = 0.9)
   } else {
     p <- p + ggplot2::geom_line(linewidth = 0.9)
@@ -369,7 +375,7 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   }
 
   p <- p + ggplot2::scale_colour_manual(values = colours, name = NULL)
-  if (linetypes && layout == "overlay") {
+  if (linetypes) {
     p <- p + ggplot2::scale_linetype_discrete(name = NULL)
   }
 
@@ -394,7 +400,6 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   #   stacked: (0.08 * 1.22 + 0.16) / (1.22 * 1.16) = 0.182
   #   overlay: (0.05 * 1.16 + 0.10) / (1.16 * 1.10) = 0.124
   # (with direct labels the overlay top expansion is larger, lowering it).
-  has_marks <- !is.null(onsets) && nrow(onsets) > 0
   mark_floor <- if (has_marks) 0.13 else 0
   stack_floor <- if (has_marks) 0.19 else 0
   if (layout == "overlay") {
@@ -431,17 +436,25 @@ knit_print.fmrihrf_plot <- function(x, ...) {
     ggplot2::theme(plot.title.position = "plot")
 }
 
+# Default arguments `defaults`, except those also given in `args` (a user's
+# `...`), which take the user's value instead; unnamed arguments are kept.
+.override <- function(defaults, args) {
+  nm <- names(defaults) %||% character(length(defaults))
+  c(defaults[!nzchar(nm) | !nm %in% names(args)], args)
+}
+
 # Base-graphics counterpart: draw one panel of series with the shared palette.
 .base_series_panel <- function(time, Y, colours, labels = NULL, main = NULL,
                                xlab = "Time (s)", ylab = "Response",
                                onsets = NULL, onset_col = .hrf_neutral,
-                               legend = TRUE, ...) {
+                               legend = TRUE, subtitle = NULL, ...) {
   Y <- as.matrix(Y)
   args <- list(...)
   ylim <- args$ylim %||% range(Y, 0, finite = TRUE)
   args$ylim <- NULL
-  do.call(graphics::plot, c(list(x = range(time), y = ylim, type = "n",
-                                 xlab = xlab, ylab = ylab, main = ""), args))
+  do.call(graphics::plot, .override(list(x = range(time), y = ylim, type = "n",
+                                         xlab = xlab, ylab = ylab, main = ""),
+                                    args))
   graphics::abline(h = 0, col = .hrf_rule, lwd = 0.8)
   if (!is.null(onsets) && length(onsets) > 0) {
     graphics::rug(onsets, ticksize = 0.035, side = 1, col = onset_col, lwd = 1.5)
@@ -449,14 +462,115 @@ knit_print.fmrihrf_plot <- function(x, ...) {
   for (j in seq_len(ncol(Y))) {
     graphics::lines(time, Y[, j], col = colours[j], lwd = 1.8)
   }
+  line <- if (legend && ncol(Y) > 1) 2.2 else 0.8
+  if (!is.null(subtitle)) {
+    graphics::mtext(subtitle, side = 3, line = line, adj = 0, cex = 0.85)
+    line <- line + 1.1
+  }
   if (!is.null(main)) {
-    graphics::title(main = main, adj = 0, line = if (legend && ncol(Y) > 1) 2.2 else 0.8,
-                    cex.main = 1, font.main = 2)
+    graphics::title(main = main, adj = 0, line = line, cex.main = 1, font.main = 2)
   }
   if (legend && ncol(Y) > 1 && !is.null(labels)) {
     graphics::legend("bottomleft", legend = labels, col = colours, lwd = 1.8,
                      bty = "n", horiz = TRUE, inset = c(0, 1), xpd = TRUE,
                      cex = 0.8, seg.len = 1.2, x.intersp = 0.5)
+  }
+  invisible(NULL)
+}
+
+# Base-graphics counterpart of .gg_series(): every series in one panel
+# ("overlay") or one panel per series on a shared time axis ("stack").
+#   Y:          matrix with one column per series, labelled by `labels`
+#   onsets:     NULL, event times shared by every series, or a list with one
+#               vector of event times per series
+#   by_series:  in an overlay, colour each series' event marks like its curve
+#   samples:    NULL, or a list with one data.frame(time, response) per series
+#   reference:  NULL, or data.frame(time, response) drawn dashed grey in every
+#               panel
+#   panel_args: the caller's graphical arguments, overriding panel defaults
+.base_series_plot <- function(time, Y, colours, labels, title = NULL,
+                              subtitle = NULL, caption = NULL,
+                              xlab = "Time (s)", ylab = "Response",
+                              layout = c("overlay", "stack"),
+                              scales = c("free_y", "fixed"),
+                              onsets = NULL, by_series = FALSE,
+                              onset_col = .hrf_neutral, samples = NULL,
+                              reference = NULL, panel_args = list()) {
+  layout <- match.arg(layout)
+  scales <- match.arg(scales)
+  Y <- as.matrix(Y)
+  n <- ncol(Y)
+  if (!is.list(onsets)) onsets <- rep(list(onsets), n)
+  panel <- function(...) do.call(.base_series_panel, .override(list(...), panel_args))
+  yrange <- function(j) {
+    range(Y[, j], reference$response,
+          unlist(lapply(samples[j], `[[`, "response")), 0, finite = TRUE)
+  }
+  # Reference curve and sample points for the series in `j`
+  decorate <- function(j) {
+    if (!is.null(reference)) {
+      graphics::lines(reference$time, reference$response, col = .hrf_neutral, lty = 2)
+    }
+    for (k in j) {
+      if (length(samples[[k]]$time) > 0) {
+        graphics::points(samples[[k]]$time, samples[[k]]$response, pch = 19,
+                         cex = 0.6, col = colours[k])
+      }
+    }
+  }
+
+  if (layout == "overlay" || n == 1) {
+    # Shared marks are drawn by the panel (under the curves); marks coloured
+    # by series are added per series.
+    panel(time, Y, colours, labels = labels, main = title, subtitle = subtitle,
+          xlab = xlab, ylab = ylab, ylim = yrange(seq_len(n)),
+          onsets = if (!by_series) unique(unlist(onsets)), onset_col = onset_col)
+    decorate(seq_len(n))
+    if (by_series) {
+      alpha <- grDevices::col2rgb(onset_col, alpha = TRUE)[4] / 255
+      for (k in seq_len(n)) {
+        if (length(onsets[[k]]) > 0) {
+          graphics::rug(onsets[[k]], ticksize = 0.035, side = 1, lwd = 1.5,
+                        col = grDevices::adjustcolor(colours[k], alpha.f = alpha))
+        }
+      }
+    }
+    if (!is.null(caption)) {
+      graphics::mtext(caption, side = 1, line = graphics::par("mgp")[1] + 1.1,
+                      adj = 0, cex = 0.8)
+    }
+    return(invisible(NULL))
+  }
+
+  extra_top <- if (is.null(subtitle)) 0 else 1.1
+  extra_bottom <- if (is.null(caption)) 0 else 1.1
+  op <- graphics::par(mfrow = c(n, 1), mar = c(1.6, 4.1, 1.4, 1.1),
+                      oma = c(2.6 + extra_bottom, 0, 1.8 + extra_top, 0))
+  on.exit(graphics::par(op), add = TRUE)
+  ylims <- if (scales == "fixed") {
+    rep(list(yrange(seq_len(n))), n)
+  } else {
+    lapply(seq_len(n), yrange)
+  }
+  for (j in seq_len(n)) {
+    panel(time, Y[, j], colours[j], main = NULL, xlab = "", ylab = labels[j],
+          legend = FALSE, ylim = ylims[[j]], xaxt = if (j < n) "n" else "s",
+          onsets = onsets[[j]], onset_col = onset_col)
+    decorate(j)
+  }
+  graphics::mtext(xlab, side = 1, outer = TRUE, line = 1.2,
+                  cex = graphics::par("cex.lab") %||% 1)
+  if (!is.null(title)) {
+    graphics::mtext(title, side = 3, outer = TRUE, line = 0.4 + extra_top,
+                    adj = 0, font = 2)
+  }
+  if (!is.null(subtitle)) {
+    graphics::mtext(subtitle, side = 3, outer = TRUE, line = 0.4, adj = 0,
+                    cex = 0.85)
+  }
+  if (!is.null(caption)) {
+    graphics::mtext(caption, side = 1, outer = TRUE, line = 2.4, adj = 0,
+                    cex = 0.8)
   }
   invisible(NULL)
 }

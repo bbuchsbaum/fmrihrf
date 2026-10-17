@@ -1,5 +1,3 @@
-# Put this in R/utils-internal.R
-
 # Declare global variables to avoid R CMD check NOTEs for ggplot2 aes() usage
 utils::globalVariables(c("time", "response", "HRF", "Regressor", "onset", ".data"))
 
@@ -108,19 +106,4 @@ recycle_or_error <- function(x, n, name) {
     peak_val <- max(abs(x), na.rm = TRUE)
     if (!is.na(peak_val) && peak_val != 0) x / peak_val else x
   }
-}
-
-# Compute per-basis peak absolute values from a reference evaluation. Zero or
-# NA peaks are replaced with 1 so downstream division is a no-op. Returns a
-# vector of length ncol(x) for matrices, or a scalar for vectors.
-#' @keywords internal
-#' @noRd
-.get_peaks <- function(x) {
-  if (is.matrix(x)) {
-    peaks <- apply(x, 2, function(col) max(abs(col), na.rm = TRUE))
-  } else {
-    peaks <- max(abs(as.numeric(x)), na.rm = TRUE)
-  }
-  peaks[is.na(peaks) | peaks == 0] <- 1
-  peaks
 }

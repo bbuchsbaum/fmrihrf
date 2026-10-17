@@ -178,14 +178,6 @@ nbasis <- function(x, ...) UseMethod("nbasis")
 penalty_matrix <- function(x, ...) UseMethod("penalty_matrix")
 
 
-#' Combine HRF Basis with Coefficients
-#'
-#' Create a new HRF by linearly weighting the basis functions of an existing HRF.
-#' This is useful for turning estimated basis coefficients into a single
-#' functional HRF.
-#'
-
-
 #' Reconstruction matrix for an HRF basis
 #'
 #' Returns a matrix \eqn{\Phi} that converts basis coefficients into a
@@ -380,7 +372,7 @@ acquisition_onsets <- function(x, ...) UseMethod("acquisition_onsets")
 #' @return A list containing:
 #' \describe{
 #'     \item{time}{Numeric vector of time points}
-#'     \item{neural_input}{Numeric vector of input amplitudes at each time point}
+#'     \item{neural_input}{Numeric vector of the stimulus density at each time point (see method details)}
 #' }
 #'
 #' @examples

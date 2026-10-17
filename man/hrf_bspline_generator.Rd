@@ -7,7 +7,7 @@
 hrf_bspline_generator(nbasis = 5, span = 24)
 }
 \arguments{
-\item{nbasis}{Number of basis functions (default: 5)}
+\item{nbasis}{Number of basis functions, at least 2 (default: 5)}
 
 \item{span}{Temporal window in seconds (default: 24)}
 }

@@ -1,8 +1,8 @@
 # fmrihrf 0.4.0.9000
 
-## Bug fixes
+## Changes that affect results
 
-* **Correctness fix that changes results.** `regressor_design()` now convolves
+* `regressor_design()` now convolves
   each run (block of the sampling frame) separately. Previously it mapped all
   onsets to session time and convolved once over the whole session, so the
   response to an event near the end of one run (including its undershoot)
@@ -11,9 +11,170 @@
   Design matrices with events within roughly one HRF span of a run's end
   change; rebuild them and refit affected analyses (#62).
 
+* `hrf_mexhat()` now uses the standard Mexican-hat (Ricker) normalising
+  constant `2 / (sqrt(3 * sd) * pi^(1/4))`, so the wavelet has unit L2 norm.
+  The previous constant, `sqrt(2 / (3 * sd * pi^(1/4)))`, was a
+  mis-transcription that gave neither unit norm nor unit peak. Every value is
+  now `sqrt(2) * pi^(-1/8)` (about 1.2257) times larger, so coefficients for
+  Mexican-hat regressors shrink by that factor.
+
+* `hrf_spmg1()` now scales its undershoot as `t^P2 * exp(-t) / (6 * P2!)`.
+  The normaliser was hard-coded as `6 * 15!`, so any `P2` other than the
+  default 15 gave a wrongly scaled undershoot. The analytic derivatives behind
+  `deriv()` are fixed the same way. Results with the default `P2` are
+  bit-identical.
+
+* `neural_input()` now returns the stimulus function that `evaluate()`'s
+  default `"conv"` method actually convolves, as a density on
+  `seq(start, end, by = resolution)`. Zero-duration events, which were
+  missing, now appear as spikes of area `amplitude`; block edges carry
+  fractional weights; blocks shorter than `resolution` keep their area
+  `amplitude * duration`; and blocks of a `summate = FALSE` regressor have
+  unit area. The return structure and defaults are unchanged.
+
+* `evaluate()` with the `"conv"` method no longer over-weights a block that
+  starts within one `precision` step of one HRF span before the first grid
+  point. Such a block gained up to half a step of extra mass, so its response
+  depended on which grid points were requested. The effect is negligible for
+  canonical HRFs and noticeable for boxcar- or FIR-like kernels that are
+  non-zero at their span.
+
+* `make_hrf()` (and therefore `regressor(hrf = "<name>")`) now gives basis sets
+  their default size when `nbasis` is omitted; its `nbasis` default is now
+  `NULL` instead of 1. Previously `make_hrf("bspline", lag)` and
+  `regressor(hrf = "bspline")` failed, `make_hrf("fir", lag)` built a single
+  24 s bin, and a plain function returning several columns was labelled as one
+  basis function. An explicit `nbasis` behaves as before.
+
+## Deprecated
+
+* `gen_hrf_blocked()` and its alias `hrf_blocked()` are formally deprecated.
+  They already warned, but their help page did not say so and other help
+  pages listed them alongside the current generators. The warning and help
+  now point to `block_hrf(hrf, width = )` for an existing HRF object and to
+  `gen_hrf(hrf, width = )`, which they call.
+
+## Bug fixes
+
 * `regressor_design()` and `evaluate()` on a `RegSet` now return named
   columns: the factor levels, or `<level>_basis<k>` when the HRF has more than
   one basis function (the same names the `design` CLI command writes) (#63).
+
+* `getHRF("lwu", ...)` now works. It returns a single-basis LWU HRF that takes
+  `tau`, `sigma` and `rho` through `...` and supports the usual lag, width and
+  normalisation options; previously it always failed with 'argument "t" is
+  missing'. `list_available_hrfs()` reports its `nbasis_default` as "1".
+
+* `gen_hrf_lagged()` / `hrf_lagged()` with a vector of lags now return an HRF
+  basis set with one block of columns per lag, as documented. They previously
+  emitted a deprecation warning and failed, and dropped `normalize`. With
+  `normalize = TRUE`, an all-zero response now stays zero instead of `NaN`.
+
+* `hrf_basis_lwu()` now works for every `theta0` that passes its own
+  validation, including `rho = 0`, `rho = 1.5` and `sigma` just above 0.05,
+  using one-sided numerical derivatives at those bounds. It is also about 300
+  times faster (one Jacobian instead of one gradient per time point).
+
+* `HRF_SPMG1` now has class `c("SPMG1_HRF", "HRF", "function")`, like
+  `HRF_SPMG2` and `HRF_SPMG3`, so `deriv(HRF_SPMG1, t)` uses the analytic
+  derivative as documented instead of numerical differentiation (values change
+  by at most 3e-13).
+
+* `as_hrf()` and `gen_hrf()` accept function literals that deparse to several
+  lines; they failed with "length(name) not equal to 1".
+
+* B-spline and tent HRFs can be evaluated on an empty time grid (tent bases
+  errored, B-spline bases warned). `hrf_bspline_generator(nbasis = 1)` and
+  `getHRF("bspline", nbasis = 1)` now stop with "nbasis must be at least 2 for
+  a cubic B-spline basis" instead of building an all-zero basis that warned on
+  every evaluation.
+
+* `penalty_matrix()` for a one-function Daguerre basis returns a 1 x 1 zero
+  matrix instead of a 0 x 0 one.
+
+* `list_available_hrfs()` marks `"gam"` as an alias of `"gamma"`.
+
+* `print()` of an HRF shows vector-valued parameters (e.g. from
+  `hrf_weighted()`) as `[a, b, ...]` instead of `c("0.0000", ...)`.
+
+* `shift()` keeps the zero-amplitude events of a regressor built with
+  `drop_zero_amplitude = FALSE`.
+
+* `regressor()` rejects `summate = NA`; the `"conv"` method silently treated it
+  as `FALSE` and `"loop"` errored.
+
+* Regressors without events behave consistently: a regressor built from a
+  list of per-event HRFs keeps the first HRF (no `span = -Inf` warning),
+  `neural_input()` no longer errors when `end` is not given, `evaluate()` on a
+  `regressor_set()` with no levels returns a `length(grid) x 0` matrix instead
+  of `NULL`, and `regressor_design()` with no events returns a zero-column
+  matrix instead of erroring.
+
+* `sampling_frame()` rejects block lengths that are not whole numbers. They
+  were silently truncated by `samples()` and `blockids()`, and `print()`
+  failed on them.
+
+* `scale_colour_hrf()` and `scale_fill_hrf()` work with ggplot2 < 3.5.0
+  (they failed with 'argument "scale_name" is missing').
+
+* `plot()` on HRF, regressor and feature-regressor objects lets arguments in
+  `...` (`main`, `ylab`, `labels`, `type`, and in stacked layouts `xlab` and
+  `xaxt`) override the method's defaults instead of failing with "matched by
+  multiple actual arguments". `plot()` on a regressor without events draws an
+  empty plot instead of failing. `print()` on a `plot_hrfs()` /
+  `plot_regressors()` result without an attached ggplot returns the object
+  unchanged.
+
+* `plot_hrfs()` and `plot_regressors()` with `use_ggplot = FALSE` now honour
+  `layout = "stack"` (one panel per curve on a shared time axis), `scales`,
+  `subtitle` and, for `plot_hrfs()`, the reference caption. The base-graphics
+  fallback used to draw every curve in one panel and ignore these arguments.
+  It also colours event marks by regressor for `show_onsets = TRUE`, as
+  documented, and draws sample points in each panel. `plot()` on regressors
+  shares the same code and is unchanged.
+
+* The `fmrihrf` command-line tool:
+  - validates every option value it is given, so `--nbasis x`, `--span 2,3`
+    or an empty `--output=` (which discarded the output) are usage errors
+    (exit status 2);
+  - keeps every `=` after the first in `--key=value`;
+  - writes `--json` output at full precision (values were rounded to 4
+    decimals, so anything below 5e-5 became 0);
+  - lists every accepted option and default in its help;
+  - makes `fmrihrf design` fail with "Missing required column(s)" when a
+    column named with `--duration` or `--amplitude` is absent, instead of
+    silently using zero durations or unit amplitudes.
+
+* The `fmrihrf.hrf_cache_max_size` option is now read when the package is
+  loaded; the HRF evaluation cache used to be created when the package was
+  built.
+
+## Performance
+
+* Regressor evaluation is much faster. The compiled engine is single-threaded
+  by design, but `src/Makevars` still enabled OpenMP, which made Armadillo
+  start threads for every convolution with 64 or more taps (including the
+  defaults). It also now computes only the convolution samples the output grid
+  needs. Results are unchanged (differences at most 1.3e-15). Building
+  fmridesign event models is 5-40 times faster end to end.
+
+* FIR basis evaluation is vectorised (about 5 times faster).
+
+## Internal changes
+
+* `gen_hrf()` and `getHRF()` share one decorator pipeline, the basis
+  generators share one constructor, and the duplicated `deriv()` and
+  `penalty_matrix()` branches are merged. The CLI uses one table of options
+  per command, and the plotting functions share their data-building helpers.
+
+* Removed unused internals (`makeDeriv()`, `soft_threshold()`, `hrf_ident()`,
+  an old copy of `hrf_half_cosine()`, `neural_input_rcpp()`, ...) and unused
+  imports. `cachem` is now declared in Imports, and `LazyData` is no longer
+  set (there is no `data/` directory).
+
+* The `reconstruction_matrix()` help page no longer has a wrong title and
+  description, and references to the non-existent `HRF_DAGUERRE` and
+  `HRF_TENT` are gone.
 
 # fmrihrf 0.4.0
 

@@ -66,8 +66,7 @@ regressor_design <- function(onsets, fac, block, sframe,
 
   method <- match.arg(method)
 
-  if (!is.numeric(block) || anyNA(block) ||
-      any(block < 1L) || any(block > length(sframe$blocklens))) {
+  if (anyNA(block) || any(block < 1L) || any(block > length(sframe$blocklens))) {
     stop("`block` values must be valid block indices for `sframe`",
          call. = FALSE)
   }
@@ -86,13 +85,8 @@ regressor_design <- function(onsets, fac, block, sframe,
                         hrf = hrf, duration = duration[idx],
                         amplitude = amplitude[idx], span = span,
                         summate = summate)
-    grid <- samples(sframe, blockids = b, global = FALSE)
-    m <- evaluate(rs, grid = grid, precision = precision,
-                  method = method, sparse = FALSE)
-    if (!is.matrix(m)) {
-      m <- matrix(m, nrow = length(grid), dimnames = list(NULL, names(m)))
-    }
-    m
+    evaluate(rs, grid = samples(sframe, blockids = b, global = FALSE),
+             precision = precision, method = method, sparse = FALSE)
   })
 
   out <- do.call(rbind, mats)

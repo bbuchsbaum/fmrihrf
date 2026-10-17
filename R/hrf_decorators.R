@@ -240,9 +240,7 @@ normalize_hrf <- function(
 
   normalized_func <- function(t) {
     values <- hrf(t)
-    if (length(factor) == 1L) {
-      values / factor
-    } else if (is.matrix(values)) {
+    if (length(factor) > 1L && is.matrix(values)) {
       sweep(values, 2L, factor, "/")
     } else {
       values / factor

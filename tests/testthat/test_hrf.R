@@ -1215,3 +1215,141 @@ test_that("B-spline basis is zero at both ends of the span", {
   y <- evaluate(reg, g, precision = 0.1)
   expect_lt(max(abs(diff(y))), 0.05)
 })
+
+test_that("getHRF and make_hrf apply the same decorators as gen_hrf", {
+  t <- seq(-2, 40, by = 0.5)
+  h <- getHRF("gaussian", lag = 2, width = 3, summate = FALSE)
+  ref <- gen_hrf(HRF_GAUSSIAN, lag = 2, width = 3, summate = FALSE)
+  expect_equal(h(t), ref(t))
+  expect_equal(attr(h, "name"), "gaussian")
+  expect_equal(attr(h, "span"), attr(ref, "span"))
+  expect_equal(attr(h, "params"), attr(ref, "params"))
+
+  bs7 <- getHRF("bs", nbasis = 7, span = 30)
+  expect_s3_class(bs7, "BSpline_HRF")
+  expect_equal(nbasis(bs7), 7L)
+  expect_equal(attr(bs7, "name"), "bs")
+  expect_equal(getHRF("spmg2", normalize = TRUE)(t), normalise_hrf(HRF_SPMG2)(t))
+  expect_error(getHRF("spmg1", width = -1), "width > 0")
+  expect_error(gen_hrf(HRF_SPMG1, hrf_norm = "bogus"), "should be one of")
+
+  m <- make_hrf("fir", lag = 2, nbasis = 4)
+  expect_equal(nbasis(m), 4L)
+  expect_equal(m(t), lag_hrf(hrf_fir_generator(nbasis = 4), 2)(t))
+  expect_equal(make_hrf(HRF_SPMG1, lag = 0)(t), HRF_SPMG1(t))
+  expect_equal(nbasis(make_hrf(function(t) cbind(t, t), lag = 1, nbasis = 2)), 2L)
+  expect_error(make_hrf(3, lag = 1), "invalid basis function")
+})
+
+test_that("list_available_hrfs flags registry aliases of objects and generators", {
+  info <- list_available_hrfs(details = TRUE)
+  expect_equal(info$name[info$is_alias], c("gam", "bs"))
+  expect_equal(info$description[info$name == "gam"], "gam HRF (object) (alias)")
+  expect_equal(info$nbasis_default[info$name == "fir"], "12")
+  expect_equal(info$nbasis_default[info$name == "daguerre"], "3")
+})
+
+test_that("gen_hrf_lagged builds an HRF set for a vector of lags and keeps normalize", {
+  t <- seq(0, 30, by = 0.5)
+  expect_no_warning(set <- gen_hrf_lagged(HRF_SPMG1, lag = c(0, 2, 4)))
+  expect_s3_class(set, "HRF")
+  expect_equal(nbasis(set), 3L)
+  expect_equal(set(t), cbind(HRF_SPMG1(t), HRF_SPMG1(t - 2), HRF_SPMG1(t - 4)))
+  expect_equal(nbasis(gen_hrf_lagged(HRF_SPMG2, lag = c(1, 2))), 4L)
+
+  nset <- hrf_lagged(hrf_gaussian, lag = c(1, 3), normalize = TRUE, sd = 3)
+  vals <- nset(t)
+  expect_equal(apply(abs(vals), 2, max), c(1, 1))
+  g3 <- hrf_gaussian(t - 3, sd = 3)
+  expect_equal(vals[, 2], g3 / max(g3))
+
+  # a scalar lag still returns the lagged function itself
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5)(t), HRF_SPMG1(t - 5))
+  # normalising an all-zero stretch leaves zeros instead of NaN
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5, normalize = TRUE)(0:3), rep(0, 4))
+})
+
+test_that("as_hrf and gen_hrf accept function literals that deparse to several lines", {
+  h <- as_hrf(function(t) {
+    exp(-t / 5)
+  })
+  expect_s3_class(h, "HRF")
+  expect_length(attr(h, "name"), 1)
+  expect_equal(h(c(0, 5)), exp(-c(0, 5) / 5))
+
+  long <- as_hrf(function(t) dgamma(t, shape = 6, rate = 1) * 2 + dnorm(t, mean = 3, sd = 1))
+  expect_length(attr(long, "name"), 1)
+
+  g <- gen_hrf(function(t) {
+    exp(-t / 5)
+  }, lag = 1)
+  expect_length(attr(g, "name"), 1)
+  expect_equal(g(3), exp(-2 / 5))
+  expect_equal(attr(as_hrf(hrf_gamma), "name"), "hrf_gamma")
+})
+
+test_that("B-spline and tent bases evaluate on an empty grid", {
+  expect_no_warning(B <- hrf_bspline(numeric(0), N = 5))
+  expect_equal(dim(B), c(0L, 5L))
+  expect_identical(colnames(B), colnames(hrf_bspline(1, N = 5)))
+  expect_equal(dim(hrf_tent_generator(nbasis = 4)(numeric(0))), c(0L, 4L))
+  expect_no_warning(E <- HRF_BSPLINE(numeric(0)))
+  expect_equal(dim(E), c(0L, nbasis(HRF_BSPLINE)))
+})
+
+test_that("hrf_bspline_generator rejects a one-function cubic basis", {
+  # A cubic basis needs N >= 2; nbasis = 1 used to give an all-zero basis
+  # that warned on every evaluation
+  expect_error(hrf_bspline_generator(nbasis = 1), "at least 2")
+  expect_error(getHRF("bspline", nbasis = 1), "at least 2")
+  expect_no_warning(b2 <- hrf_bspline_generator(nbasis = 2)(seq(0, 24, by = 1)))
+  expect_equal(unname(b2), unname(hrf_bspline(seq(0, 24, by = 1), N = 2)))
+  expect_gt(max(b2), 0)
+})
+
+test_that("print.HRF shows vector-valued parameters readably", {
+  h <- hrf_weighted(c(1, 2, 3), width = 2)
+  out <- paste(capture.output(print(h)), collapse = "\n")
+  expect_match(out, "weights = [1, 2, 3]", fixed = TRUE)
+  expect_match(out, "times = [0.0000, 0.6667, 1.3333]", fixed = TRUE)
+  expect_false(grepl('c("', out, fixed = TRUE))
+  # scalar parameters print as before
+  expect_output(print(HRF_SPMG1), "Parameters: P1 = 5, P2 = 15, A1 = 0.008333", fixed = TRUE)
+})
+
+test_that("hrf_mexhat uses the unit-L2-norm Ricker normaliser", {
+  dt <- 0.001
+  for (sd in c(0.5, 2, 3.5)) {
+    mu <- 15 * sd # far enough from onset that the causal mask clips nothing
+    tt <- seq(mu - 12 * sd, mu + 12 * sd, by = dt)
+    y <- hrf_mexhat(tt, mean = mu, sd = sd)
+    expect_equal(sum(y^2) * dt, 1, tolerance = 1e-6)
+    expect_equal(hrf_mexhat(mu, mean = mu, sd = sd), 2 / (sqrt(3 * sd) * pi^(1/4)))
+  }
+  t <- seq(0, 20, by = 0.5)
+  expect_equal(hrf_mexhat(t, mean = 6, sd = 2),
+               2 / (sqrt(6) * pi^(1/4)) * (1 - ((t - 6) / 2)^2) * exp(-(t - 6)^2 / 8))
+})
+
+test_that("make_hrf() without nbasis gives basis sets their default size", {
+  # Previously nbasis defaulted to 1: "bspline" failed and "fir" gave one
+  # 24 s bin, also for regressor(hrf = "<name>"), which calls make_hrf().
+  expect_equal(nbasis(make_hrf("bspline", lag = 0)), nbasis(getHRF("bspline")))
+  expect_equal(nbasis(make_hrf("fir", lag = 1)), nbasis(getHRF("fir")))
+  expect_equal(nbasis(make_hrf("spmg3", lag = 0)), 3L)
+  expect_equal(nbasis(make_hrf(function(t) cbind(dnorm(t, 5), dnorm(t, 7)), lag = 0)), 2L)
+  expect_equal(nbasis(make_hrf("fir", lag = 0, nbasis = 3)), 3L)
+  reg <- regressor(c(2, 20), hrf = "bspline")
+  expect_equal(ncol(evaluate(reg, seq(0, 40, by = 2))), nbasis(getHRF("bspline")))
+  expect_error(make_hrf("fir", lag = 0, nbasis = 0), "positive integer")
+})
+
+test_that("gen_hrf_blocked() and hrf_blocked() are deprecated in favour of block_hrf()/gen_hrf()", {
+  t <- seq(0, 30, by = 0.5)
+  expect_warning(b1 <- gen_hrf_blocked(hrf_gaussian, width = 4),
+                 "`gen_hrf_blocked\\(\\)` is deprecated.*block_hrf", class = "deprecatedWarning")
+  expect_warning(b2 <- hrf_blocked(hrf_gaussian, width = 4),
+                 "`hrf_blocked\\(\\)` is deprecated", class = "deprecatedWarning")
+  expect_equal(b1(t), gen_hrf(hrf_gaussian, width = 4)(t))
+  expect_equal(b2(t), b1(t))
+})
