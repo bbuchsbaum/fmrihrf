@@ -178,3 +178,49 @@ test_that("base plot methods let ... override their default arguments", {
   expect_false(identical(render(HRF_SPMG1, ylab = "BOLD"), render(HRF_SPMG1)))
   expect_false(identical(render(HRF_SPMG3, labels = c("a", "b", "c")), render(HRF_SPMG3)))
 })
+
+# Calls and text drawn by a base-graphics plot, from its display list.
+base_display_list <- function(expr) {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  grDevices::dev.control("enable")
+  force(expr)
+  dl <- grDevices::recordPlot()[[1]]
+  fn <- function(e) {
+    f <- e[[2]][[1]]
+    if (is.list(f) && !is.null(f$name)) f$name else ""
+  }
+  list(calls = vapply(dl, fn, character(1)),
+       windows = lapply(dl[vapply(dl, fn, character(1)) == "C_plot_window"],
+                        function(e) e[[2]][[3]]),
+       text = unlist(lapply(dl, function(e) Filter(is.character, e[[2]][-1]))))
+}
+
+test_that("base-graphics plot_hrfs() and plot_regressors() honour layout, scales, subtitle and reference", {
+  # The use_ggplot = FALSE fallback used to draw a single overlay panel and
+  # ignore layout, scales, subtitle and the reference caption.
+  panels <- function(d) sum(d$calls == "C_plot_new")
+  d <- base_display_list(plot_hrfs(HRF_SPMG1, HRF_GAMMA, HRF_GAUSSIAN,
+                                   layout = "stack", use_ggplot = FALSE))
+  expect_equal(panels(d), 3)
+  d <- base_display_list(plot_hrfs(HRF_SPMG1, HRF_GAMMA, use_ggplot = FALSE))
+  expect_equal(panels(d), 1)
+
+  for (layout in c("overlay", "stack")) {
+    d <- base_display_list(plot_hrfs(HRF_GAMMA, HRF_GAUSSIAN, layout = layout,
+                                     subtitle = "two shapes", reference = HRF_SPMG1,
+                                     use_ggplot = FALSE))
+    expect_true("two shapes" %in% d$text)
+    expect_true("Dashed grey: SPMG1" %in% d$text)
+  }
+
+  r1 <- regressor(c(10, 30, 50), HRF_SPMG1)
+  r2 <- regressor(c(15, 45), HRF_GAMMA, duration = 4)
+  d <- base_display_list(plot_regressors(r1, r2, layout = "stack", scales = "fixed",
+                                         subtitle = "sub", use_ggplot = FALSE))
+  expect_equal(panels(d), 2)
+  expect_true("sub" %in% d$text)
+  expect_identical(d$windows[[1]], d$windows[[2]])
+  d <- base_display_list(plot_regressors(r1, r2, layout = "stack", use_ggplot = FALSE))
+  expect_false(identical(d$windows[[1]], d$windows[[2]]))
+})

@@ -211,11 +211,10 @@ plot_hrfs <- function(..., time = NULL, normalize = FALSE, labels = NULL,
     return(.finish_gg(df, p, draw))
   }
   if (draw) {
-    .base_series_panel(time, resp, pal$colours, labels = series_labels,
-                       main = title, ylab = ylab)
-    if (!is.null(ref_df)) {
-      graphics::lines(ref_df$time, ref_df$response, col = .hrf_neutral, lty = 2)
-    }
+    .base_series_plot(time, resp, pal$colours, series_labels, title = title,
+                      subtitle = subtitle, ylab = ylab, layout = layout,
+                      scales = scales, reference = ref_df,
+                      caption = if (!is.null(ref_df)) paste("Dashed grey:", reference_label))
   }
   invisible(df)
 }
@@ -288,38 +287,21 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
   response <- evaluate(x, grid, precision = .plot_precision(precision, grid))
   onset_col <- grDevices::adjustcolor(onset_color %||% .hrf_neutral,
                                       alpha.f = onset_alpha)
-  marks <- if (show_onsets) x$onsets else NULL
   nb <- NCOL(response)
   stacked <- is.matrix(response) && layout == "stack" && nb > 1
+  labels <- paste0("B", seq_len(nb))
+  xlab <- "Time (s)"
   if (stacked) {
     # Stacked panels share one time-axis label (xlab); ylab labels the panels.
-    xlab <- args[["xlab"]] %||% "Time (s)"
-    ylab <- rep_len(args[["ylab"]] %||% paste0("B", seq_len(nb)), nb)
+    xlab <- args[["xlab"]] %||% xlab
+    labels <- rep_len(args[["ylab"]] %||% labels, nb)
     args[["xlab"]] <- args[["ylab"]] <- NULL
   }
-  panel <- function(...) do.call(.base_series_panel, .override(list(...), args))
-
-  if (stacked) {
-    cols <- .basis_palette(nb)
-    op <- graphics::par(mfrow = c(nb, 1), mar = c(1.6, 4.1, 1.4, 1.1),
-                        oma = c(2.6, 0, 1.8, 0))
-    on.exit(graphics::par(op), add = TRUE)
-    for (j in seq_len(nb)) {
-      panel(grid, response[, j], cols[j], main = NULL, xlab = "", ylab = ylab[j],
-            onsets = marks, onset_col = onset_col, legend = FALSE,
-            xaxt = if (j < nb) "n" else "s")
-    }
-    graphics::mtext(xlab, side = 1, outer = TRUE, line = 1.2,
-                    cex = graphics::par("cex.lab") %||% 1)
-    graphics::mtext(title, side = 3, outer = TRUE, line = 0.4, adj = 0,
-                    font = 2)
-  } else if (is.matrix(response)) {
-    panel(grid, response, .basis_palette(nb), labels = paste0("B", seq_len(nb)),
-          main = title, onsets = marks, onset_col = onset_col)
-  } else {
-    panel(grid, response, hrf_palette(1), main = title, onsets = marks,
-          onset_col = onset_col)
-  }
+  colours <- if (is.matrix(response)) .basis_palette(nb) else hrf_palette(1)
+  .base_series_plot(grid, response, colours, labels, title = title, xlab = xlab,
+                    layout = if (stacked) "stack" else "overlay",
+                    onsets = if (show_onsets) x$onsets, onset_col = onset_col,
+                    panel_args = args)
   invisible(.wide_frame(grid, response))
 }
 
@@ -492,13 +474,16 @@ plot_regressors <- function(..., grid = NULL, labels = NULL,
     return(.finish_gg(df, p, draw))
   }
   if (draw) {
-    .base_series_panel(grid, resp, pal$colours, labels = series_labels,
-                       main = title, onsets = unique(onset_data$onset),
-                       onset_col = grDevices::adjustcolor(.hrf_neutral, alpha.f = onset_alpha))
-    if (!is.null(sample_data)) {
-      graphics::points(sample_data$time, sample_data$response, pch = 19, cex = 0.6,
-                       col = pal$colours[as.integer(sample_data$series)])
+    per_series <- function(d) {
+      if (!is.null(d)) unname(split(d, factor(d$series, levels = series_labels)))
     }
+    .base_series_plot(grid, resp, pal$colours, series_labels, title = title,
+                      subtitle = subtitle, layout = layout, scales = scales,
+                      onsets = if (!is.null(onset_data)) lapply(per_series(onset_data), `[[`, "onset"),
+                      by_series = isTRUE(attr(onset_data, "by_series")) &&
+                        layout == "overlay",
+                      onset_col = grDevices::adjustcolor(.hrf_neutral, alpha.f = onset_alpha),
+                      samples = per_series(sample_data))
   }
   invisible(df)
 }

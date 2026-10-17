@@ -117,6 +117,14 @@
   `plot_regressors()` result without an attached ggplot returns the object
   unchanged.
 
+* `plot_hrfs()` and `plot_regressors()` with `use_ggplot = FALSE` now honour
+  `layout = "stack"` (one panel per curve on a shared time axis), `scales`,
+  `subtitle` and, for `plot_hrfs()`, the reference caption. The base-graphics
+  fallback used to draw every curve in one panel and ignore these arguments.
+  It also colours event marks by regressor for `show_onsets = TRUE`, as
+  documented, and draws sample points in each panel. `plot()` on regressors
+  shares the same code and is unchanged.
+
 * The `fmrihrf` command-line tool:
   - validates every option value it is given, so `--nbasis x`, `--span 2,3`
     or an empty `--output=` (which discarded the output) are usage errors
