@@ -1316,3 +1316,17 @@ test_that("print.HRF shows vector-valued parameters readably", {
   # scalar parameters print as before
   expect_output(print(HRF_SPMG1), "Parameters: P1 = 5, P2 = 15, A1 = 0.008333", fixed = TRUE)
 })
+
+test_that("hrf_mexhat uses the unit-L2-norm Ricker normaliser", {
+  dt <- 0.001
+  for (sd in c(0.5, 2, 3.5)) {
+    mu <- 15 * sd # far enough from onset that the causal mask clips nothing
+    tt <- seq(mu - 12 * sd, mu + 12 * sd, by = dt)
+    y <- hrf_mexhat(tt, mean = mu, sd = sd)
+    expect_equal(sum(y^2) * dt, 1, tolerance = 1e-6)
+    expect_equal(hrf_mexhat(mu, mean = mu, sd = sd), 2 / (sqrt(3 * sd) * pi^(1/4)))
+  }
+  t <- seq(0, 20, by = 0.5)
+  expect_equal(hrf_mexhat(t, mean = 6, sd = 2),
+               2 / (sqrt(6) * pi^(1/4)) * (1 - ((t - 6) / 2)^2) * exp(-(t - 6)^2 / 8))
+})

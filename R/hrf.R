@@ -644,7 +644,10 @@ list_available_hrfs <- function(details = FALSE) {
 #'
 #' @return 
 #' When called as functions, return numeric vectors or matrices of HRF values.
-#' When used as objects, they are HRF objects with class \code{c("HRF", "function")}.
+#' When used as objects, they are HRF objects with class \code{c("HRF", "function")};
+#' \code{HRF_SPMG1}, \code{HRF_SPMG2} and \code{HRF_SPMG3} are additionally
+#' classed \code{"SPMG1_HRF"}, \code{"SPMG2_HRF"} and \code{"SPMG3_HRF"}, which
+#' select analytic \code{\link{deriv}} and \code{\link{penalty_matrix}} methods.
 #' 
 #' @examples
 #' # Evaluate HRFs at specific time points
@@ -711,6 +714,8 @@ HRF_GAUSSIAN <- as_hrf(hrf_gaussian, name="gaussian", params=list(mean=6, sd=2))
 #' @rdname HRF_objects
 #' @export
 HRF_SPMG1 <- as_hrf(hrf_spmg1, name="SPMG1", params=list(P1=5, P2=15, A1=1/120))
+# Subclass (like SPMG2/SPMG3) so deriv() dispatches to the analytic derivative
+class(HRF_SPMG1) <- c("SPMG1_HRF", class(HRF_SPMG1))
 
 #' @rdname HRF_objects
 #' @export

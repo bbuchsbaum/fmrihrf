@@ -19,6 +19,15 @@ A numeric vector representing the Mexican hat wavelet-based HRF at the given tim
 \description{
 The `hrf_mexhat` function computes the Mexican hat wavelet-based HRF (hemodynamic response function) at given time points `t`.
 }
+\details{
+The response is the Ricker (Mexican hat) wavelet centred at
+  \code{mean} with width \code{sd}, set to zero before onset (\code{t < 0}):
+  \deqn{h(t) = \frac{2}{\sqrt{3\,sd}\,\pi^{1/4}}
+    \left(1 - \left(\frac{t - mean}{sd}\right)^2\right)
+    \exp\left(-\frac{(t - mean)^2}{2\,sd^2}\right).}{h(t) = 2 / (sqrt(3 * sd) * pi^(1/4)) *
+    (1 - ((t - mean) / sd)^2) * exp(-(t - mean)^2 / (2 * sd^2)).}
+  The normalising constant gives the un-truncated wavelet unit L2 norm.
+}
 \examples{
 # Compute the Mexican hat HRF representation for time points from 0 to 20 with 0.5 increments
 hrf_mexhat_vals <- hrf_mexhat(seq(0, 20, by = .5), mean = 6, sd = 2)

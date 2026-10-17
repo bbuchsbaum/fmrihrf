@@ -30,7 +30,10 @@ HRF_FIR(t)
 }
 \value{
 When called as functions, return numeric vectors or matrices of HRF values.
-When used as objects, they are HRF objects with class \code{c("HRF", "function")}.
+When used as objects, they are HRF objects with class \code{c("HRF", "function")};
+\code{HRF_SPMG1}, \code{HRF_SPMG2} and \code{HRF_SPMG3} are additionally
+classed \code{"SPMG1_HRF"}, \code{"SPMG2_HRF"} and \code{"SPMG3_HRF"}, which
+select analytic \code{\link{deriv}} and \code{\link{penalty_matrix}} methods.
 }
 \description{
 A collection of pre-defined HRF objects for common fMRI analysis scenarios.
