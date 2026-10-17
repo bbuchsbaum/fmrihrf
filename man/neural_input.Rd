@@ -24,7 +24,7 @@ neural_input(x, ...)
 A list containing:
 \describe{
     \item{time}{Numeric vector of time points}
-    \item{neural_input}{Numeric vector of input amplitudes at each time point}
+    \item{neural_input}{Numeric vector of the stimulus density at each time point (see method details)}
 }
 }
 \description{
