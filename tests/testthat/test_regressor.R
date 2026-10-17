@@ -154,3 +154,54 @@ test_that("evaluate.Reg validates normalize argument", {
   expect_error(evaluate(reg, 0:1, normalize = NA), "normalize")
   expect_error(evaluate(reg, 0:1, normalize = 1), "normalize")
 })
+
+test_that("conv matches a full convolution of the fine-grid impulse train", {
+  # Reference: unit-mass impulses split linearly over the two bracketing
+  # fine-grid bins, convolved with the sampled kernel over the whole fine
+  # grid, then linearly interpolated onto the evaluation grid.
+  conv_reference <- function(grid, onsets, amp, hrf, dt) {
+    span <- attr(hrf, "span")
+    hmat <- as.matrix(evaluate(hrf, seq(0, span, by = dt)))
+    start <- min(grid) - span
+    end <- max(grid, onsets) + span
+    n <- floor((end - start) / dt) + 1
+    neural <- numeric(n + 1)
+    pos <- (onsets - start) / dt
+    a <- floor(pos)
+    for (i in which(pos >= 0)) {  # earlier events end before the grid's reach
+      neural[a[i] + 1:2] <- neural[a[i] + 1:2] + amp[i] * c(1 - (pos[i] - a[i]), pos[i] - a[i])
+    }
+    neural <- neural[seq_len(n)]
+    fine <- start + (seq_len(n) - 1) * dt
+    out <- vapply(seq_len(ncol(hmat)), function(b) {
+      h <- hmat[, b]
+      full <- vapply(seq_len(n), function(k) {
+        lags <- seq_len(min(k, length(h)))
+        sum(h[lags] * neural[k - lags + 1])
+      }, numeric(1))
+      stats::approx(fine, full, grid, rule = 2)$y
+    }, numeric(length(grid)))
+    matrix(out, nrow = length(grid))
+  }
+
+  onsets <- c(3.17, 20, 41.9, 42.4, 75)
+  amp <- c(1, -0.5, 2, 1.25, 0.8)
+  grids <- list(
+    scans = seq(1, by = 2, length.out = 45),
+    denser_than_fine = seq(0, 30, by = 0.1),
+    irregular = c(0.5, 0.52, 7, 7, 33.3, 61, 88.8, 120),
+    single = 44.4
+  )
+  for (hrf in list(HRF_SPMG1, HRF_SPMG3)) {
+    reg <- regressor(onsets, hrf, amplitude = amp)
+    for (dt in c(0.1, 0.33, 1)) {
+      for (g in names(grids)) {
+        expected <- conv_reference(grids[[g]], onsets, amp, hrf, dt)
+        if (nbasis(hrf) == 1) expected <- as.vector(expected)
+        expect_equal(evaluate(reg, grids[[g]], precision = dt), expected,
+                     tolerance = 1e-10,
+                     info = paste(attr(hrf, "name"), dt, g))
+      }
+    }
+  }
+})
