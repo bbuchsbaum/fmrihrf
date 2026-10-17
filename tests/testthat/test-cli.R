@@ -33,6 +33,36 @@ test_that("parser handles boolean flags, negation and required options", {
   expect_equal(status, 1L)
 })
 
+test_that("every supplied option value is validated, whether used or not", {
+  invalid <- list(
+    c("eval", "--nbasis", "x"),
+    c("eval", "--nbasis", "2.5"),
+    c("eval", "--span", "2,3"),
+    c("eval", "--times", "0,1", "--from", "x"),
+    c("eval", "--times", "0,1", "--by", "0"),
+    c("eval", "--output="),
+    c("regressor", "--onsets", "0", "--blocklens", "4", "--tr", "1", "--to", "x"),
+    c("regressor", "--onsets", "0", "--start-time", "x"),
+    c("regressor", "--events", "events.csv", "--duration", "x"),
+    c("design", "--events", "events.csv", "--blocklens", "6", "--tr", "1",
+      "--nbasis", "x")
+  )
+  for (args in invalid) {
+    expect_equal(suppressMessages(fmrihrf_cli(args)), 2L,
+                 info = paste(args, collapse = " "))
+  }
+  expect_message(fmrihrf_cli(c("eval", "--nbasis", "x")),
+                 "--nbasis must contain only numeric values", fixed = TRUE)
+
+  # Valid values of options that the chosen HRF or grid does not use still work
+  out <- capture.output(status <- fmrihrf_cli(c(
+    "eval", "--hrf", "spmg1", "--nbasis", "3", "--span", "30",
+    "--times", "0,1", "--from", "5", "--by", "2"
+  )))
+  expect_equal(status, 0L)
+  expect_equal(length(out), 3L)
+})
+
 test_that("parser supports equals values and negative numeric values", {
   out <- capture.output(
     status <- fmrihrf_cli(c("eval", "--hrf=spmg1", "--times", "-0.5,0,0.5"))
