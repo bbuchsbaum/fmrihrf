@@ -23,8 +23,7 @@ Reg <- function(onsets, hrf=HRF_SPMG1, duration=0, amplitude=1, span=40,
   duration  <- as.numeric(duration)
   amplitude <- as.numeric(amplitude)
 
-  assert_that(is.logical(summate), length(summate) == 1)
-  summate   <- as.logical(summate)
+  assert_that(is.logical(summate), length(summate) == 1, !is.na(summate))
   assert_that(is.logical(drop_zero_amplitude), length(drop_zero_amplitude) == 1,
               !is.na(drop_zero_amplitude))
   drop_zero_amplitude <- isTRUE(drop_zero_amplitude)

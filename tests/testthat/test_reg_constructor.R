@@ -12,6 +12,13 @@ test_that("Reg validates inputs", {
   expect_error(fmrihrf:::Reg(onsets = c(0,1), amplitude = c(1,2,3)), "amplitude")
 })
 
+test_that("Reg rejects a missing summate flag", {
+  # NA used to be accepted: conv treated it as FALSE while loop errored.
+  expect_error(regressor(onsets = 1, summate = NA), "summate")
+  expect_error(regressor(onsets = 1, summate = c(TRUE, FALSE)), "summate")
+  expect_error(regressor(onsets = 1, summate = "yes"), "summate")
+})
+
 # Verify single_trial_regressor construction and errors
 
 test_that("single_trial_regressor constructs single event", {
