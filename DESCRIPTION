@@ -11,7 +11,6 @@ Description: Creates, manipulates, and evaluates hemodynamic response functions
     on standard fMRI analysis techniques as described in Jezzard et al. (2001, ISBN:9780192630711).
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.3
 Imports:
     Rcpp,
@@ -22,6 +21,7 @@ Imports:
     cli,
     jsonlite,
     memoise,
+    cachem,
     numDeriv,
     splines,
     pracma

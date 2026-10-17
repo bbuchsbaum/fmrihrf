@@ -1,32 +1,22 @@
 #' @importFrom memoise memoise
 #' @keywords internal
 #' @noRd
-# Bounded in-memory LRU cache for HRF evaluations to prevent
-# unbounded growth in long-running sessions. If cachem isn't
-# available at runtime, fall back to memoise's default memory cache.
-.hrf_eval_cache <- tryCatch(
-  cachem::cache_mem(
-    max_size = getOption("fmrihrf.hrf_cache_max_size", 50 * 1024^2), # 50 MB default
-    evict = "lru"
-  ),
-  error = function(e) memoise::cache_memory()
-)
-
-.memo_hrf <- memoise::memoise(
-  function(hrf, span, dt) {
-    if (!is.numeric(span) || length(span) != 1 || span <= 0) {
-        stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
-    }
-    if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
-        stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
-    }
-    times <- seq(0, span, by = dt)
-    # Evaluate HRF - ensure it returns a matrix
-    val <- fmrihrf::evaluate(hrf, times)
-    if (is.vector(val)) matrix(val, ncol = 1) else val
-  },
-  cache = .hrf_eval_cache
-)
+# HRF sampled on [0, span] at step dt, as a matrix. .onLoad() (zzz.R) replaces
+# this with a memoised version backed by a bounded LRU cache, so the cache and
+# its `fmrihrf.hrf_cache_max_size` option are set up when the package is loaded
+# rather than when it is built.
+.memo_hrf <- function(hrf, span, dt) {
+  if (!is.numeric(span) || length(span) != 1 || span <= 0) {
+      stop("`span` must be a single numeric value strictly greater than 0.", call. = FALSE)
+  }
+  if (!is.numeric(dt) || length(dt) != 1 || dt <= 0) {
+      stop("`dt` must be a single numeric value strictly greater than 0.", call. = FALSE)
+  }
+  times <- seq(0, span, by = dt)
+  # Evaluate HRF - ensure it returns a matrix
+  val <- fmrihrf::evaluate(hrf, times)
+  if (is.vector(val)) matrix(val, ncol = 1) else val
+}
 
 #' Prepare Inputs for Regressor Evaluation Engines
 #'
