@@ -47,18 +47,18 @@ plot.HRF <- function(x, time = NULL, normalize = FALSE, show_peak = TRUE, ...) {
   if (is.matrix(y)) {
     nb <- ncol(y)
     cols <- .basis_palette(nb)
-    do.call(.base_series_panel, c(list(time = time, Y = y, colours = cols,
-                                       labels = paste0("B", seq_len(nb)),
-                                       main = main, ylab = ylab), args))
+    do.call(.base_series_panel, .override(list(time = time, Y = y, colours = cols,
+                                               labels = paste0("B", seq_len(nb)),
+                                               main = main, ylab = ylab), args))
   } else {
     if (show_peak && length(y) > 0 && is.null(args$ylim)) {
       limits <- range(y, 0, finite = TRUE)
       limits[2] <- limits[2] + max(diff(limits), abs(limits[2]), 1e-6) * 0.18
       args$ylim <- limits
     }
-    do.call(.base_series_panel, c(list(time = time, Y = y,
-                                       colours = hrf_palette(1),
-                                       main = main, ylab = ylab), args))
+    do.call(.base_series_panel, .override(list(time = time, Y = y,
+                                               colours = hrf_palette(1),
+                                               main = main, ylab = ylab), args))
     if (show_peak && length(y) > 0) {
       peak_idx <- which.max(y)
       graphics::points(time[peak_idx], y[peak_idx], pch = 19, cex = 0.9,
@@ -275,11 +275,13 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
 }
 
 # Shared base-graphics body for plot.Reg() and plot.FeatureReg(): evaluate `x`
-# (by default on .reg_plot_grid()) and draw it. A `main` passed through the
-# methods' `...` replaces the default title.
+# (by default on .reg_plot_grid()) and draw it. Arguments in `...` override
+# the defaults used here; `main` replaces the default title.
 .plot_reg_base <- function(x, grid, precision, title, show_onsets,
-                           onset_color, onset_alpha, layout, main = NULL, ...) {
-  title <- main %||% title
+                           onset_color, onset_alpha, layout, ...) {
+  args <- list(...)
+  title <- args[["main"]] %||% title
+  args[["main"]] <- NULL
   if (is.null(grid)) {
     grid <- .reg_plot_grid(list(x))
   }
@@ -287,31 +289,36 @@ plot.Reg <- function(x, grid = NULL, show_onsets = TRUE,
   onset_col <- grDevices::adjustcolor(onset_color %||% .hrf_neutral,
                                       alpha.f = onset_alpha)
   marks <- if (show_onsets) x$onsets else NULL
+  nb <- NCOL(response)
+  stacked <- is.matrix(response) && layout == "stack" && nb > 1
+  if (stacked) {
+    # Stacked panels share one time-axis label (xlab); ylab labels the panels.
+    xlab <- args[["xlab"]] %||% "Time (s)"
+    ylab <- rep_len(args[["ylab"]] %||% paste0("B", seq_len(nb)), nb)
+    args[["xlab"]] <- args[["ylab"]] <- NULL
+  }
+  panel <- function(...) do.call(.base_series_panel, .override(list(...), args))
 
-  if (is.matrix(response)) {
-    nb <- ncol(response)
+  if (stacked) {
     cols <- .basis_palette(nb)
-    if (layout == "stack" && nb > 1) {
-      op <- graphics::par(mfrow = c(nb, 1), mar = c(1.6, 4.1, 1.4, 1.1),
-                          oma = c(2.6, 0, 1.8, 0))
-      on.exit(graphics::par(op), add = TRUE)
-      for (j in seq_len(nb)) {
-        .base_series_panel(grid, response[, j], cols[j], main = NULL,
-                           xlab = "", ylab = paste0("B", j), onsets = marks,
-                           onset_col = onset_col, legend = FALSE,
-                           xaxt = if (j < nb) "n" else "s", ...)
-      }
-      graphics::mtext("Time (s)", side = 1, outer = TRUE, line = 1.2,
-                      cex = graphics::par("cex.lab") %||% 1)
-      graphics::mtext(title, side = 3, outer = TRUE, line = 0.4, adj = 0,
-                      font = 2)
-    } else {
-      .base_series_panel(grid, response, cols, labels = paste0("B", seq_len(nb)),
-                         main = title, onsets = marks, onset_col = onset_col, ...)
+    op <- graphics::par(mfrow = c(nb, 1), mar = c(1.6, 4.1, 1.4, 1.1),
+                        oma = c(2.6, 0, 1.8, 0))
+    on.exit(graphics::par(op), add = TRUE)
+    for (j in seq_len(nb)) {
+      panel(grid, response[, j], cols[j], main = NULL, xlab = "", ylab = ylab[j],
+            onsets = marks, onset_col = onset_col, legend = FALSE,
+            xaxt = if (j < nb) "n" else "s")
     }
+    graphics::mtext(xlab, side = 1, outer = TRUE, line = 1.2,
+                    cex = graphics::par("cex.lab") %||% 1)
+    graphics::mtext(title, side = 3, outer = TRUE, line = 0.4, adj = 0,
+                    font = 2)
+  } else if (is.matrix(response)) {
+    panel(grid, response, .basis_palette(nb), labels = paste0("B", seq_len(nb)),
+          main = title, onsets = marks, onset_col = onset_col)
   } else {
-    .base_series_panel(grid, response, hrf_palette(1), main = title,
-                       onsets = marks, onset_col = onset_col, ...)
+    panel(grid, response, hrf_palette(1), main = title, onsets = marks,
+          onset_col = onset_col)
   }
   invisible(.wide_frame(grid, response))
 }
