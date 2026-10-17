@@ -45,7 +45,8 @@ A list containing:
 
 - neural_input:
 
-  Numeric vector of input amplitudes at each time point
+  Numeric vector of the stimulus density at each time point (see method
+  details)
 
 ## Details
 
@@ -64,6 +65,22 @@ A list containing:
 - visualization:
 
   Visualizing the temporal structure of experimental designs
+
+For a `Reg` object the input is built exactly as the default `"conv"`
+engine of
+[`evaluate`](https://bbuchsbaum.github.io/fmrihrf/reference/evaluate.md)
+builds it, on the time grid `seq(start, end, by = resolution)`. A point
+event (duration 0) is an impulse of mass `amplitude`, split linearly
+between the two samples bracketing its onset. A block is projected onto
+linear (hat) basis functions centred on the samples, with both edges at
+their exact positions, so it carries mass `amplitude * duration`
+(divided by `duration` when the regressor has `summate = FALSE`),
+however short it is. The values are a density, mass per second: a block
+is `amplitude` high away from its edges, a point event is a spike of
+area `amplitude`, and `sum(neural_input) * resolution` is the input mass
+inside the window. Convolving `neural_input * resolution` with the HRF
+sampled every `resolution` seconds is the convolution that
+`evaluate(x, grid, precision = resolution)` computes.
 
 ## See also
 

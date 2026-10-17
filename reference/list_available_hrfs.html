@@ -59,7 +59,9 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with columns: name, type (object/generator), nbasis_default.</p>
+    <p>A data frame with columns <code>name</code>, <code>type</code>
+  (<code>"object"</code> or <code>"generator"</code>), <code>nbasis_default</code> and
+  <code>is_alias</code>, plus <code>description</code> when <code>details = TRUE</code>.</p>
     </div>
 
     <div class="section level2">
@@ -78,8 +80,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8   fourier generator              5    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  daguerre generator              3    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10      fir generator             12    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator       variable    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13       bs generator              5     TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># List with details</span></span></span>
@@ -96,8 +98,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8   fourier generator              5    FALSE   fourier HRF (generator) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9  daguerre generator              3    FALSE  daguerre HRF (generator) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10      fir generator             12    FALSE       fir HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator       variable    FALSE       lwu HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1    FALSE          gam HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator              1    FALSE       lwu HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1     TRUE   gam HRF (object) (alias)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13       bs generator              5     TRUE bs HRF (generator) (alias)</span>
 </code></pre></div>
     </div>

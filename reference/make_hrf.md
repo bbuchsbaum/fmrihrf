@@ -8,7 +8,7 @@ object.
 ## Usage
 
 ``` r
-make_hrf(basis, lag, nbasis = 1)
+make_hrf(basis, lag, nbasis = NULL)
 ```
 
 ## Arguments
@@ -24,8 +24,11 @@ make_hrf(basis, lag, nbasis = 1)
 
 - nbasis:
 
-  Integer specifying the number of basis functions when \`basis\` is
-  provided as a name.
+  Number of basis functions. \`NULL\` (the default) gives a basis-set
+  name such as \`"bspline"\` or \`"fir"\` the default size used by
+  \[getHRF()\], and a plain function as many basis functions as the
+  columns it returns. Ignored for fixed HRFs such as \`"spmg1"\` or an
+  \`HRF\` object.
 
 ## Value
 

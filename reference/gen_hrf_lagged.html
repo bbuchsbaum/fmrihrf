@@ -73,7 +73,9 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A function representing the lagged HRF. If `lag` is a vector of lags, the function returns an HRF set.</p>
+    <p>For a scalar `lag`, a function of `t` giving the lagged response. For a
+  vector of lags, an `HRF` basis set (see <code><a href="hrf_set.html">hrf_set</a></code>) with
+  <code>nbasis(hrf)</code> columns per lag.</p>
 <p>an lagged hrf function</p>
     </div>
     <div class="section level2">
@@ -81,13 +83,6 @@
 
 <ul><li><p><code>hrf_lagged()</code>: alias for gen_hrf_lagged</p></li>
 </ul></div>
-    <div class="section level2">
-    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other gen_hrf:
-<code><a href="gen_hrf_blocked.html">gen_hrf_blocked()</a></code></p>
-<p>Other gen_hrf:
-<code><a href="gen_hrf_blocked.html">gen_hrf_blocked()</a></code></p></div>
-    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

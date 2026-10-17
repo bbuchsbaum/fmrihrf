@@ -58,7 +58,7 @@
 
 - [`gen_hrf_blocked()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_blocked.md)
   [`hrf_blocked()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_blocked.md)
-  : Generate a Blocked HRF Function
+  : Generate a Blocked HRF Function (deprecated)
 
 - [`gen_hrf_lagged()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_lagged.md)
   [`hrf_lagged()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_lagged.md)
@@ -189,7 +189,7 @@
   : Print method for Reg objects
 
 - [`reconstruction_matrix()`](https://bbuchsbaum.github.io/fmrihrf/reference/reconstruction_matrix.md)
-  : Combine HRF Basis with Coefficients
+  : Reconstruction matrix for an HRF basis
 
 - [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md)
   : Construct a Regressor Object

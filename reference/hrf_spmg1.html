@@ -62,7 +62,9 @@
 
 
 <dt id="arg-p-">P2<a class="anchor" aria-label="anchor" href="#arg-p-"></a></dt>
-<dd><p>The second exponent parameter (default: 15).</p></dd>
+<dd><p>The second exponent parameter (default: 15). The undershoot is
+<code>t^P2 * exp(-t) / (6 * factorial(P2))</code>, one sixth of a gamma density
+with shape <code>P2 + 1</code> and unit rate.</p></dd>
 
 
 <dt id="arg-a-">A1<a class="anchor" aria-label="anchor" href="#arg-a-"></a></dt>

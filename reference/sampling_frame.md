@@ -13,7 +13,8 @@ sampling_frame(blocklens, TR, start_time = TR/2, precision = 0.1)
 
 - blocklens:
 
-  A numeric vector representing the number of scans in each block.
+  A numeric vector representing the number of scans in each block
+  (positive whole numbers).
 
 - TR:
 

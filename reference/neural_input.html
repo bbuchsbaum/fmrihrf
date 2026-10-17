@@ -85,7 +85,7 @@ neural activity before HRF convolution. This function is useful for:</p>
 <dd><p>Numeric vector of time points</p></dd>
 
     <dt>neural_input</dt>
-<dd><p>Numeric vector of input amplitudes at each time point</p></dd>
+<dd><p>Numeric vector of the stimulus density at each time point (see method details)</p></dd>
 
 
 </dl></div>
@@ -105,7 +105,21 @@ neural activity before HRF convolution. This function is useful for:</p>
 <dd><p>Visualizing the temporal structure of experimental designs</p></dd>
 
 
-</dl></div>
+</dl><p>For a <code>Reg</code> object the input is built exactly as the default
+<code>"conv"</code> engine of <code><a href="evaluate.html">evaluate</a></code> builds it, on the time grid
+<code>seq(start, end, by = resolution)</code>. A point event (duration 0) is an
+impulse of mass <code>amplitude</code>, split linearly between the two samples
+bracketing its onset. A block is projected onto linear (hat) basis
+functions centred on the samples, with both edges at their exact
+positions, so it carries mass <code>amplitude * duration</code> (divided by
+<code>duration</code> when the regressor has <code>summate = FALSE</code>), however
+short it is. The values are a density, mass per second: a block is
+<code>amplitude</code> high away from its edges, a point event is a spike of area
+<code>amplitude</code>, and <code>sum(neural_input) * resolution</code> is the input
+mass inside the window. Convolving <code>neural_input * resolution</code> with
+the HRF sampled every <code>resolution</code> seconds is the convolution that
+<code>evaluate(x, grid, precision = resolution)</code> computes.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="regressor.html">regressor</a></code>, <code><a href="evaluate.html">evaluate.Reg</a></code>, <code><a href="HRF_objects.html">HRF_SPMG1</a></code></p></div>

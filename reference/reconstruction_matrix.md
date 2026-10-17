@@ -1,8 +1,7 @@
-# Combine HRF Basis with Coefficients
+# Reconstruction matrix for an HRF basis
 
-Create a new HRF by linearly weighting the basis functions of an
-existing HRF. This is useful for turning estimated basis coefficients
-into a single functional HRF.
+Returns a matrix \\\Phi\\ that converts basis coefficients into a
+sampled HRF shape.
 
 S3 method for \`HRF\` objects that returns a matrix mapping basis
 coefficients to sampled HRF values at the provided time grid. For
@@ -40,13 +39,6 @@ reconstruction_matrix(hrf, sframe, ...)
 A numeric matrix with one column per basis function.
 
 A numeric matrix of dimension \`length(times) x nbasis(hrf)\`.
-
-## Details
-
-Reconstruction matrix for an HRF basis
-
-Returns a matrix \\\Phi\\ that converts basis coefficients into a
-sampled HRF shape.
 
 ## Examples
 

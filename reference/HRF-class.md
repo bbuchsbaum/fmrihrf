@@ -55,7 +55,7 @@ function-based HRF with longer tail
 \*\*Flexible basis sets:\*\* \* \`"bspline"\` or \`"bs"\` or
 \`HRF_BSPLINE\`: B-spline basis for flexible HRF modeling \* \`"tent"\`:
 Tent (triangular) basis functions for flexible HRF modeling \*
-\`"daguerre"\` or \`HRF_DAGUERRE\`: Daguerre basis functions
+\`"daguerre"\`: Daguerre basis functions
 
 To see a complete list of available HRF types with details, use the
 \`list_available_hrfs()\` function.
@@ -79,7 +79,7 @@ list_available_hrfs(details = TRUE)
 #> 8   fourier generator              5    FALSE   fourier HRF (generator) 
 #> 9  daguerre generator              3    FALSE  daguerre HRF (generator) 
 #> 10      fir generator             12    FALSE       fir HRF (generator) 
-#> 11      lwu generator       variable    FALSE       lwu HRF (generator) 
-#> 12      gam    object              1    FALSE          gam HRF (object) 
+#> 11      lwu generator              1    FALSE       lwu HRF (generator) 
+#> 12      gam    object              1     TRUE   gam HRF (object) (alias)
 #> 13       bs generator              5     TRUE bs HRF (generator) (alias)
 ```

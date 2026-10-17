@@ -33,7 +33,12 @@ HRF_FIR(t)
 
 When called as functions, return numeric vectors or matrices of HRF
 values. When used as objects, they are HRF objects with class
-`c("HRF", "function")`.
+`c("HRF", "function")`; `HRF_SPMG1`, `HRF_SPMG2` and `HRF_SPMG3` are
+additionally classed `"SPMG1_HRF"`, `"SPMG2_HRF"` and `"SPMG3_HRF"`,
+which select analytic
+[`deriv`](https://bbuchsbaum.github.io/fmrihrf/reference/deriv.md) and
+[`penalty_matrix`](https://bbuchsbaum.github.io/fmrihrf/reference/penalty_matrix.md)
+methods.
 
 ## Details
 

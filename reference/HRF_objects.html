@@ -78,7 +78,10 @@ for creating custom HRFs.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>When called as functions, return numeric vectors or matrices of HRF values.
-When used as objects, they are HRF objects with class <code>c("HRF", "function")</code>.</p>
+When used as objects, they are HRF objects with class <code>c("HRF", "function")</code>;
+<code>HRF_SPMG1</code>, <code>HRF_SPMG2</code> and <code>HRF_SPMG3</code> are additionally
+classed <code>"SPMG1_HRF"</code>, <code>"SPMG2_HRF"</code> and <code>"SPMG3_HRF"</code>, which
+select analytic <code><a href="deriv.html">deriv</a></code> and <code><a href="penalty_matrix.html">penalty_matrix</a></code> methods.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

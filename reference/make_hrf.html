@@ -55,7 +55,7 @@ object.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_hrf</span><span class="op">(</span><span class="va">basis</span>, <span class="va">lag</span>, nbasis <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_hrf</span><span class="op">(</span><span class="va">basis</span>, <span class="va">lag</span>, nbasis <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -73,8 +73,10 @@ HRF.</p></dd>
 
 
 <dt id="arg-nbasis">nbasis<a class="anchor" aria-label="anchor" href="#arg-nbasis"></a></dt>
-<dd><p>Integer specifying the number of basis functions when
-`basis` is provided as a name.</p></dd>
+<dd><p>Number of basis functions. `NULL` (the default) gives a
+basis-set name such as `"bspline"` or `"fir"` the default size used by
+[getHRF()], and a plain function as many basis functions as the columns it
+returns. Ignored for fixed HRFs such as `"spmg1"` or an `HRF` object.</p></dd>
 
 </dl></div>
     <div class="section level2">

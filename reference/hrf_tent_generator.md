@@ -1,8 +1,8 @@
 # Create Tent HRF Basis Set
 
 Generates an HRF object using tent (piecewise linear) basis functions
-with custom parameters. This generator mirrors `HRF_TENT` but allows
-callers to control the number of basis elements and temporal span.
+with custom parameters. Unlike the fixed `HRF_*` objects, it lets
+callers control the number of basis elements and temporal span.
 
 ## Usage
 

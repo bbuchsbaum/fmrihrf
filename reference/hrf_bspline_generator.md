@@ -15,7 +15,7 @@ hrf_bspline_generator(nbasis = 5, span = 24)
 
 - nbasis:
 
-  Number of basis functions (default: 5)
+  Number of basis functions, at least 2 (default: 5)
 
 - span:
 

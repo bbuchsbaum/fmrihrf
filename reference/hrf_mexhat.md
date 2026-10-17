@@ -30,6 +30,15 @@ hrf_mexhat(t, mean = 6, sd = 2)
 A numeric vector representing the Mexican hat wavelet-based HRF at the
 given time points \`t\`.
 
+## Details
+
+The response is the Ricker (Mexican hat) wavelet centred at `mean` with
+width `sd`, set to zero before onset (`t < 0`): \$\$h(t) =
+\frac{2}{\sqrt{3\\sd}\\\pi^{1/4}} \left(1 - \left(\frac{t -
+mean}{sd}\right)^2\right) \exp\left(-\frac{(t -
+mean)^2}{2\\sd^2}\right).\$\$ The normalising constant gives the
+un-truncated wavelet unit L2 norm.
+
 ## See also
 
 Other hrf_functions:

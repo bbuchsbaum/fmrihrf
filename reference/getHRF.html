@@ -77,6 +77,8 @@ and custom basis sets with specified parameters.</p>
 <li><p><code>"fourier"</code> - Fourier basis</p></li>
 <li><p><code>"daguerre"</code> - Daguerre spherical basis</p></li>
 <li><p><code>"tent"</code> - Tent (linear spline) basis</p></li>
+<li><p><code>"lwu"</code> - Lag-Width-Undershoot HRF (see <code><a href="hrf_lwu.html">hrf_lwu</a></code>);
+    shape parameters <code>tau</code>, <code>sigma</code>, <code>rho</code> are passed via <code>...</code></p></li>
 </ul></dd>
 
 
@@ -111,7 +113,8 @@ legacy per-basis unit-peak shortcut; do not supply both.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to generator functions (e.g., <code>scale</code> for daguerre)</p></dd>
+<dd><p>Additional arguments passed to generator functions (e.g., <code>scale</code> for daguerre,
+<code>tau</code>, <code>sigma</code>, <code>rho</code> for lwu)</p></dd>
 
 </dl></div>
     <div class="section level2">

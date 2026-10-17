@@ -40,6 +40,10 @@ getHRF(
 
   - `"tent"` - Tent (linear spline) basis
 
+  - `"lwu"` - Lag-Width-Undershoot HRF (see
+    [`hrf_lwu`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_lwu.md));
+    shape parameters `tau`, `sigma`, `rho` are passed via `...`
+
 - nbasis:
 
   Number of basis functions (for basis set types)
@@ -73,7 +77,7 @@ getHRF(
 - ...:
 
   Additional arguments passed to generator functions (e.g., `scale` for
-  daguerre)
+  daguerre, `tau`, `sigma`, `rho` for lwu)
 
 ## Value
 

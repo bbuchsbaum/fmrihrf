@@ -35,22 +35,16 @@ hrf_lagged(hrf, lag = 2, normalize = FALSE, ...)
 
 ## Value
 
-A function representing the lagged HRF. If \`lag\` is a vector of lags,
-the function returns an HRF set.
+For a scalar \`lag\`, a function of \`t\` giving the lagged response.
+For a vector of lags, an \`HRF\` basis set (see
+[`hrf_set`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_set.md))
+with `nbasis(hrf)` columns per lag.
 
 an lagged hrf function
 
 ## Functions
 
 - `hrf_lagged()`: alias for gen_hrf_lagged
-
-## See also
-
-Other gen_hrf:
-[`gen_hrf_blocked()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_blocked.md)
-
-Other gen_hrf:
-[`gen_hrf_blocked()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_blocked.md)
 
 ## Examples
 

@@ -21,7 +21,9 @@ hrf_spmg1(t, P1 = 5, P2 = 15, A1 = 1/120)
 
 - P2:
 
-  The second exponent parameter (default: 15).
+  The second exponent parameter (default: 15). The undershoot is
+  `t^P2 * exp(-t) / (6 * factorial(P2))`, one sixth of a gamma density
+  with shape `P2 + 1` and unit rate.
 
 - A1:
 

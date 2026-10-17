@@ -24,7 +24,7 @@ list_available_hrfs(details = TRUE) %>%
 #> 3  fourier generator              5    FALSE   fourier HRF (generator) 
 #> 4 daguerre generator              3    FALSE  daguerre HRF (generator) 
 #> 5      fir generator             12    FALSE       fir HRF (generator) 
-#> 6      lwu generator       variable    FALSE       lwu HRF (generator) 
+#> 6      lwu generator              1    FALSE       lwu HRF (generator) 
 #> 7       bs generator              5     TRUE bs HRF (generator) (alias)
 ```
 

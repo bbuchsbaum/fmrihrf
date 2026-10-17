@@ -1,8 +1,12 @@
-# Generate a Blocked HRF Function
+# Generate a Blocked HRF Function (deprecated)
 
-The \`gen_hrf_blocked\` function creates a blocked HRF by convolving the
-input HRF with a boxcar function. This can be used to model block
-designs in fMRI analysis.
+`gen_hrf_blocked()` and its alias `hrf_blocked()` are deprecated and
+warn when called. Use
+[`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md)
+to block an existing HRF object, or
+[`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md)
+with `width` (e.g. `gen_hrf(hrf_gaussian, width = 5)`), which is exactly
+what `gen_hrf_blocked()` calls.
 
 ## Usage
 
@@ -33,7 +37,7 @@ hrf_blocked(
 - hrf:
 
   A function representing the hemodynamic response function. Default is
-  \`hrf_gaussian\`.
+  `hrf_gaussian`.
 
 - width:
 
@@ -48,20 +52,20 @@ hrf_blocked(
 - half_life:
 
   A numeric value specifying the half-life of the exponential decay
-  function, used to model response attenuation. Default is \`Inf\`,
-  which means no decay.
+  function, used to model response attenuation. Default is `Inf`, which
+  means no decay.
 
 - summate:
 
   Logical; if TRUE (default), integrate responses over the block. If
   FALSE, divide by the block width to obtain a temporal average.
   Averaging does not fix the peak height: longer blocks can have smaller
-  peaks. Use \`normalize = TRUE\` for unit-peak scaling.
+  peaks. Use `normalize = TRUE` for unit-peak scaling.
 
 - normalize:
 
   A logical value indicating whether to rescale the output so that the
-  peak of the output is 1. Default is \`FALSE\`.
+  peak of the output is 1. Default is `FALSE`.
 
 - ...:
 
@@ -69,21 +73,19 @@ hrf_blocked(
 
 ## Value
 
-A `function` representing the blocked HRF.
-
-A `function` representing the blocked HRF.
-
-## Functions
-
-- `hrf_blocked()`: alias for gen_hrf_blocked
+The blocked `HRF` object returned by
+[`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md).
 
 ## See also
 
-Other gen_hrf:
-[`gen_hrf_lagged()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf_lagged.md)
+[`block_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/block_hrf.md),
+[`gen_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/gen_hrf.md)
 
 ## Examples
 
 ``` r
-# Deprecated: use gen_hrf(..., width = 10) or block_hrf(HRF, width = 10)
+# Instead of gen_hrf_blocked(hrf_gaussian, width = 10), use
+blocked <- gen_hrf(hrf_gaussian, width = 10)
+# or, for an existing HRF object
+blocked <- block_hrf(HRF_SPMG1, width = 10)
 ```
