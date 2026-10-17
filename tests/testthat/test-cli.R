@@ -171,6 +171,26 @@ test_that("design command creates condition columns from an events table", {
   expect_equal(nrow(out), 6L)
 })
 
+test_that("design command requires explicitly named duration/amplitude columns", {
+  events <- tempfile(fileext = ".csv")
+  writeLines(c("onset,condition,block,dur", "0,A,1,2", "4,B,1,0"), events)
+  run <- function(...) {
+    path <- tempfile(fileext = ".csv")
+    status <- fmrihrf_cli(c("design", "--events", events, "--blocklens", "8",
+                            "--tr", "1", "--output", path, ...))
+    list(status = status, out = if (file.exists(path)) utils::read.csv(path))
+  }
+  expect_message(res <- run("--duration", "duration_s"),
+                 "Missing required column(s): duration_s", fixed = TRUE)
+  expect_equal(res$status, 1L)
+  expect_equal(suppressMessages(run("--amplitude", "amp")$status), 1L)
+  # The default columns stay optional, and a named column that exists is used
+  default <- run()
+  named <- run("--duration", "dur")
+  expect_equal(c(default$status, named$status), c(0L, 0L))
+  expect_false(isTRUE(all.equal(default$out, named$out)))
+})
+
 test_that("design command names basis columns after each condition", {
   events <- tempfile(fileext = ".tsv")
   writeLines(c("onset\tcond\trun", "0\tA\t1", "4\tB\t1", "1\tA\t2"), events)

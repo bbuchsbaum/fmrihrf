@@ -179,7 +179,8 @@ install_cli <- function(dest_dir = "~/.local/bin",
       "Usage: fmrihrf design --events FILE --blocklens LIST --tr LIST [options]",
       "",
       "The events file must include onset, condition, and block columns.",
-      "Optional duration and amplitude columns are used when present.",
+      "Duration and amplitude columns are used when present; a column named",
+      "with --duration or --amplitude must exist.",
       "",
       "Options:",
       "  --events FILE       CSV/TSV events table",
@@ -290,7 +291,11 @@ install_cli <- function(dest_dir = "~/.local/bin",
 .fmrihrf_cli_design <- function(opts) {
   .require_options(opts, c("events", "blocklens", "tr"))
   events <- .read_events_table(opts$events)
-  .require_columns(events, c(opts$onset, opts$condition, opts$block))
+  # The default duration/amplitude columns are optional; renamed ones are not.
+  renamed <- c(opts$duration, opts$amplitude)[
+    c(opts$duration != "duration", opts$amplitude != "amplitude")
+  ]
+  .require_columns(events, unique(c(opts$onset, opts$condition, opts$block, renamed)))
   sframe <- .sampling_frame_from_options(opts)
 
   design <- regressor_design(
