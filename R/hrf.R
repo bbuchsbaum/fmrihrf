@@ -84,10 +84,14 @@ as_hrf <- function(f, name = deparse(substitute(f)), nbasis = 1L, span = 24,
 
 # Internal constructors already capture their parameters in a closure. Preserve
 # those values as metadata without trying to pass them to a function(t).
-.as_closed_hrf <- function(f, name, nbasis, span, params) {
+# `subclass` is prepended to the class vector (e.g. "BSpline_HRF").
+.as_closed_hrf <- function(f, name, nbasis, span, params, subclass = NULL) {
   obj <- as_hrf(f, name = name, nbasis = nbasis, span = span)
   attr(obj, "params") <- params
   attr(obj, "param_names") <- names(params)
+  if (!is.null(subclass)) {
+    class(obj) <- c(subclass, class(obj))
+  }
   obj
 }
 
@@ -770,45 +774,28 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
     stop("span must be positive", call. = FALSE)
   }
   
-  # Ensure nbasis is integer
   nbasis <- as.integer(nbasis)
-  
   degree <- 3 # Default cubic B-splines
-  effective_nbasis <- max(1, nbasis) 
-  
+
   # Delegate to hrf_bspline() so the knot sequence is fixed by `span` at
   # construction rather than inferred by splines::bs() from whatever `t` the
   # caller happens to supply. Evaluating on a coarse grid, a grid that stops
   # short of `span`, or a single time point must not change the basis.
   f_bspline <- function(t) {
-    bs_matrix <- tryCatch({
-        hrf_bspline(t, span = span, N = effective_nbasis, degree = degree)
-    }, error = function(e) {
+    bs_matrix <- tryCatch(
+      hrf_bspline(t, span = span, N = nbasis, degree = degree),
+      error = function(e) {
         warning(sprintf("splines::bs failed for effective_nbasis=%d, span=%g: %s",
-                        effective_nbasis, span, e$message), call. = FALSE)
-        NULL
-    })
-
-    if (is.null(bs_matrix)) {
-      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
-    }
-    if (ncol(bs_matrix) != effective_nbasis) {
-      warning(sprintf("splines::bs returned %d columns, expected %d for effective_nbasis=%d, span=%g. Returning zeros.",
-                      ncol(bs_matrix), effective_nbasis, effective_nbasis, span), call. = FALSE)
-      return(matrix(0, nrow = length(t), ncol = effective_nbasis))
-    }
-    matrix(as.numeric(bs_matrix), nrow = length(t), ncol = effective_nbasis)
+                        nbasis, span, e$message), call. = FALSE)
+        matrix(0, nrow = length(t), ncol = nbasis)
+      })
+    matrix(as.numeric(bs_matrix), nrow = length(t), ncol = nbasis)
   }
 
-  obj <- as_hrf(
-    f = f_bspline,
-    name = "bspline", nbasis = as.integer(effective_nbasis), span = span
-  )
-  # Store params as metadata (the closure already captured these values)
-  attr(obj, "params") <- list(nbasis = effective_nbasis, degree = degree, span = span)
-  attr(obj, "param_names") <- c("nbasis", "degree", "span")
-  class(obj) <- c("BSpline_HRF", class(obj))
-  obj
+  .as_closed_hrf(f_bspline, name = "bspline", nbasis = nbasis, span = span,
+                 params = list(nbasis = as.numeric(nbasis), degree = degree,
+                               span = span),
+                 subclass = "BSpline_HRF")
 }
 
 #' Create Tent HRF Basis Set
@@ -831,13 +818,12 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Tent HRF with 6 basis functions")
 #' @export
 hrf_tent_generator <- function(nbasis=5, span=24) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) hrf_bspline(t, span=span, N=nbasis, degree=1),
     name="tent", nbasis=as.integer(nbasis), span=span,
-    params=list(N=nbasis, degree=1, span=span)
+    params=list(N=nbasis, degree=1, span=span),
+    subclass = "Tent_HRF"
   )
-  class(obj) <- c("Tent_HRF", class(obj))
-  obj
 }
 
 #' Create Fourier HRF Basis Set
@@ -862,13 +848,12 @@ hrf_tent_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Fourier HRF with 8 basis functions")
 #' @export
 hrf_fourier_generator <- function(nbasis=5, span=24) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) hrf_fourier(t, span=span, nbasis=nbasis),
     name="fourier", nbasis=as.integer(nbasis), span=span,
-    params=list(nbasis=nbasis, span=span)
+    params=list(nbasis=nbasis, span=span),
+    subclass = "Fourier_HRF"
   )
-  class(obj) <- c("Fourier_HRF", class(obj))
-  obj
 }
 
 #' Create Daguerre HRF Basis Set
@@ -894,13 +879,12 @@ hrf_fourier_generator <- function(nbasis=5, span=24) {
 #' matplot(t, response, type = "l", main = "Daguerre HRF with 5 basis functions")
 #' @export
 hrf_daguerre_generator <- function(nbasis=3, scale=4) {
-  obj <- .as_closed_hrf(
+  .as_closed_hrf(
     f = function(t) daguerre_basis(t, n_basis=nbasis, scale=scale, span=24),
     name="daguerre", nbasis=as.integer(nbasis), span=24,
-    params=list(n_basis=nbasis, scale=scale)
+    params=list(n_basis=nbasis, scale=scale),
+    subclass = "Daguerre_HRF"
   )
-  class(obj) <- c("Daguerre_HRF", class(obj))
-  obj
 }
 
 #' Create FIR HRF Basis Set
@@ -950,28 +934,17 @@ hrf_fir_generator <- function(nbasis = 12, span = 24) {
       return(matrix(0, nrow = 0, ncol = nbasis))
     }
     output_matrix <- matrix(0, nrow = length(t), ncol = nbasis)
-    for (i in seq_along(t)) {
-      current_t <- t[i]
-      if (!is.na(current_t) && current_t >= 0 && current_t < span) {
-        bin_index <- if (current_t == 0) 1 else floor(current_t / bin_width) + 1
-        bin_index <- min(bin_index, nbasis) 
-        output_matrix[i, bin_index] <- 1
-      }
-    }
-    return(output_matrix)
+    # Indicator of the bin [k * bin_width, (k + 1) * bin_width) holding each t
+    inside <- which(!is.na(t) & t >= 0 & t < span)
+    bin_index <- pmin(floor(t[inside] / bin_width) + 1, nbasis)
+    output_matrix[cbind(inside, bin_index)] <- 1
+    output_matrix
   }
 
-  obj <- as_hrf(
-    f = f_fir,
-    name = "fir",
-    nbasis = nbasis,
-    span = span
-  )
-  # Store params as metadata (the closure already captured these values)
-  attr(obj, "params") <- list(nbasis = nbasis, span = span, bin_width = bin_width)
-  attr(obj, "param_names") <- c("nbasis", "span", "bin_width")
-  class(obj) <- c("FIR_HRF", class(obj))
-  obj
+  .as_closed_hrf(f_fir, name = "fir", nbasis = nbasis, span = span,
+                 params = list(nbasis = nbasis, span = span,
+                               bin_width = bin_width),
+                 subclass = "FIR_HRF")
 }
 
 # Define HRF Registry -----
