@@ -213,3 +213,17 @@ test_that("conv matches a full convolution of the fine-grid impulse train", {
     }
   }
 })
+
+test_that("neural_input samples block events and handles empty regressors", {
+  reg <- regressor(onsets = c(2, 6), duration = c(2, 1), amplitude = c(1, 3))
+  ni <- neural_input(reg, start = 0, end = 10, resolution = 1)
+  expect_equal(ni$time, 0:10)
+  expect_equal(ni$neural_input, c(0, 0, 1, 1, 0, 0, 3, 0, 0, 0, 0))
+  expect_equal(range(neural_input(reg, resolution = 0.5)$time), c(0, 17))
+
+  # An empty regressor used to fail on max(numeric(0)) when `end` was not given.
+  empty <- regressor(onsets = c(1, 2), amplitude = 0)
+  expect_no_warning(ni0 <- neural_input(empty, start = 5, resolution = 1))
+  expect_equal(ni0$time, 5:15)
+  expect_equal(ni0$neural_input, numeric(11))
+})
