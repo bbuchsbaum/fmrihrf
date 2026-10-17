@@ -552,43 +552,22 @@ hrf_blocked <- gen_hrf_blocked
 #' print(hrfs_detailed)
 #' @export
 list_available_hrfs <- function(details = FALSE) {
-  # Get names directly from the registry
   hrf_names <- names(HRF_REGISTRY)
-  
-  # Determine type and default nbasis by inspecting registry entries
-  hrf_info <- lapply(hrf_names, function(name) {
-    entry <- HRF_REGISTRY[[name]]
-    type <- if (inherits(entry, 'HRF')) "object" else if (is.function(entry)) "generator" else "unknown"
-    
-    nbasis_default <- NA
-    if (type == "object") {
-      nbasis_default <- tryCatch(nbasis(entry), error = function(e) NA)
-    } else if (type == "generator") {
-      fmls <- formals(entry)
-      if ("nbasis" %in% names(fmls)) {
-        nb_val <- fmls$nbasis
-        if(is.numeric(nb_val)) nbasis_default <- nb_val 
-      } 
-      if(is.na(nbasis_default)) nbasis_default <- "variable"
-    }
-    
-    # Check if this name is an alias (points to the same object/func as another primary name)
-    is_alias <- FALSE
-    if (type == "object") {
-      primary_names <- names(HRF_REGISTRY)[sapply(HRF_REGISTRY, identical, entry)]
-      is_alias <- length(primary_names) > 1 && name %in% primary_names[primary_names != name]
-    } else if (type == "generator") {
-      # More complex for functions, check if it points to the same generator function
-      # For now, let's assume aliases only exist for objects, or mark known ones
-      is_alias <- name %in% c("gam", "bs")
-    }
+  is_object <- vapply(HRF_REGISTRY, inherits, logical(1), "HRF", USE.NAMES = FALSE)
+  # Objects report their basis count; generators their `nbasis` default, if any.
+  nbasis_default <- vapply(HRF_REGISTRY, function(entry) {
+    nb <- if (inherits(entry, "HRF")) nbasis(entry) else formals(entry)[["nbasis"]]
+    if (is.numeric(nb)) as.character(nb) else "variable"
+  }, character(1), USE.NAMES = FALSE)
 
-    list(name = name, type = type, nbasis_default = as.character(nbasis_default), is_alias = is_alias) 
-  })
-  
-  # Combine into a data frame
-  hrf_df <- do.call(rbind.data.frame, c(hrf_info, list(stringsAsFactors = FALSE)))
-  
+  hrf_df <- data.frame(
+    name = hrf_names,
+    type = ifelse(is_object, "object", "generator"),
+    nbasis_default = nbasis_default,
+    is_alias = !is_object & hrf_names %in% c("gam", "bs"),
+    stringsAsFactors = FALSE
+  )
+
   # Add basic descriptions if requested
   if (details) {
       hrf_df$description <- paste(hrf_df$name, "HRF", 
