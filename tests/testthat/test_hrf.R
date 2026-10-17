@@ -1343,3 +1343,13 @@ test_that("make_hrf() without nbasis gives basis sets their default size", {
   expect_equal(ncol(evaluate(reg, seq(0, 40, by = 2))), nbasis(getHRF("bspline")))
   expect_error(make_hrf("fir", lag = 0, nbasis = 0), "positive integer")
 })
+
+test_that("gen_hrf_blocked() and hrf_blocked() are deprecated in favour of block_hrf()/gen_hrf()", {
+  t <- seq(0, 30, by = 0.5)
+  expect_warning(b1 <- gen_hrf_blocked(hrf_gaussian, width = 4),
+                 "`gen_hrf_blocked\\(\\)` is deprecated.*block_hrf", class = "deprecatedWarning")
+  expect_warning(b2 <- hrf_blocked(hrf_gaussian, width = 4),
+                 "`hrf_blocked\\(\\)` is deprecated", class = "deprecatedWarning")
+  expect_equal(b1(t), gen_hrf(hrf_gaussian, width = 4)(t))
+  expect_equal(b2(t), b1(t))
+})

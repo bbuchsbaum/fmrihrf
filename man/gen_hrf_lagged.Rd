@@ -40,11 +40,4 @@ hrf_lag5(0:20)
 }
 
 }
-\seealso{
-Other gen_hrf: 
-\code{\link{gen_hrf_blocked}()}
-
-Other gen_hrf: 
-\code{\link{gen_hrf_blocked}()}
-}
 \concept{gen_hrf}

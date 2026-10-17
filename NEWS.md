@@ -46,6 +46,14 @@
   24 s bin, and a plain function returning several columns was labelled as one
   basis function. An explicit `nbasis` behaves as before.
 
+## Deprecated
+
+* `gen_hrf_blocked()` and its alias `hrf_blocked()` are formally deprecated.
+  They already warned, but their help page did not say so and other help
+  pages listed them alongside the current generators. The warning and help
+  now point to `block_hrf(hrf, width = )` for an existing HRF object and to
+  `gen_hrf(hrf, width = )`, which they call.
+
 ## Bug fixes
 
 * `regressor_design()` and `evaluate()` on a `RegSet` now return named
