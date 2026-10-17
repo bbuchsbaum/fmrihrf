@@ -741,7 +741,7 @@ class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 #' This is the generator function that creates HRF objects with variable numbers
 #' of basis functions, unlike the pre-defined \code{HRF_BSPLINE} which has 5 functions.
 #'
-#' @param nbasis Number of basis functions (default: 5)
+#' @param nbasis Number of basis functions, at least 2 (default: 5)
 #' @param span Temporal window in seconds (default: 24)
 #' @return An HRF object of class \code{c("BSpline_HRF", "HRF", "function")}
 #' @seealso \code{\link{HRF_objects}} for pre-defined HRF objects,
@@ -755,8 +755,10 @@ class(HRF_SPMG3) <- c("SPMG3_HRF", class(HRF_SPMG3))
 #' @export
 hrf_bspline_generator <- function(nbasis=5, span=24) {
   # Validate inputs
-  if (nbasis < 1) {
-    stop("nbasis must be at least 1", call. = FALSE)
+  # The cubic basis drops the two boundary functions of a clamped basis, which
+  # needs at least degree + 1 = 4 functions (see hrf_bspline())
+  if (nbasis < 2) {
+    stop("nbasis must be at least 2 for a cubic B-spline basis", call. = FALSE)
   }
   if (span <= 0) {
     stop("span must be positive", call. = FALSE)
@@ -770,13 +772,7 @@ hrf_bspline_generator <- function(nbasis=5, span=24) {
   # caller happens to supply. Evaluating on a coarse grid, a grid that stops
   # short of `span`, or a single time point must not change the basis.
   f_bspline <- function(t) {
-    bs_matrix <- tryCatch(
-      hrf_bspline(t, span = span, N = nbasis, degree = degree),
-      error = function(e) {
-        warning(sprintf("splines::bs failed for effective_nbasis=%d, span=%g: %s",
-                        nbasis, span, e$message), call. = FALSE)
-        matrix(0, nrow = length(t), ncol = nbasis)
-      })
+    bs_matrix <- hrf_bspline(t, span = span, N = nbasis, degree = degree)
     matrix(as.numeric(bs_matrix), nrow = length(t), ncol = nbasis)
   }
 

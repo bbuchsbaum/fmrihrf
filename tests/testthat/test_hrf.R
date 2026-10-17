@@ -1296,3 +1296,13 @@ test_that("B-spline and tent bases evaluate on an empty grid", {
   expect_no_warning(E <- HRF_BSPLINE(numeric(0)))
   expect_equal(dim(E), c(0L, nbasis(HRF_BSPLINE)))
 })
+
+test_that("hrf_bspline_generator rejects a one-function cubic basis", {
+  # A cubic basis needs N >= 2; nbasis = 1 used to give an all-zero basis
+  # that warned on every evaluation
+  expect_error(hrf_bspline_generator(nbasis = 1), "at least 2")
+  expect_error(getHRF("bspline", nbasis = 1), "at least 2")
+  expect_no_warning(b2 <- hrf_bspline_generator(nbasis = 2)(seq(0, 24, by = 1)))
+  expect_equal(unname(b2), unname(hrf_bspline(seq(0, 24, by = 1), N = 2)))
+  expect_gt(max(b2), 0)
+})
