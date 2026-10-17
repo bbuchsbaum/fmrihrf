@@ -106,6 +106,18 @@ test_that("list command emits parseable JSON", {
   expect_true("spmg1" %in% parsed$name)
 })
 
+test_that("--key=value keeps every \"=\" after the first in the value", {
+  path <- file.path(tempfile(), "out=a=")
+  dir.create(dirname(path))
+  status <- fmrihrf_cli(c("eval", "--to", "1", paste0("--output=", path)))
+  expect_equal(status, 0L)
+  expect_true(file.exists(path))
+  expect_equal(utils::read.csv(path)$time, c(0, 0.5, 1))
+  expect_message(status <- fmrihrf_cli(c("eval", "--to=3=4")),
+                 "--to must contain only numeric values", fixed = TRUE)
+  expect_equal(status, 2L)
+})
+
 test_that("eval command emits expected columns", {
   path <- tempfile(fileext = ".csv")
   status <- fmrihrf_cli(c(

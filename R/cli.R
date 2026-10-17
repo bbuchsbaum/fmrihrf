@@ -328,14 +328,10 @@ install_cli <- function(dest_dir = "~/.local/bin",
       .cli_usage_error("Unexpected positional argument: ", token)
     }
     token <- substring(token, 3L)
-    value <- NULL
-    if (grepl("=", token, fixed = TRUE)) {
-      parts <- strsplit(token, "=", fixed = TRUE)[[1]]
-      key <- parts[[1]]
-      value <- paste(parts[-1], collapse = "=")
-    } else {
-      key <- token
-    }
+    # --key=value: split at the first "=" only; the value may contain more.
+    eq <- regexpr("=", token, fixed = TRUE)
+    key <- if (eq > 0) substring(token, 1L, eq - 1L) else token
+    value <- if (eq > 0) substring(token, eq + 1L)
 
     negated <- startsWith(key, "no-") && substring(key, 4L) %in% spec$false_flags
     if (negated || key %in% spec$flags) {
