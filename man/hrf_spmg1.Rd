@@ -11,7 +11,9 @@ hrf_spmg1(t, P1 = 5, P2 = 15, A1 = 1/120)
 
 \item{P1}{The first exponent parameter (default: 5).}
 
-\item{P2}{The second exponent parameter (default: 15).}
+\item{P2}{The second exponent parameter (default: 15). The undershoot is
+\code{t^P2 * exp(-t) / (6 * factorial(P2))}, one sixth of a gamma density
+with shape \code{P2 + 1} and unit rate.}
 
 \item{A1}{Amplitude scaling factor for the positive gamma function component; normally fixed at 1/120}
 }

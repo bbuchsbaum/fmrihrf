@@ -1246,5 +1246,73 @@ test_that("list_available_hrfs flags registry aliases of objects and generators"
   expect_equal(info$name[info$is_alias], c("gam", "bs"))
   expect_equal(info$description[info$name == "gam"], "gam HRF (object) (alias)")
   expect_equal(info$nbasis_default[info$name == "fir"], "12")
-  expect_equal(info$nbasis_default[info$name == "lwu"], "variable")
+  expect_equal(info$nbasis_default[info$name == "daguerre"], "3")
+})
+
+test_that("gen_hrf_lagged builds an HRF set for a vector of lags and keeps normalize", {
+  t <- seq(0, 30, by = 0.5)
+  expect_no_warning(set <- gen_hrf_lagged(HRF_SPMG1, lag = c(0, 2, 4)))
+  expect_s3_class(set, "HRF")
+  expect_equal(nbasis(set), 3L)
+  expect_equal(set(t), cbind(HRF_SPMG1(t), HRF_SPMG1(t - 2), HRF_SPMG1(t - 4)))
+  expect_equal(nbasis(gen_hrf_lagged(HRF_SPMG2, lag = c(1, 2))), 4L)
+
+  nset <- hrf_lagged(hrf_gaussian, lag = c(1, 3), normalize = TRUE, sd = 3)
+  vals <- nset(t)
+  expect_equal(apply(abs(vals), 2, max), c(1, 1))
+  g3 <- hrf_gaussian(t - 3, sd = 3)
+  expect_equal(vals[, 2], g3 / max(g3))
+
+  # a scalar lag still returns the lagged function itself
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5)(t), HRF_SPMG1(t - 5))
+  # normalising an all-zero stretch leaves zeros instead of NaN
+  expect_equal(gen_hrf_lagged(HRF_SPMG1, lag = 5, normalize = TRUE)(0:3), rep(0, 4))
+})
+
+test_that("as_hrf and gen_hrf accept function literals that deparse to several lines", {
+  h <- as_hrf(function(t) {
+    exp(-t / 5)
+  })
+  expect_s3_class(h, "HRF")
+  expect_length(attr(h, "name"), 1)
+  expect_equal(h(c(0, 5)), exp(-c(0, 5) / 5))
+
+  long <- as_hrf(function(t) dgamma(t, shape = 6, rate = 1) * 2 + dnorm(t, mean = 3, sd = 1))
+  expect_length(attr(long, "name"), 1)
+
+  g <- gen_hrf(function(t) {
+    exp(-t / 5)
+  }, lag = 1)
+  expect_length(attr(g, "name"), 1)
+  expect_equal(g(3), exp(-2 / 5))
+  expect_equal(attr(as_hrf(hrf_gamma), "name"), "hrf_gamma")
+})
+
+test_that("B-spline and tent bases evaluate on an empty grid", {
+  expect_no_warning(B <- hrf_bspline(numeric(0), N = 5))
+  expect_equal(dim(B), c(0L, 5L))
+  expect_identical(colnames(B), colnames(hrf_bspline(1, N = 5)))
+  expect_equal(dim(hrf_tent_generator(nbasis = 4)(numeric(0))), c(0L, 4L))
+  expect_no_warning(E <- HRF_BSPLINE(numeric(0)))
+  expect_equal(dim(E), c(0L, nbasis(HRF_BSPLINE)))
+})
+
+test_that("hrf_bspline_generator rejects a one-function cubic basis", {
+  # A cubic basis needs N >= 2; nbasis = 1 used to give an all-zero basis
+  # that warned on every evaluation
+  expect_error(hrf_bspline_generator(nbasis = 1), "at least 2")
+  expect_error(getHRF("bspline", nbasis = 1), "at least 2")
+  expect_no_warning(b2 <- hrf_bspline_generator(nbasis = 2)(seq(0, 24, by = 1)))
+  expect_equal(unname(b2), unname(hrf_bspline(seq(0, 24, by = 1), N = 2)))
+  expect_gt(max(b2), 0)
+})
+
+test_that("print.HRF shows vector-valued parameters readably", {
+  h <- hrf_weighted(c(1, 2, 3), width = 2)
+  out <- paste(capture.output(print(h)), collapse = "\n")
+  expect_match(out, "weights = [1, 2, 3]", fixed = TRUE)
+  expect_match(out, "times = [0.0000, 0.6667, 1.3333]", fixed = TRUE)
+  expect_false(grepl('c("', out, fixed = TRUE))
+  # scalar parameters print as before
+  expect_output(print(HRF_SPMG1), "Parameters: P1 = 5, P2 = 15, A1 = 0.008333", fixed = TRUE)
 })

@@ -19,7 +19,9 @@ hrf_lagged(hrf, lag = 2, normalize = FALSE, ...)
 \item{...}{Extra arguments supplied to the `hrf` function.}
 }
 \value{
-A function representing the lagged HRF. If `lag` is a vector of lags, the function returns an HRF set.
+For a scalar `lag`, a function of `t` giving the lagged response. For a
+  vector of lags, an `HRF` basis set (see \code{\link{hrf_set}}) with
+  \code{nbasis(hrf)} columns per lag.
 
 an lagged hrf function
 }

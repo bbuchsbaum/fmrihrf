@@ -69,11 +69,17 @@ hrf_bspline <- function(t, span=24, N=5, degree=3, ...) {
   in_support <- !is.na(t) & t >= 0 & t <= span
   t_eval <- t
   t_eval[!in_support] <- 0
+  # splines::bs() cannot evaluate an empty vector; build the basis at one
+  # point and keep its (zero-row) column structure.
+  if (length(t) == 0L) t_eval <- 0
 
   full <- do.call(splines::bs, c(list(x = t_eval, knots = knots, degree = degree,
                                       intercept = TRUE, Boundary.knots = c(0, span)),
                                  dots))
   basis <- full[, -c(1L, ncol(full)), drop = FALSE]
+  if (length(t) == 0L) {
+    return(basis[0L, , drop = FALSE])
+  }
   if (any(!in_support)) {
     basis[!in_support, ] <- 0
   }
@@ -149,7 +155,9 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #'
 #' @param t A vector of time points.
 #' @param P1 The first exponent parameter (default: 5).
-#' @param P2 The second exponent parameter (default: 15).
+#' @param P2 The second exponent parameter (default: 15). The undershoot is
+#'   \code{t^P2 * exp(-t) / (6 * factorial(P2))}, one sixth of a gamma density
+#'   with shape \code{P2 + 1} and unit rate.
 #' @param A1 Amplitude scaling factor for the positive gamma function component; normally fixed at 1/120
 #' @return A vector of HRF values at the given time points.
 #' @family hrf_functions
@@ -162,7 +170,7 @@ hrf_mexhat <- function(t, mean = 6, sd = 2) {
 #' # Plot the HRF values
 #' plot(time_points, hrf_values, type='l', main='SPM Canonical Double Gamma HRF')
 hrf_spmg1 <- function(t, P1=5, P2=15,A1=1/120) {
-  ifelse(t < 0, 0, exp(-t) * (A1 * t^P1 - t^P2 / (6 * factorial(15))))
+  ifelse(t < 0, 0, exp(-t) * (A1 * t^P1 - t^P2 / (6 * factorial(P2))))
 	
 }
 
@@ -171,7 +179,7 @@ hrf_spmg1 <- function(t, P1=5, P2=15,A1=1/120) {
 #' @keywords internal
 #' @noRd
 hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
-  C <- (1 / (6 * factorial(15)))
+  C <- (1 / (6 * factorial(P2)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
@@ -186,7 +194,7 @@ hrf_spmg1_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
 #' @keywords internal
 #' @noRd
 hrf_spmg1_second_deriv <- function(t, P1 = 5, P2 = 15, A1 = 1/120) {
-  C <- (1 / (6 * factorial(15)))
+  C <- (1 / (6 * factorial(P2)))
   ret <- numeric(length(t))
   pos <- t >= 0
   if (any(pos)) {
@@ -862,8 +870,21 @@ hrf_basis_lwu <- function(theta0, t, normalize_primary = "none") {
   lwu_at <- function(params_vec) {
     hrf_lwu(t = t, tau = params_vec[1], sigma = params_vec[2], rho = params_vec[3], normalize = "none")
   }
-  deriv_matrix <- matrix(numDeriv::jacobian(func = lwu_at, x = theta0),
-                         nrow = length(t), ncol = 3,
+  # numDeriv's Richardson steps reach +-h (its default d = eps = 1e-4); where
+  # a central step would leave the validated domain (sigma > 0.05,
+  # 0 <= rho <= 1.5), difference one-sidedly into the domain instead.
+  zero_tol <- sqrt(.Machine$double.eps / 7e-7)
+  h <- abs(1e-4 * theta0) + 1e-4 * (abs(theta0) < zero_tol)
+  side <- rep(NA_real_, 3)
+  if (theta0[["sigma"]] - h[2] <= 0.05) side[2] <- 1
+  if (theta0[["rho"]] - h[3] < 0) {
+    side[3] <- 1
+  } else if (theta0[["rho"]] + h[3] > 1.5) {
+    side[3] <- -1
+  }
+  jac <- numDeriv::jacobian(func = lwu_at, x = theta0, side = side,
+                            method.args = list(eps = 1e-4, d = 1e-4, zero.tol = zero_tol))
+  deriv_matrix <- matrix(jac, nrow = length(t), ncol = 3,
                          dimnames = list(NULL, c("d_tau", "d_sigma", "d_rho")))
 
   cbind(h0 = h0, deriv_matrix)
