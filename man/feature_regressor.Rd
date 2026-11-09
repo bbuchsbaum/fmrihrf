@@ -13,7 +13,8 @@ feature_regressor(
   center = TRUE,
   scale = c("none", "sd"),
   mask = NULL,
-  span = NULL
+  span = NULL,
+  durations = NULL
 )
 }
 \arguments{
@@ -26,7 +27,9 @@ allowed. Defaults to \code{HRF_SPMG1}.}
 
 \item{times}{Numeric vector of sample times in seconds, same length as
 \code{values}. Mutually exclusive with \code{dt}. Times must be strictly increasing
-and non-negative. The last bin width is the last inter-sample gap.}
+and non-negative. The last bin width is the last inter-sample gap. When
+\code{durations} is supplied, times are event onsets and need only be
+non-decreasing.}
 
 \item{dt}{Positive sampling interval in seconds. Mutually exclusive with
 \code{times}. Sample times are \code{start + seq(0, by = dt, length.out = length(values))}.}
@@ -47,8 +50,15 @@ scale statistics are computed on \code{mask == TRUE} samples only; off-mask
 samples are set to 0. This is not equivalent to global all-sample
 centering.}
 
-\item{span}{Temporal window in seconds for the HRF, passed to \code{\link[=regressor]{regressor()}}.
-If \code{NULL}, the HRF's own span is used.}
+\item{span}{Temporal window in seconds over which the HRF is evaluated.
+If \code{NULL} (default), the HRF's own span is used. An explicit value is
+honoured even when the HRF carries its own span.}
+
+\item{durations}{Optional event durations in seconds, only valid with
+\code{times}: a single number or one per sample, finite and non-negative. If
+\code{NULL} (default), each sample is held until the next one (zero-order
+hold). If supplied, the samples are events; see the section on
+event-timed features.}
 }
 \value{
 An S3 object of class \code{c("FeatureReg", "Reg", "list")}. Evaluation
@@ -92,6 +102,28 @@ feature sampling interval. Compared with
 \code{regressor(times, amplitude = values, duration = 0)}, the predicted BOLD
 is smaller by about \eqn{\Delta t}.
 }
+\section{Event-timed features}{
+
+The zero-order hold is right for a densely sampled signal but wrong for a
+sparse, event-locked feature such as word surprisal or a per-phone feature:
+holding each value until the next sample fills every pause with the value
+of the preceding event. Supply \code{durations} (with \code{times}) to treat sample
+\code{i} as an event that starts at \code{times[i]}, lasts \code{durations[i]} seconds
+(\code{0} is an impulse) and has amplitude \code{values[i]}. Nothing is held across
+gaps, and the result is the same as
+\code{regressor(times, hrf, duration = durations, amplitude = values, drop_zero_amplitude = FALSE)} after centering and scaling. Zero-amplitude
+events are kept. Events that overlap in time add. \code{times} must then be
+non-decreasing rather than strictly increasing, so simultaneous events
+(ties) are allowed, and a single event is accepted.
+
+\code{center} and \code{scale} keep their meaning: the statistics are taken over the
+samples, that is, over events, and each event counts once whatever its
+duration. This is the parametric-modulator convention (the amplitude is
+centered across events). The centered column no longer carries the mean
+response to the events themselves; model that with a separate unmodulated
+regressor if it is of interest.
+}
+
 \examples{
 # 10 Hz envelope over 8 seconds, demeaned
 dt <- 0.1
@@ -107,6 +139,15 @@ feat_raw <- feature_regressor(rms, dt = dt, center = FALSE, scale = "none")
 ev <- regressor(t, HRF_SPMG1, duration = dt, amplitude = rms)
 all.equal(evaluate(feat_raw, grid, precision = dt),
           evaluate(ev, grid, precision = dt))
+
+# Event-timed feature: word onsets, word durations and a per-word value.
+# The value of the second word is not carried across the pause before the
+# third.
+onsets <- c(0.5, 1.1, 6.0)
+word_dur <- c(0.4, 0.5, 0.3)
+surprisal <- c(2, 7, 4)
+words <- feature_regressor(surprisal, times = onsets, durations = word_dur)
+y_words <- evaluate(words, grid, precision = 0.1)
 
 }
 \seealso{
