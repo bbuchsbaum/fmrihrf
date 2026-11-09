@@ -270,6 +270,21 @@
   replacing the copied theme assets. Figure resolution is limited to keep
   the source package compact.
 
+* `feature_regressor()` gains `durations` for sparse, event-timed features
+  such as word surprisal or per-phone features. With `times` and `durations`,
+  sample `i` is an event starting at `times[i]`, lasting `durations[i]`
+  seconds (0 is an impulse) with amplitude `values[i]`; the value is no longer
+  held until the next sample, so it does not fill the following pause. The
+  result equals `regressor()` built from the same onsets, durations and
+  amplitudes. Overlapping events add, simultaneous events (tied `times`) are
+  allowed, and `center` / `scale` act across events (the parametric-modulator
+  convention). Without `durations` nothing changes.
+
+* `feature_regressor()` now honours an explicit `span`. It was documented as
+  the HRF evaluation window, but the regressor always took the HRF's own span
+  attribute, so `span = 12` was silently ignored. `span = NULL` still means
+  the HRF's own span.
+
 * Added `feature_regressor()` for continuously sampled features (for example
   RMS energy). Each sample is a zero-order-hold bin of width dt, with
   optional pre-convolution centering and scaling. This is the continuous

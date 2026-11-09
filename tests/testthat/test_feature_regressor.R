@@ -330,6 +330,158 @@ test_that("a multi-basis HRF returns one column per basis", {
 })
 
 
+# --- Event-timed features (durations) ---------------------------------------
+
+test_that("durations make each sample an event with its own duration", {
+  feat <- feature_regressor(c(2, 0, 4), times = c(1, 3, 9),
+                            durations = c(0.5, 0, 2),
+                            center = FALSE, scale = "none")
+  expect_s3_class(feat, "FeatureReg")
+  expect_equal(feat$onsets, c(1, 3, 9))
+  expect_equal(feat$duration, c(0.5, 0, 2))
+  # zero-amplitude events are kept
+  expect_equal(feat$amplitude, c(2, 0, 4))
+  expect_true(is.na(attr(feat, "dt")))
+  expect_true(attr(feat, "event_timed"))
+  expect_output(print(feat), "explicit durations")
+
+  scalar <- feature_regressor(c(2, 0, 4), times = c(1, 3, 9), durations = 0.3,
+                              center = FALSE, scale = "none")
+  expect_equal(scalar$duration, rep(0.3, 3))
+
+  legacy <- feature_regressor(c(2, 0, 4), times = c(1, 3, 9),
+                              center = FALSE, scale = "none")
+  expect_false(attr(legacy, "event_timed"))
+  expect_equal(legacy$duration, c(2, 6, 6))
+})
+
+test_that("impulse events match regressor() with the same onsets", {
+  onsets <- c(1, 4.5, 12, 13)
+  values <- c(2, -1, 3, 0.5)
+  grid <- seq(0, 40, by = 0.5)
+  feat <- feature_regressor(values, times = onsets, durations = 0,
+                            center = FALSE, scale = "none")
+  ev <- regressor(onsets, HRF_SPMG1, duration = 0, amplitude = values)
+  for (method in c("conv", "loop")) {
+    expect_equal(evaluate(feat, grid, precision = 0.1, method = method),
+                 evaluate(ev, grid, precision = 0.1, method = method),
+                 tolerance = 1e-12)
+  }
+})
+
+test_that("block events match regressor() with the same durations", {
+  onsets <- c(1, 4.5, 12, 13)
+  durs <- c(0.4, 2, 0, 3)
+  values <- c(2, -1, 3, 0.5)
+  grid <- seq(0, 40, by = 0.5)
+  feat <- feature_regressor(values, times = onsets, durations = durs,
+                            center = FALSE, scale = "none")
+  ev <- regressor(onsets, HRF_SPMG1, duration = durs, amplitude = values)
+  expect_equal(evaluate(feat, grid, precision = 0.1),
+               evaluate(ev, grid, precision = 0.1), tolerance = 1e-12)
+
+  # centering is over events: the parametric-modulator convention
+  feat_c <- feature_regressor(values, times = onsets, durations = durs,
+                              center = TRUE, scale = "none")
+  expect_equal(feat_c$amplitude, values - mean(values))
+  ev_c <- regressor(onsets, HRF_SPMG1, duration = durs,
+                    amplitude = values - mean(values),
+                    drop_zero_amplitude = FALSE)
+  expect_equal(evaluate(feat_c, grid, precision = 0.1),
+               evaluate(ev_c, grid, precision = 0.1), tolerance = 1e-12)
+})
+
+test_that("a value is not carried across a pause when durations are given", {
+  # Two short events 30 s apart. Late in the pause the response to the first
+  # event has died away, unless its value is held until the second event.
+  onsets <- c(0, 30)
+  values <- c(1, 1)
+  probe <- 27
+
+  events <- feature_regressor(values, times = onsets, durations = 0.5,
+                              center = FALSE, scale = "none")
+  held <- feature_regressor(values, times = onsets,
+                            center = FALSE, scale = "none")
+  y_events <- evaluate(events, probe, precision = 0.1)
+  y_held <- evaluate(held, probe, precision = 0.1)
+
+  # 27 s lies beyond event end (0.5 s) + HRF span (24 s): exactly no response
+  expect_equal(y_events, 0)
+  # legacy zero-order hold: the first value fills the whole 30 s gap
+  expect_equal(held$duration, c(30, 30))
+  boxcar <- regressor(0, HRF_SPMG1, duration = 30, amplitude = 1)
+  expect_equal(y_held, evaluate(boxcar, probe, precision = 0.1))
+  expect_gt(abs(y_held), 0.1)
+})
+
+test_that("overlapping and simultaneous events add", {
+  grid <- seq(0, 40, by = 0.5)
+  feat <- feature_regressor(c(1, 2, 3), times = c(2, 2, 3),
+                            durations = c(0, 4, 2),
+                            center = FALSE, scale = "none")
+  parts <- evaluate(regressor(2, HRF_SPMG1, duration = 0, amplitude = 1),
+                    grid, precision = 0.1) +
+    evaluate(regressor(2, HRF_SPMG1, duration = 4, amplitude = 2),
+             grid, precision = 0.1) +
+    evaluate(regressor(3, HRF_SPMG1, duration = 2, amplitude = 3),
+             grid, precision = 0.1)
+  expect_equal(evaluate(feat, grid, precision = 0.1), parts, tolerance = 1e-10)
+})
+
+test_that("a single event is allowed when durations are given", {
+  feat <- feature_regressor(3, times = 2, durations = 1,
+                            center = FALSE, scale = "none")
+  expect_equal(feat$onsets, 2)
+  expect_equal(feat$duration, 1)
+})
+
+test_that("durations validation errors", {
+  expect_error(feature_regressor(1:3, dt = 0.5, durations = 0.1),
+               "only be used with `times`")
+  expect_error(feature_regressor(1:3, times = c(0, 1, 2), durations = c(1, 2)),
+               "same length")
+  expect_error(feature_regressor(1:3, times = c(0, 1, 2), durations = "a"),
+               "durations")
+  expect_error(feature_regressor(1:3, times = c(0, 1, 2), durations = -1),
+               "non-negative")
+  expect_error(feature_regressor(1:3, times = c(0, 1, 2),
+                                 durations = c(1, NA, 1)), "finite")
+  expect_error(feature_regressor(1:3, times = c(0, 1, 2),
+                                 durations = c(1, Inf, 1)), "finite")
+  expect_error(feature_regressor(1:3, times = c(0, 2, 1), durations = 0),
+               "non-decreasing")
+})
+
+
+# --- Span -------------------------------------------------------------------
+
+test_that("span = NULL uses the HRF's own span", {
+  feat <- feature_regressor(1:3, dt = 0.5, center = FALSE, scale = "none")
+  expect_equal(feat$span, attr(HRF_SPMG1, "span"))
+})
+
+test_that("an explicit span is honoured", {
+  feat <- feature_regressor(1:3, dt = 0.5, center = FALSE, scale = "none",
+                            span = 12)
+  expect_equal(feat$span, 12)
+  expect_output(print(feat), "HRF span: 12 s")
+
+  # the response is cut off at event end + span
+  short <- feature_regressor(1, times = 0, durations = 0, center = FALSE,
+                             scale = "none", span = 12)
+  full <- feature_regressor(1, times = 0, durations = 0, center = FALSE,
+                            scale = "none")
+  expect_equal(evaluate(short, 14, precision = 0.1), 0)
+  expect_false(evaluate(full, 14, precision = 0.1) == 0)
+  expect_equal(evaluate(short, 6, precision = 0.1),
+               evaluate(full, 6, precision = 0.1))
+
+  expect_error(feature_regressor(1:3, dt = 0.5, span = -1), "span")
+  expect_error(feature_regressor(1:3, dt = 0.5, span = c(10, 20)), "span")
+  expect_error(feature_regressor(1:3, dt = 0.5, span = "a"), "span")
+})
+
+
 # --- Methods ----------------------------------------------------------------
 
 test_that("shift keeps FeatureReg and does not re-center", {

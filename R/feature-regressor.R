@@ -36,6 +36,27 @@
 #' `regressor(times, amplitude = values, duration = 0)`, the predicted BOLD
 #' is smaller by about \eqn{\Delta t}.
 #'
+#' @section Event-timed features:
+#' The zero-order hold is right for a densely sampled signal but wrong for a
+#' sparse, event-locked feature such as word surprisal or a per-phone feature:
+#' holding each value until the next sample fills every pause with the value
+#' of the preceding event. Supply `durations` (with `times`) to treat sample
+#' `i` as an event that starts at `times[i]`, lasts `durations[i]` seconds
+#' (`0` is an impulse) and has amplitude `values[i]`. Nothing is held across
+#' gaps, and the result is the same as
+#' `regressor(times, hrf, duration = durations, amplitude = values,
+#' drop_zero_amplitude = FALSE)` after centering and scaling. Zero-amplitude
+#' events are kept. Events that overlap in time add. `times` must then be
+#' non-decreasing rather than strictly increasing, so simultaneous events
+#' (ties) are allowed, and a single event is accepted.
+#'
+#' `center` and `scale` keep their meaning: the statistics are taken over the
+#' samples, that is, over events, and each event counts once whatever its
+#' duration. This is the parametric-modulator convention (the amplitude is
+#' centered across events). The centered column no longer carries the mean
+#' response to the events themselves; model that with a separate unmodulated
+#' regressor if it is of interest.
+#'
 #' @md
 #' @param values Numeric vector of feature samples. Matrix and array inputs are
 #'   rejected; construct one feature regressor per column instead.
@@ -44,7 +65,9 @@
 #'   allowed. Defaults to `HRF_SPMG1`.
 #' @param times Numeric vector of sample times in seconds, same length as
 #'   `values`. Mutually exclusive with `dt`. Times must be strictly increasing
-#'   and non-negative. The last bin width is the last inter-sample gap.
+#'   and non-negative. The last bin width is the last inter-sample gap. When
+#'   `durations` is supplied, times are event onsets and need only be
+#'   non-decreasing.
 #' @param dt Positive sampling interval in seconds. Mutually exclusive with
 #'   `times`. Sample times are `start + seq(0, by = dt, length.out = length(values))`.
 #' @param start Start time in seconds used only when `dt` is supplied.
@@ -59,8 +82,14 @@
 #'   scale statistics are computed on `mask == TRUE` samples only; off-mask
 #'   samples are set to 0. This is not equivalent to global all-sample
 #'   centering.
-#' @param span Temporal window in seconds for the HRF, passed to [regressor()].
-#'   If `NULL`, the HRF's own span is used.
+#' @param span Temporal window in seconds over which the HRF is evaluated.
+#'   If `NULL` (default), the HRF's own span is used. An explicit value is
+#'   honoured even when the HRF carries its own span.
+#' @param durations Optional event durations in seconds, only valid with
+#'   `times`: a single number or one per sample, finite and non-negative. If
+#'   `NULL` (default), each sample is held until the next one (zero-order
+#'   hold). If supplied, the samples are events; see the section on
+#'   event-timed features.
 #'
 #' @return An S3 object of class `c("FeatureReg", "Reg", "list")`. Evaluation
 #'   uses the same convolution path as [regressor()].
@@ -81,6 +110,15 @@
 #' all.equal(evaluate(feat_raw, grid, precision = dt),
 #'           evaluate(ev, grid, precision = dt))
 #'
+#' # Event-timed feature: word onsets, word durations and a per-word value.
+#' # The value of the second word is not carried across the pause before the
+#' # third.
+#' onsets <- c(0.5, 1.1, 6.0)
+#' word_dur <- c(0.4, 0.5, 0.3)
+#' surprisal <- c(2, 7, 4)
+#' words <- feature_regressor(surprisal, times = onsets, durations = word_dur)
+#' y_words <- evaluate(words, grid, precision = 0.1)
+#'
 #' @seealso [regressor()], [evaluate()]
 #' @export
 feature_regressor <- function(values,
@@ -91,7 +129,8 @@ feature_regressor <- function(values,
                               center = TRUE,
                               scale = c("none", "sd"),
                               mask = NULL,
-                              span = NULL) {
+                              span = NULL,
+                              durations = NULL) {
 
   scale <- match.arg(scale)
 
@@ -114,6 +153,11 @@ feature_regressor <- function(values,
   has_dt <- !is.null(dt)
   if (has_times == has_dt) {
     stop("Supply exactly one of `times` or `dt`.", call. = FALSE)
+  }
+
+  has_durations <- !is.null(durations)
+  if (has_durations && !has_times) {
+    stop("`durations` can only be used with `times`.", call. = FALSE)
   }
 
   n <- length(values)
@@ -146,20 +190,40 @@ feature_regressor <- function(values,
     if (any(times < 0)) {
       stop("`times` must be non-negative.", call. = FALSE)
     }
-    if (n < 2L) {
-      stop("`times` must have at least two samples so the last bin width ",
-           "can be inferred.", call. = FALSE)
-    }
-    if (is.unsorted(times, strictly = TRUE)) {
-      stop("`times` must be strictly increasing.", call. = FALSE)
-    }
-    gaps <- diff(times)
-    duration <- c(gaps, gaps[length(gaps)])
-    dt_attr <- if ((max(gaps) - min(gaps)) <=
-                   sqrt(.Machine$double.eps) * max(1, stats::median(gaps))) {
-      gaps[[1L]]
+    if (has_durations) {
+      # Event-timed samples: each one lasts its own duration and nothing is
+      # held across the gap to the next. Ties are simultaneous events.
+      if (!is.numeric(durations) || !(length(durations) %in% c(1L, n))) {
+        stop("`durations` must be a single number or a numeric vector the ",
+             "same length as `values`.", call. = FALSE)
+      }
+      if (anyNA(durations) || any(!is.finite(durations))) {
+        stop("`durations` must contain finite numeric values.", call. = FALSE)
+      }
+      if (any(durations < 0)) {
+        stop("`durations` must be non-negative.", call. = FALSE)
+      }
+      if (is.unsorted(times)) {
+        stop("`times` must be non-decreasing.", call. = FALSE)
+      }
+      duration <- rep_len(as.numeric(durations), n)
+      dt_attr <- NA_real_
     } else {
-      NA_real_
+      if (n < 2L) {
+        stop("`times` must have at least two samples so the last bin width ",
+             "can be inferred.", call. = FALSE)
+      }
+      if (is.unsorted(times, strictly = TRUE)) {
+        stop("`times` must be strictly increasing.", call. = FALSE)
+      }
+      gaps <- diff(times)
+      duration <- c(gaps, gaps[length(gaps)])
+      dt_attr <- if ((max(gaps) - min(gaps)) <=
+                     sqrt(.Machine$double.eps) * max(1, stats::median(gaps))) {
+        gaps[[1L]]
+      } else {
+        NA_real_
+      }
     }
   }
 
@@ -194,21 +258,29 @@ feature_regressor <- function(values,
     amplitude[!mask] <- 0
   }
 
-  span_arg <- if (is.null(span)) 40 else span
+  if (!is.null(span) && (!is.numeric(span) || length(span) != 1L)) {
+    stop("`span` must be a single positive finite number.", call. = FALSE)
+  }
   out <- Reg(
     onsets = times,
     hrf = hrf,
     duration = duration,
     amplitude = amplitude,
-    span = span_arg,
+    span = if (is.null(span)) 40 else span,
     summate = TRUE,
     drop_zero_amplitude = FALSE
   )
+  # Reg() prefers the HRF's own span attribute, which every HRF built by
+  # make_hrf() carries, so an explicit `span` has to be applied afterwards.
+  if (!is.null(span)) {
+    out$span <- as.numeric(span)
+  }
 
   class(out) <- c("FeatureReg", class(out))
   attr(out, "center") <- center
   attr(out, "scale") <- scale
   attr(out, "dt") <- dt_attr
+  attr(out, "event_timed") <- has_durations
   out
 }
 
@@ -228,7 +300,9 @@ print.FeatureReg <- function(x, ...) {
   if (n_samp > 0L) {
     cat("   Time range:", round(min(x$onsets), 2), "s to",
         round(max(x$onsets), 2), "s\n")
-    if (!is.null(dt_attr) && length(dt_attr) == 1L && !is.na(dt_attr)) {
+    if (isTRUE(attr(x, "event_timed"))) {
+      cat("   Timing: events with explicit durations\n")
+    } else if (!is.null(dt_attr) && length(dt_attr) == 1L && !is.na(dt_attr)) {
       cat("   Sampling interval:", dt_attr, "s\n")
     } else {
       cat("   Sampling interval: irregular\n")
