@@ -18,7 +18,8 @@ feature_regressor(
   center = TRUE,
   scale = c("none", "sd"),
   mask = NULL,
-  span = NULL
+  span = NULL,
+  durations = NULL
 )
 ```
 
@@ -41,7 +42,9 @@ feature_regressor(
 
   Numeric vector of sample times in seconds, same length as `values`.
   Mutually exclusive with `dt`. Times must be strictly increasing and
-  non-negative. The last bin width is the last inter-sample gap.
+  non-negative. The last bin width is the last inter-sample gap. When
+  `durations` is supplied, times are event onsets and need only be
+  non-decreasing.
 
 - dt:
 
@@ -74,9 +77,17 @@ feature_regressor(
 
 - span:
 
-  Temporal window in seconds for the HRF, passed to
-  [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md).
-  If `NULL`, the HRF's own span is used.
+  Temporal window in seconds over which the HRF is evaluated. If `NULL`
+  (default), the HRF's own span is used. An explicit value is honoured
+  even when the HRF carries its own span.
+
+- durations:
+
+  Optional event durations in seconds, only valid with `times`: a single
+  number or one per sample, finite and non-negative. If `NULL`
+  (default), each sample is held until the next one (zero-order hold).
+  If supplied, the samples are events; see the section on event-timed
+  features.
 
 ## Value
 
@@ -117,6 +128,28 @@ feature sampling interval. Compared with
 `regressor(times, amplitude = values, duration = 0)`, the predicted BOLD
 is smaller by about \\\Delta t\\.
 
+## Event-timed features
+
+The zero-order hold is right for a densely sampled signal but wrong for
+a sparse, event-locked feature such as word surprisal or a per-phone
+feature: holding each value until the next sample fills every pause with
+the value of the preceding event. Supply `durations` (with `times`) to
+treat sample `i` as an event that starts at `times[i]`, lasts
+`durations[i]` seconds (`0` is an impulse) and has amplitude
+`values[i]`. Nothing is held across gaps, and the result is the same as
+`regressor(times, hrf, duration = durations, amplitude = values, drop_zero_amplitude = FALSE)`
+after centering and scaling. Zero-amplitude events are kept. Events that
+overlap in time add. `times` must then be non-decreasing rather than
+strictly increasing, so simultaneous events (ties) are allowed, and a
+single event is accepted.
+
+`center` and `scale` keep their meaning: the statistics are taken over
+the samples, that is, over events, and each event counts once whatever
+its duration. This is the parametric-modulator convention (the amplitude
+is centered across events). The centered column no longer carries the
+mean response to the events themselves; model that with a separate
+unmodulated regressor if it is of interest.
+
 ## See also
 
 [`regressor()`](https://bbuchsbaum.github.io/fmrihrf/reference/regressor.md),
@@ -140,4 +173,13 @@ ev <- regressor(t, HRF_SPMG1, duration = dt, amplitude = rms)
 all.equal(evaluate(feat_raw, grid, precision = dt),
           evaluate(ev, grid, precision = dt))
 #> [1] TRUE
+
+# Event-timed feature: word onsets, word durations and a per-word value.
+# The value of the second word is not carried across the pause before the
+# third.
+onsets <- c(0.5, 1.1, 6.0)
+word_dur <- c(0.4, 0.5, 0.3)
+surprisal <- c(2, 7, 4)
+words <- feature_regressor(surprisal, times = onsets, durations = word_dur)
+y_words <- evaluate(words, grid, precision = 0.1)
 ```
