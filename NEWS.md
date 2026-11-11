@@ -1,4 +1,4 @@
-# fmrihrf 0.4.0.9000
+# fmrihrf 0.5.0
 
 ## New features
 
