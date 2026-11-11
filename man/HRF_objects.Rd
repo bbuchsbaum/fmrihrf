@@ -5,6 +5,7 @@
 \alias{HRF_SPMG1}
 \alias{HRF_SPMG2}
 \alias{HRF_SPMG3}
+\alias{HRF_SPMGQ}
 \alias{HRF_GAMMA}
 \alias{HRF_GAUSSIAN}
 \alias{HRF_BSPLINE}
@@ -18,6 +19,8 @@ HRF_GAUSSIAN(t)
 HRF_SPMG1(t)
 
 HRF_SPMG2(t)
+
+HRF_SPMGQ(t)
 
 HRF_SPMG3(t)
 
@@ -45,6 +48,9 @@ SPMG bases are raw continuous kernels. SPMG2 adds the analytic
 time derivative; SPMG3 also adds the response-dispersion difference
 \code{(h(d) - h(d + 0.01))/0.01}, holding the response mean and mass fixed.
 Columns are not implicitly orthogonalized or independently rescaled.
+The exception is \code{HRF_SPMGQ}, whose second function, the quadrature
+(Hilbert) partner of the canonical HRF (\code{\link[=hrf_spmg1_quadrature]{hrf_spmg1_quadrature()}}), is by
+construction orthogonal to the canonical HRF and of equal norm.
 Use \code{\link[=normalize_hrf]{normalize_hrf()}} or the existing normalization flags to select scaling.
 These conventions do not reproduce every sampled SPM/Nilearn design detail.
 }
@@ -145,8 +151,8 @@ matplot(times, bspline_response, type = "l", main = "Custom B-spline with 8 basi
 \code{\link{hrf_fourier_generator}}, \code{\link{hrf_daguerre_generator}}
 for creating custom basis sets directly
 
-Other hrf: 
-\code{\link{deriv}()},
-\code{\link{penalty_matrix}()}
+Other hrf:
+\code{\link[=deriv]{deriv()}},
+\code{\link[=penalty_matrix]{penalty_matrix()}}
 }
 \concept{hrf}

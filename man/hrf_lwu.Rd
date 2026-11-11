@@ -51,17 +51,18 @@ plot(t_points, lwu_normalized, type = "l", main = "Height-Normalized LWU HRF", y
 abline(h = c(-1, 1), lty = 2, col = "grey") # Max absolute value should be 1
 }
 \seealso{
-Other hrf_functions: 
-\code{\link{hrf_basis_lwu}()},
-\code{\link{hrf_boxcar}()},
-\code{\link{hrf_bspline}()},
-\code{\link{hrf_gamma}()},
-\code{\link{hrf_gaussian}()},
-\code{\link{hrf_inv_logit}()},
-\code{\link{hrf_mexhat}()},
-\code{\link{hrf_sine}()},
-\code{\link{hrf_spmg1}()},
-\code{\link{hrf_time}()},
-\code{\link{hrf_weighted}()}
+Other hrf_functions:
+\code{\link[=hrf_basis_lwu]{hrf_basis_lwu()}},
+\code{\link[=hrf_boxcar]{hrf_boxcar()}},
+\code{\link[=hrf_bspline]{hrf_bspline()}},
+\code{\link[=hrf_gamma]{hrf_gamma()}},
+\code{\link[=hrf_gaussian]{hrf_gaussian()}},
+\code{\link[=hrf_inv_logit]{hrf_inv_logit()}},
+\code{\link[=hrf_mexhat]{hrf_mexhat()}},
+\code{\link[=hrf_sine]{hrf_sine()}},
+\code{\link[=hrf_spmg1]{hrf_spmg1()}},
+\code{\link[=hrf_spmg1_quadrature]{hrf_spmg1_quadrature()}},
+\code{\link[=hrf_time]{hrf_time()}},
+\code{\link[=hrf_weighted]{hrf_weighted()}}
 }
 \concept{hrf_functions}
