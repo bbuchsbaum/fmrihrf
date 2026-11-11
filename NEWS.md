@@ -1,5 +1,20 @@
 # fmrihrf 0.4.0.9000
 
+## New features
+
+* New quadrature basis `HRF_SPMGQ` (`"spmgq"` or `"quadrature"` in
+  `getHRF()`): the SPM canonical HRF and its quadrature partner
+  `hrf_spmg1_quadrature()`, the Hilbert transform of the canonical HRF made
+  orthogonal to it and scaled to equal norm. A shift of the response in time
+  acts approximately as a rotation of the two coefficients, over a wider
+  range of shifts than the temporal derivative of `HRF_SPMG2` allows.
+* New `amplitude_latency()` turns the fitted coefficients of a multi-basis
+  HRF (`HRF_SPMG2`, `HRF_SPMGQ`, ...) into a response amplitude and latency by
+  locating them on the curve traced by a time-shifted response
+  (`hrf_shift_curve()`). The amplitude stays unbiased for shifts of several
+  seconds, where the derivative-boost estimate (Calhoun et al., 2004; also
+  available as `method = "boost"`) falls off.
+
 ## Changes that affect results
 
 * `regressor_design()` now convolves

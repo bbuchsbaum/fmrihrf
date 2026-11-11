@@ -30,6 +30,7 @@ The package provides several pre-defined HRF types that can be used in modeling 
 * `"spmg1"` or `HRF_SPMG1`: SPM's canonical HRF (single basis function)
 * `"spmg2"` or `HRF_SPMG2`: SPM canonical + temporal derivative (2 basis functions)
 * `"spmg3"` or `HRF_SPMG3`: SPM canonical + temporal and dispersion derivatives (3 basis functions)
+* `"spmgq"` (or `"quadrature"`) or `HRF_SPMGQ`: SPM canonical + its quadrature (Hilbert) partner (2 basis functions); see [amplitude_latency()]
 * `"gaussian"` or `HRF_GAUSSIAN`: Gaussian-shaped HRF with peak around 5-6s
 * `"gamma"` or `HRF_GAMMA`: Gamma function-based HRF with longer tail
 

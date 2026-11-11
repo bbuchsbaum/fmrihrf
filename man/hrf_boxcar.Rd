@@ -70,17 +70,18 @@ hrf_delayed <- lag_hrf(hrf_boxcar(width = 5), lag = 10)  # Window from 10-15s
 \code{\link{hrf_weighted}} for weighted/shaped boxcars,
   \code{\link{lag_hrf}} to shift the window in time
 
-Other hrf_functions: 
-\code{\link{hrf_basis_lwu}()},
-\code{\link{hrf_bspline}()},
-\code{\link{hrf_gamma}()},
-\code{\link{hrf_gaussian}()},
-\code{\link{hrf_inv_logit}()},
-\code{\link{hrf_lwu}()},
-\code{\link{hrf_mexhat}()},
-\code{\link{hrf_sine}()},
-\code{\link{hrf_spmg1}()},
-\code{\link{hrf_time}()},
-\code{\link{hrf_weighted}()}
+Other hrf_functions:
+\code{\link[=hrf_basis_lwu]{hrf_basis_lwu()}},
+\code{\link[=hrf_bspline]{hrf_bspline()}},
+\code{\link[=hrf_gamma]{hrf_gamma()}},
+\code{\link[=hrf_gaussian]{hrf_gaussian()}},
+\code{\link[=hrf_inv_logit]{hrf_inv_logit()}},
+\code{\link[=hrf_lwu]{hrf_lwu()}},
+\code{\link[=hrf_mexhat]{hrf_mexhat()}},
+\code{\link[=hrf_sine]{hrf_sine()}},
+\code{\link[=hrf_spmg1]{hrf_spmg1()}},
+\code{\link[=hrf_spmg1_quadrature]{hrf_spmg1_quadrature()}},
+\code{\link[=hrf_time]{hrf_time()}},
+\code{\link[=hrf_weighted]{hrf_weighted()}}
 }
 \concept{hrf_functions}

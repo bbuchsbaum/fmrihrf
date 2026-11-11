@@ -52,7 +52,9 @@ export(HRF_GAUSSIAN)
 export(HRF_SPMG1)
 export(HRF_SPMG2)
 export(HRF_SPMG3)
+export(HRF_SPMGQ)
 export(acquisition_onsets)
+export(amplitude_latency)
 export(amplitudes)
 export(as_hrf)
 export(bind_basis)
@@ -93,8 +95,10 @@ export(hrf_lwu)
 export(hrf_mexhat)
 export(hrf_palette)
 export(hrf_set)
+export(hrf_shift_curve)
 export(hrf_sine)
 export(hrf_spmg1)
+export(hrf_spmg1_quadrature)
 export(hrf_tent_generator)
 export(hrf_time)
 export(hrf_toeplitz)
@@ -125,16 +129,20 @@ export(single_trial_regressor)
 importFrom(Matrix,Matrix)
 importFrom(Rcpp,sourceCpp)
 importFrom(assertthat,assert_that)
-importFrom(cli,cli_div)
-importFrom(cli,cli_h1)
-importFrom(cli,cli_li)
-importFrom(cli,cli_text)
+importFrom(cli,
+  cli_div,
+  cli_h1,
+  cli_li,
+  cli_text
+)
 importFrom(memoise,memoise)
 importFrom(numDeriv,grad)
 importFrom(purrr,pmap)
 importFrom(splines,bs)
-importFrom(stats,dgamma)
-importFrom(stats,dnorm)
-importFrom(stats,quantile)
+importFrom(stats,
+  dgamma,
+  dnorm,
+  quantile
+)
 importFrom(utils,tail)
 useDynLib(fmrihrf, .registration = TRUE)

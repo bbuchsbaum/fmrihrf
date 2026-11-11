@@ -25,17 +25,18 @@ hrf_val <- hrf_time(5)
 hrf_val_custom_maxt <- hrf_time(5, maxt = 30)
 }
 \seealso{
-Other hrf_functions: 
-\code{\link{hrf_basis_lwu}()},
-\code{\link{hrf_boxcar}()},
-\code{\link{hrf_bspline}()},
-\code{\link{hrf_gamma}()},
-\code{\link{hrf_gaussian}()},
-\code{\link{hrf_inv_logit}()},
-\code{\link{hrf_lwu}()},
-\code{\link{hrf_mexhat}()},
-\code{\link{hrf_sine}()},
-\code{\link{hrf_spmg1}()},
-\code{\link{hrf_weighted}()}
+Other hrf_functions:
+\code{\link[=hrf_basis_lwu]{hrf_basis_lwu()}},
+\code{\link[=hrf_boxcar]{hrf_boxcar()}},
+\code{\link[=hrf_bspline]{hrf_bspline()}},
+\code{\link[=hrf_gamma]{hrf_gamma()}},
+\code{\link[=hrf_gaussian]{hrf_gaussian()}},
+\code{\link[=hrf_inv_logit]{hrf_inv_logit()}},
+\code{\link[=hrf_lwu]{hrf_lwu()}},
+\code{\link[=hrf_mexhat]{hrf_mexhat()}},
+\code{\link[=hrf_sine]{hrf_sine()}},
+\code{\link[=hrf_spmg1]{hrf_spmg1()}},
+\code{\link[=hrf_spmg1_quadrature]{hrf_spmg1_quadrature()}},
+\code{\link[=hrf_weighted]{hrf_weighted()}}
 }
 \concept{hrf_functions}

@@ -397,6 +397,7 @@ gen_hrf_library <- function(...) {
 #' * `"spmg1"` or `HRF_SPMG1`: SPM's canonical HRF (single basis function)
 #' * `"spmg2"` or `HRF_SPMG2`: SPM canonical + temporal derivative (2 basis functions)
 #' * `"spmg3"` or `HRF_SPMG3`: SPM canonical + temporal and dispersion derivatives (3 basis functions)
+#' * `"spmgq"` (or `"quadrature"`) or `HRF_SPMGQ`: SPM canonical + its quadrature (Hilbert) partner (2 basis functions); see [amplitude_latency()]
 #' * `"gaussian"` or `HRF_GAUSSIAN`: Gaussian-shaped HRF with peak around 5-6s
 #' * `"gamma"` or `HRF_GAMMA`: Gamma function-based HRF with longer tail
 #'
@@ -698,9 +699,12 @@ list_available_hrfs <- function(details = FALSE) {
 #' time derivative; SPMG3 also adds the response-dispersion difference
 #' `(h(d) - h(d + 0.01))/0.01`, holding the response mean and mass fixed.
 #' Columns are not implicitly orthogonalized or independently rescaled.
+#' The exception is `HRF_SPMGQ`, whose second function, the quadrature
+#' (Hilbert) partner of the canonical HRF ([hrf_spmg1_quadrature()]), is by
+#' construction orthogonal to the canonical HRF and of equal norm.
 #' Use [normalize_hrf()] or the existing normalization flags to select scaling.
 #' These conventions do not reproduce every sampled SPM/Nilearn design detail.
-#' @aliases HRF_SPMG1 HRF_SPMG2 HRF_SPMG3 HRF_GAMMA HRF_GAUSSIAN HRF_BSPLINE HRF_FIR
+#' @aliases HRF_SPMG1 HRF_SPMG2 HRF_SPMG3 HRF_SPMGQ HRF_GAMMA HRF_GAUSSIAN HRF_BSPLINE HRF_FIR
 #' @family hrf
 #' @seealso 
 #' \code{\link{evaluate.HRF}} for evaluating HRF objects,
@@ -736,6 +740,17 @@ HRF_SPMG2 <- bind_basis(
 )
 attr(HRF_SPMG2, "name") <- "SPMG2"
 class(HRF_SPMG2) <- c("SPMG2_HRF", class(HRF_SPMG2))
+
+#' @rdname HRF_objects
+#' @export
+# Quadrature pair: canonical + its orthogonalised, equal-norm Hilbert transform.
+HRF_SPMGQ <- bind_basis(
+  as_hrf(hrf_spmg1, name="SPMG1_canonical", params=list(P1=5, P2=15, A1=1/120)),
+  as_hrf(hrf_spmg1_quadrature, name="SPMG1_quadrature", span=32,
+         params=list(P1=5, P2=15, A1=1/120, span=32))
+)
+attr(HRF_SPMGQ, "name") <- "SPMGQ"
+class(HRF_SPMGQ) <- c("SPMGQ_HRF", class(HRF_SPMGQ))
 
 #' @rdname HRF_objects
 #' @export
@@ -961,6 +976,7 @@ HRF_REGISTRY <- list(
   spmg1    = HRF_SPMG1,
   spmg2    = HRF_SPMG2,
   spmg3    = HRF_SPMG3,
+  spmgq    = HRF_SPMGQ,
   gamma    = HRF_GAMMA,
   gaussian = HRF_GAUSSIAN,
   bspline  = hrf_bspline_generator,
@@ -971,7 +987,8 @@ HRF_REGISTRY <- list(
   lwu      = .hrf_lwu_generator,
   # Aliases
   gam      = HRF_GAMMA,
-  bs       = hrf_bspline_generator
+  bs       = hrf_bspline_generator,
+  quadrature = HRF_SPMGQ
 )
 
 # getHRF function using the registry (Minimal Version) -----
