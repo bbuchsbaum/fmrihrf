@@ -69,38 +69,42 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># List all available HRFs</span></span></span>
 <span class="r-in"><span><span class="va">hrfs</span> <span class="op">&lt;-</span> <span class="fu">list_available_hrfs</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrfs</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        name      type nbasis_default is_alias</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     spmg1    object              1    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     spmg2    object              2    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     spmg3    object              3    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     gamma    object              1    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  gaussian    object              1    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   bspline generator              5    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      tent generator              5    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   fourier generator              5    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  daguerre generator              3    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10      fir generator             12    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator              1    FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13       bs generator              5     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          name      type nbasis_default is_alias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       spmg1    object              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       spmg2    object              2    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       spmg3    object              3    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       spmgq    object              2    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       gamma    object              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    gaussian    object              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7     bspline generator              5    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8        tent generator              5    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9     fourier generator              5    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   daguerre generator              3    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11        fir generator             12    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12        lwu generator              1    FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13        gam    object              1     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14         bs generator              5     TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 quadrature    object              2     TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># List with details</span></span></span>
 <span class="r-in"><span><span class="va">hrfs_detailed</span> <span class="op">&lt;-</span> <span class="fu">list_available_hrfs</span><span class="op">(</span>details <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hrfs_detailed</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        name      type nbasis_default is_alias                description</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     spmg1    object              1    FALSE        spmg1 HRF (object) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     spmg2    object              2    FALSE        spmg2 HRF (object) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     spmg3    object              3    FALSE        spmg3 HRF (object) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     gamma    object              1    FALSE        gamma HRF (object) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  gaussian    object              1    FALSE     gaussian HRF (object) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   bspline generator              5    FALSE   bspline HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      tent generator              5    FALSE      tent HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   fourier generator              5    FALSE   fourier HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  daguerre generator              3    FALSE  daguerre HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10      fir generator             12    FALSE       fir HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11      lwu generator              1    FALSE       lwu HRF (generator) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      gam    object              1     TRUE   gam HRF (object) (alias)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13       bs generator              5     TRUE bs HRF (generator) (alias)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          name      type nbasis_default is_alias                     description</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       spmg1    object              1    FALSE             spmg1 HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       spmg2    object              2    FALSE             spmg2 HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       spmg3    object              3    FALSE             spmg3 HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       spmgq    object              2    FALSE             spmgq HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       gamma    object              1    FALSE             gamma HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    gaussian    object              1    FALSE          gaussian HRF (object) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7     bspline generator              5    FALSE        bspline HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8        tent generator              5    FALSE           tent HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9     fourier generator              5    FALSE        fourier HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   daguerre generator              3    FALSE       daguerre HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11        fir generator             12    FALSE            fir HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12        lwu generator              1    FALSE            lwu HRF (generator) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13        gam    object              1     TRUE        gam HRF (object) (alias)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14         bs generator              5     TRUE      bs HRF (generator) (alias)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 quadrature    object              2     TRUE quadrature HRF (object) (alias)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -15,6 +15,8 @@ HRF_SPMG1(t)
 
 HRF_SPMG2(t)
 
+HRF_SPMGQ(t)
+
 HRF_SPMG3(t)
 
 HRF_BSPLINE(t)
@@ -45,7 +47,12 @@ methods.
 SPMG bases are raw continuous kernels. SPMG2 adds the analytic time
 derivative; SPMG3 also adds the response-dispersion difference
 `(h(d) - h(d + 0.01))/0.01`, holding the response mean and mass fixed.
-Columns are not implicitly orthogonalized or independently rescaled. Use
+Columns are not implicitly orthogonalized or independently rescaled. The
+exception is `HRF_SPMGQ`, whose second function, the quadrature
+(Hilbert) partner of the canonical HRF
+([`hrf_spmg1_quadrature()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1_quadrature.md)),
+is by construction orthogonal to the canonical HRF and of equal norm.
+Use
 [`normalize_hrf()`](https://bbuchsbaum.github.io/fmrihrf/reference/normalize_hrf.md)
 or the existing normalization flags to select scaling. These conventions
 do not reproduce every sampled SPM/Nilearn design detail.

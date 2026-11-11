@@ -14,6 +14,7 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/Reg.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/acquisition_onsets.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/amplitude_latency.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/amplitudes.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/as_hrf.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/bind_basis.html</loc></url>
@@ -52,8 +53,10 @@
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_mexhat.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_set.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_shift_curve.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1_quadrature.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_tent_generator.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_time.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/fmrihrf/reference/hrf_toeplitz.html</loc></url>

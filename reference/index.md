@@ -9,6 +9,7 @@
   [`HRF_GAUSSIAN()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
   [`HRF_SPMG1()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
   [`HRF_SPMG2()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
+  [`HRF_SPMGQ()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
   [`HRF_SPMG3()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
   [`HRF_BSPLINE()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
   [`HRF_FIR()`](https://bbuchsbaum.github.io/fmrihrf/reference/HRF_objects.md)
@@ -16,6 +17,9 @@
 
 - [`acquisition_onsets()`](https://bbuchsbaum.github.io/fmrihrf/reference/acquisition_onsets.md)
   : Get fMRI Acquisition Onset Times
+
+- [`amplitude_latency()`](https://bbuchsbaum.github.io/fmrihrf/reference/amplitude_latency.md)
+  : Amplitude and latency from the coefficients of a multi-basis HRF
 
 - [`amplitudes()`](https://bbuchsbaum.github.io/fmrihrf/reference/amplitudes.md)
   : Get amplitudes from an object
@@ -118,11 +122,17 @@
 - [`hrf_palette()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_palette.md)
   : Colour palettes for HRF and regressor plots
 
+- [`hrf_shift_curve()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_shift_curve.md)
+  : Coefficients of a time-shifted response in an HRF basis
+
 - [`hrf_sine()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_sine.md)
   : hrf_sine
 
 - [`hrf_spmg1()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1.md)
   : hrf_spmg1
+
+- [`hrf_spmg1_quadrature()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_spmg1_quadrature.md)
+  : Quadrature partner of the SPM canonical HRF
 
 - [`hrf_tent_generator()`](https://bbuchsbaum.github.io/fmrihrf/reference/hrf_tent_generator.md)
   : Create Tent HRF Basis Set
