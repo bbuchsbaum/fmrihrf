@@ -129,20 +129,16 @@ export(single_trial_regressor)
 importFrom(Matrix,Matrix)
 importFrom(Rcpp,sourceCpp)
 importFrom(assertthat,assert_that)
-importFrom(cli,
-  cli_div,
-  cli_h1,
-  cli_li,
-  cli_text
-)
+importFrom(cli,cli_div)
+importFrom(cli,cli_h1)
+importFrom(cli,cli_li)
+importFrom(cli,cli_text)
 importFrom(memoise,memoise)
 importFrom(numDeriv,grad)
 importFrom(purrr,pmap)
 importFrom(splines,bs)
-importFrom(stats,
-  dgamma,
-  dnorm,
-  quantile
-)
+importFrom(stats,dgamma)
+importFrom(stats,dnorm)
+importFrom(stats,quantile)
 importFrom(utils,tail)
 useDynLib(fmrihrf, .registration = TRUE)
