@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -43,7 +43,7 @@ jobs:
           git rev-parse HEAD > candidate/source-sha.txt
           Rscript -e 'sessionInfo()' > candidate/build-session.txt
           cd candidate
-          sha256sum fmrihrf_*.tar.gz > SHA256SUMS
+          shasum -a 256 fmrihrf_*.tar.gz > SHA256SUMS
           cat source-sha.txt SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
@@ -62,6 +62,7 @@ jobs:
           - {os: ubuntu-latest, r: devel}
           - {os: macos-latest, r: release}
           - {os: windows-latest, r: release}
+          - {os: windows-latest, r: devel}
     runs-on: ${{ matrix.config.os }}
     name: Exact tarball / ${{ matrix.config.os }} / ${{ matrix.config.r }}
     env:
